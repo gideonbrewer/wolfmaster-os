@@ -17,8 +17,8 @@ python3 -m http.server 8000      # open http://localhost:8000
 
 ## Architecture
 
-- **Tabs:** NOW, PLAN, PEOPLE, REVIEW, MORE (MORE = Build, Purple Atlas lane,
-  Fitness, Money, Reflect).
+- **Tabs:** NOW, PLAN, PEOPLE, BUILD, REVIEW. Fitness and Money still exist in
+  code but are parked off-nav.
 - **Auth + data:** Supabase REST (`SUPABASE_URL` / `SUPABASE_ANON_KEY` near the
   top of the `<script type="text/babel">` block). Session is cached in
   `localStorage` (`wm_session`); all app data persists to Supabase tables, not
@@ -26,6 +26,24 @@ python3 -m http.server 8000      # open http://localhost:8000
 - **Styling:** base design system (`.glass`, `.card`, `.cc-*`) plus a
   `#wm-polish` layer (last in `<head>`) adding focus rings, select chevrons,
   button/hover states, elevated cards, custom scrollbars, dark native pickers.
+
+## AI Command Brief
+
+The NOW brief uses `supabase/functions/ai-brief` for a real Claude-written brief
+when the user is signed in. The existing deterministic brief remains the fallback
+if the function is not deployed, the user is offline/logged out, or Claude fails.
+
+One-time Supabase setup:
+
+```bash
+supabase login
+supabase link --project-ref cgbyfooxstxinttfvwzq
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxx
+supabase functions deploy ai-brief
+```
+
+Run `supabase/sql/ai_briefs.sql` once in the Supabase SQL editor to create the
+daily cache table and RLS policy.
 
 ## Constraints for future edits
 
