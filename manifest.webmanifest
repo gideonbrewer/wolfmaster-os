@@ -1,0 +1,14 @@
+{
+  "name": "WolfMaster OS",
+  "short_name": "WolfMaster",
+  "description": "Personal command center",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0C0C0F",
+  "theme_color": "#0C0C0F",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
