@@ -9,6 +9,7 @@ from typing import Any
 
 from sqlalchemy import (
     BigInteger,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Index,
@@ -81,8 +82,22 @@ class TradeRow(Base):
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="unknown")
 
     quantity: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    # Timestamp provenance (ADR-020): opened_at/closed_at hold the source
+    # wall clock verbatim; *_utc are populated ONLY when the source
+    # carried an explicit UTC offset. A timezone is never guessed:
+    # source_timezone stays NULL for Option Alpha exports (tz-unknown),
+    # while exchange_timezone records venue knowledge where the venue is
+    # identifiable. Raw timestamp text lives in raw_payload; created_at
+    # is the UTC ingestion timestamp.
     opened_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=False), index=True)
     closed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=False))
+    opened_at_utc: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    closed_at_utc: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    source_timezone: Mapped[str | None] = mapped_column(String(64))
+    exchange_timezone: Mapped[str | None] = mapped_column(String(64))
+    timestamp_confidence: Mapped[str] = mapped_column(
+        String(32), nullable=False, server_default="tz_unknown"
+    )
     expires_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=False))
     dte_at_entry: Mapped[int | None] = mapped_column(Integer)
     days_in_trade: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
@@ -127,4 +142,16 @@ class TradeRow(Base):
     __table_args__ = (
         Index("ix_trades_bot_opened", "bot_name", "opened_at"),
         Index("ix_trades_strategy_family", "strategy_family"),
+        # Secondary defenses; application validation remains primary.
+        CheckConstraint("quantity IS NULL OR quantity > 0", name="ck_trades_quantity_positive"),
+        CheckConstraint("fingerprint <> ''", name="ck_trades_fingerprint_not_empty"),
+        CheckConstraint(
+            "fingerprint_version IN ('oa1', 'oa2')",
+            name="ck_trades_fingerprint_version_valid",
+        ),
+        CheckConstraint("source IN ('option_alpha', 'manual')", name="ck_trades_source_valid"),
+        CheckConstraint(
+            "timestamp_confidence IN ('tz_unknown', 'explicit_offset')",
+            name="ck_trades_timestamp_confidence_valid",
+        ),
     )

@@ -97,13 +97,12 @@ def normalize_row(
     """
     outcome = RowOutcome(row_number=row_number, raw_row=dict(raw_row))
 
-    def optional_ts(column: str) -> dt.datetime | None:
+    def optional_ts(column: str) -> values.ParsedTimestamp | None:
         try:
-            parsed = values.parse_timestamp(raw_row.get(column), date_order)
+            return values.parse_timestamp(raw_row.get(column), date_order)
         except ValueError as exc:
             outcome.warnings.append(f"{column}: {exc}")
             return None
-        return parsed.local if parsed is not None else None
 
     def optional_num(parser: Any, column: str, field: str) -> Decimal | None:
         try:
@@ -155,10 +154,26 @@ def normalize_row(
     assert symbol is not None and opened_at is not None
 
     # --- optional fields: warn on failure, never invent ------------------
-    closed_at = optional_ts("closeDate")
-    expires_at = optional_ts("expiration")
-    mfe_at = optional_ts("highReturnPctDate")
-    mae_at = optional_ts("lowReturnPctDate")
+    closed_ts = optional_ts("closeDate")
+    closed_at = closed_ts.local if closed_ts is not None else None
+    expires_ts = optional_ts("expiration")
+    expires_at = expires_ts.local if expires_ts is not None else None
+    mfe_ts = optional_ts("highReturnPctDate")
+    mfe_at = mfe_ts.local if mfe_ts is not None else None
+    mae_ts = optional_ts("lowReturnPctDate")
+    mae_at = mae_ts.local if mae_ts is not None else None
+
+    # Timestamp provenance (ADR-020): UTC instants only when the source
+    # carried explicit offsets. Option Alpha exports never do, so these
+    # stay NULL and the row remains explicitly timezone-unknown.
+    opened_at_utc = opened_ts.utc if opened_ts is not None else None
+    closed_at_utc = closed_ts.utc if closed_ts is not None else None
+    present_confidences = [ts.confidence for ts in (opened_ts, closed_ts) if ts is not None]
+    timestamp_confidence = (
+        values.TZ_EXPLICIT_OFFSET
+        if present_confidences and all(c == values.TZ_EXPLICIT_OFFSET for c in present_confidences)
+        else values.TZ_UNKNOWN
+    )
 
     entry_price = optional_num(values.parse_money, "openPrice", "entry_price")
     exit_price = optional_num(values.parse_money, "closePrice", "exit_price")
@@ -256,6 +271,15 @@ def normalize_row(
         quantity=quantity,
         opened_at=opened_at,
         closed_at=closed_at,
+        opened_at_utc=opened_at_utc,
+        closed_at_utc=closed_at_utc,
+        source_timezone=None,  # Option Alpha exports carry no timezone
+        exchange_timezone=(
+            "America/New_York"
+            if asset_class in (AssetClass.EQUITY, AssetClass.EQUITY_OPTION)
+            else None
+        ),
+        timestamp_confidence=timestamp_confidence,
         expires_at=expires_at,
         dte_at_entry=dte_at_entry,
         days_in_trade=days_in_trade,

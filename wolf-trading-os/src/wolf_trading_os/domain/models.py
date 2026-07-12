@@ -77,10 +77,17 @@ class CanonicalTrade(BaseModel):
     direction: Direction = Direction.UNKNOWN
     status: TradeStatus = TradeStatus.UNKNOWN
 
-    # Size & timing
+    # Size & timing. Wall-clock event times as written by the source;
+    # *_utc only when the source carried an explicit UTC offset — a
+    # timezone is never guessed (ADR-020).
     quantity: Decimal | None = None
     opened_at: dt.datetime | None = None
     closed_at: dt.datetime | None = None
+    opened_at_utc: dt.datetime | None = None
+    closed_at_utc: dt.datetime | None = None
+    source_timezone: str | None = None  # NULL == timezone unknown
+    exchange_timezone: str | None = None  # venue knowledge, when identifiable
+    timestamp_confidence: str = "tz_unknown"  # tz_unknown | explicit_offset
     expires_at: dt.datetime | None = None
     dte_at_entry: int | None = None
     days_in_trade: Decimal | None = None

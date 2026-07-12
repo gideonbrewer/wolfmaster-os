@@ -185,3 +185,33 @@ Remediation of audit finding M4. ISO-8601 dates are always accepted
 DMY` for day-first exports. Before parsing, the importer scans every
 date cell: any cell valid ONLY under the opposite order is contradictory
 evidence and rejects the whole file. Individual cells are never guessed.
+
+## ADR-020: Timestamp provenance — never guess a timezone
+
+Remediation of audit findings M4 (architecture) and M9. Every trade
+carries structured timestamp provenance:
+
+- `opened_at` / `closed_at`: source wall clock verbatim (naive) — the
+  authoritative values for session analytics (entry hour, day of week).
+- `opened_at_utc` / `closed_at_utc`: aware UTC instants, populated ONLY
+  when the source carried an explicit UTC offset.
+- `source_timezone`: the timezone of the source clock; NULL means
+  explicitly unknown. Option Alpha exports carry no timezone, so all OA
+  rows are NULL — no guessed backfill, ever (AGENTS.md rule 4).
+- `exchange_timezone`: venue knowledge where the venue is identifiable
+  (America/New_York for US equity/equity-option rows). This is a fact
+  about the exchange, not an assumption about the source clock.
+- `timestamp_confidence`: `tz_unknown` | `explicit_offset`.
+- Raw timestamp text is preserved in `raw_payload`; `created_at` is the
+  UTC ingestion timestamp.
+
+Policy for future sources (equities/options/crypto/futures via
+TradingView, IBKR, Coinbase): every adapter must state its clock. UTC
+sources (Coinbase, TradingView epoch payloads) populate `*_utc` directly
+and set `source_timezone='UTC'`; sources with documented zones set
+`source_timezone` and derive UTC through it; sources with unknown clocks
+remain `tz_unknown` and are EXCLUDED from cross-source time joins.
+Cross-source chronology must only ever be computed over `*_utc`;
+wall-clock columns are for session analytics. DST-ambiguous local times
+without offsets stay verbatim and unresolved — disambiguation requires
+an explicit offset from the source.
