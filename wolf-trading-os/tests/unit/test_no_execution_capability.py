@@ -1,9 +1,25 @@
-"""Guard test: Phase 1 must contain no order-placement or simulation path.
+"""Tripwire: Phase 1 must contain no order-placement or simulation path.
 
-AGENTS.md rule 13. This test scans the installed package source for
-symbols and dependencies that would indicate an order path. It is a
-tripwire, not a proof — but it fails loudly if someone adds the obvious
-things.
+AGENTS.md rule 13. Honest statement of guarantees (audit finding L1):
+
+WHAT THIS DETECTS (accidental introduction of the obvious):
+- order-placement function definitions/calls (place/submit/send/
+  transmit/route/execute_order, placeOrder, create_order)
+- imports of known broker/exchange client libraries
+- broker SDK dependencies declared in pyproject.toml
+- HTTP client usage or order-route URL strings inside the execution/
+  and brokers/ packages
+- any file other than the approved placeholder appearing in execution/
+
+WHAT THIS CANNOT DETECT:
+- arbitrarily named functions (def buy(...)), generic HTTP calls
+  elsewhere in the codebase, obfuscated/getattr-composed calls,
+  renamed broker library forks, or deliberately hidden functionality
+
+This test is a tripwire against accidents, NOT proof that no
+maliciously concealed order functionality exists. The real controls
+are AGENTS.md rules, human code review, and dependency control —
+see docs/testing-policy.md and docs/execution-policy.md.
 """
 
 from __future__ import annotations
@@ -66,6 +82,32 @@ def test_execution_package_defines_nothing_executable() -> None:
 
     public = [n for n in vars(execution) if not n.startswith("_")]
     assert public == [], f"execution package must define nothing, found: {public}"
+
+
+def test_execution_package_contains_only_approved_files() -> None:
+    """execution/ must hold exactly the approved placeholder module."""
+    execution_dir = SRC_ROOT / "execution"
+    files = sorted(
+        p.name
+        for p in execution_dir.iterdir()
+        if p.is_file() and not p.name.endswith((".pyc", ".pyo"))
+    )
+    assert files == ["__init__.py"], f"unapproved files in execution/: {files}"
+
+
+def test_no_http_clients_or_order_routes_in_execution_or_brokers() -> None:
+    """No HTTP client usage or order-route strings in the reserved packages."""
+    http_pattern = re.compile(
+        r"^\s*(?:import|from)\s+(requests|httpx|aiohttp|urllib3|websocket|websockets)\b"
+        r"|/v?\d*/orders?\b",
+        re.MULTILINE | re.IGNORECASE,
+    )
+    offenders = []
+    for package in ("execution", "brokers"):
+        for path in sorted((SRC_ROOT / package).rglob("*.py")):
+            if http_pattern.search(path.read_text(encoding="utf-8")):
+                offenders.append(str(path.relative_to(SRC_ROOT)))
+    assert not offenders, f"HTTP/order-route usage in reserved packages: {offenders}"
 
 
 def test_no_broker_dependencies_declared() -> None:

@@ -6,13 +6,13 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-wolf}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wolf}
-      POSTGRES_DB: ${POSTGRES_DB:-wolf_trading_os}
+      POSTGRES_DB: ${POSTGRES_DB:-wolf_trading_os_dev}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wolf} -d ${POSTGRES_DB:-wolf_trading_os}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wolf} -d ${POSTGRES_DB:-wolf_trading_os_dev}"]
       interval: 3s
       timeout: 3s
       retries: 20
@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     environment:
       WTOS_ENVIRONMENT: ${WTOS_ENVIRONMENT:-development}
-      WTOS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-wolf}:${POSTGRES_PASSWORD:-wolf}@db:5432/${POSTGRES_DB:-wolf_trading_os}
+      WTOS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-wolf}:${POSTGRES_PASSWORD:-wolf}@db:5432/${POSTGRES_DB:-wolf_trading_os_dev}
       WTOS_LOG_FORMAT: ${WTOS_LOG_FORMAT:-json}
       WTOS_LOG_LEVEL: ${WTOS_LOG_LEVEL:-INFO}
     ports:

@@ -2,10 +2,15 @@
 
 **Phase 1 has no execution capability whatsoever** — no order
 placement, routing, transmission, or simulation, and no broker
-connectivity (AGENTS.md rule 13, enforced by
-`tests/unit/test_no_execution_capability.py`). This document records the
-principles that will govern the execution layer when a future phase
-introduces one.
+connectivity (AGENTS.md rule 13, guarded by
+`tests/unit/test_no_execution_capability.py`). That guard is a tripwire
+against accidental introduction — it detects obvious order symbols,
+broker client imports/dependencies, HTTP usage in the reserved
+packages, and unapproved files in `execution/` — but it is NOT proof
+against deliberately hidden functionality. The binding controls are
+these policies, human review of every change to `execution/`/`brokers/`,
+and dependency control. This document records the principles that will
+govern the execution layer when a future phase introduces one.
 
 ## Non-negotiables inherited from AGENTS.md
 

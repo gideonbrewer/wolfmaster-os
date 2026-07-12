@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     )
 
     environment: Environment = Environment.DEVELOPMENT
-    database_url: str = "postgresql+psycopg://wolf:wolf@localhost:5432/wolf_trading_os"
+    database_url: str = "postgresql+psycopg://wolf:wolf@localhost:5432/wolf_trading_os_dev"
     log_format: str = "json"  # "json" | "console"
     log_level: str = "INFO"
 

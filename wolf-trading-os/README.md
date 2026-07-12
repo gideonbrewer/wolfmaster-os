@@ -66,7 +66,7 @@ pip install -e ".[dev]"
 cp .env.example .env          # point WTOS_DATABASE_URL at your Postgres
 
 # create the database (adjust to your setup)
-createdb wolf_trading_os
+createdb wolf_trading_os_dev
 
 # run migrations
 wolf-trading-os database-upgrade
@@ -82,10 +82,10 @@ wolf-trading-os run-dashboard
 
 | Command | Purpose |
 | --- | --- |
-| `wolf-trading-os import-option-alpha FILE [FILE ...]` | Import CSV exports; prints a JSON import summary |
+| `wolf-trading-os import-option-alpha FILE [FILE ...] [--date-order MDY|DMY]` | Import CSV exports; prints a JSON import summary |
 | `wolf-trading-os run-dashboard` | Launch the Streamlit dashboard |
 | `wolf-trading-os database-upgrade` | Run Alembic migrations to head |
-| `wolf-trading-os database-reset-dev` | Drop + recreate schema — **blocked unless `WTOS_ENVIRONMENT=development`**, and requires `--yes` |
+| `wolf-trading-os database-reset-dev` | Drop + recreate schema — **blocked unless `WTOS_ENVIRONMENT=development` AND the target is a local dev/test-named database**; requires `--yes` (remote/shared targets additionally need `--force-unsafe-reset --confirm-database NAME`) |
 
 ## Running tests, linting, and type checks
 
@@ -93,8 +93,9 @@ wolf-trading-os run-dashboard
 # unit tests (no database needed)
 pytest tests/unit
 
-# integration tests (need a reachable PostgreSQL; uses WTOS_TEST_DATABASE_URL
-# or falls back to WTOS_DATABASE_URL; creates/drops its own scratch database)
+# integration tests (need a reachable PostgreSQL; uses WTOS_TEST_DATABASE_URL;
+# creates/drops its own scratch database). With WTOS_REQUIRE_DB=1 (CI default)
+# an unreachable database FAILS instead of skipping.
 pytest tests/integration -m integration
 
 # everything
@@ -153,7 +154,14 @@ exports) never creates duplicate trades.
   `NULL`, never guessed.
 - Percentage drawdown is only computed where mathematically valid (positive
   running peak); otherwise dollar drawdown is authoritative.
-- Timestamps in Option Alpha exports carry no timezone; they are stored as
-  given and treated as exchange-local (US/Eastern) wall-clock times.
+- Timestamps in Option Alpha exports carry no timezone; wall-clock values
+  are stored verbatim and rows are marked explicitly timezone-unknown —
+  UTC fields are populated only when a source carries an explicit offset.
+- Returns/excursions are stored as decimal fractions (0.125 = 12.5%),
+  matching Option Alpha's export convention; files that appear to use
+  percentage points are rejected rather than silently converted.
+- Slash dates are parsed month-first (the confirmed Option Alpha format)
+  unless `--date-order DMY` is passed; contradictory in-file evidence
+  rejects the file.
 - No live data feeds, no broker reconciliation, no order capability of any
   kind (by design — see AGENTS.md rule 13).

@@ -34,9 +34,22 @@ what that means here.
 - **The no-execution tripwire**
   (`tests/unit/test_no_execution_capability.py`) must stay in place for
   all of Phase 1; weakening it requires a decision-log entry.
+  Its guarantees are limited and documented in the test itself: it
+  detects the *accidental* introduction of obvious order paths
+  (order-function names, broker client imports/dependencies, HTTP usage
+  or order-route strings inside `execution/`/`brokers/`, unapproved
+  files in `execution/`). It cannot detect arbitrarily named functions,
+  obfuscated calls, or renamed broker forks — it is not proof that no
+  maliciously hidden order functionality exists. The binding controls
+  remain AGENTS.md rules, human code review of every change touching
+  the reserved packages, and dependency review.
 - **CI gates**: ruff lint, ruff format check, mypy (strict), unit tests,
   and PostgreSQL-backed integration tests all must pass on every push
   and pull request. All commands run identically locally (see README).
+- **No silent skips in CI**: the test job sets `WTOS_REQUIRE_DB=1`, so
+  an unreachable PostgreSQL fails the session instead of skipping the
+  integration tests, and a follow-up step fails the build if zero
+  integration tests executed or any were skipped.
 
 ## Commands
 

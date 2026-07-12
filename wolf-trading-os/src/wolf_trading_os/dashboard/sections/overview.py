@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from wolf_trading_os.dashboard.data import cached_trades
+from wolf_trading_os.dashboard.data import trades_or_error
 from wolf_trading_os.services import build_analytics_bundle
 
 
@@ -32,7 +32,9 @@ def _fmt_fraction(value: float | None, digits: int = 1) -> str:
 
 def render() -> None:
     st.header("Overview")
-    df = cached_trades()
+    df = trades_or_error()
+    if df is None:
+        return
     if df.empty:
         st.info("No trades imported yet. Use the **Import** page or the CLI.")
         return

@@ -7,14 +7,16 @@ import streamlit as st
 from wolf_trading_os.analytics import closed_trades, equity_curve, grouped_metrics
 from wolf_trading_os.analytics.normalization import per_contract_pnl
 from wolf_trading_os.dashboard import charts
-from wolf_trading_os.dashboard.data import cached_trades
+from wolf_trading_os.dashboard.data import trades_or_error
 
 _DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 def render() -> None:
     st.header("Visualizations")
-    df = cached_trades()
+    df = trades_or_error()
+    if df is None:
+        return
     closed = closed_trades(df)
     if closed.empty:
         st.info("No closed trades to visualize yet.")

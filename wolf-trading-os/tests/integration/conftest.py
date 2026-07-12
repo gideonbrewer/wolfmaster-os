@@ -36,6 +36,16 @@ def _server_available() -> bool:
         return False
 
 
+def db_unreachable_action() -> str:
+    """What to do when PostgreSQL is unreachable (audit finding H5).
+
+    With WTOS_REQUIRE_DB=1 (set in CI) the session FAILS hard so a broken
+    service container can never produce a green build with silently
+    skipped integration tests. Locally, skipping stays convenient.
+    """
+    return "fail" if os.environ.get("WTOS_REQUIRE_DB") == "1" else "skip"
+
+
 pytestmark = pytest.mark.integration
 
 
@@ -43,7 +53,13 @@ pytestmark = pytest.mark.integration
 def scratch_database_url() -> Iterator[str]:
     """A freshly created, fully migrated scratch database (dropped on exit)."""
     if not _server_available():
-        pytest.skip(f"PostgreSQL not reachable at {_SERVER_URL}")
+        message = (
+            f"PostgreSQL not reachable for integration tests "
+            f"(WTOS_TEST_DATABASE_URL host: {make_url(_SERVER_URL).host})"
+        )
+        if db_unreachable_action() == "fail":
+            pytest.fail(f"{message} — WTOS_REQUIRE_DB=1 forbids skipping", pytrace=False)
+        pytest.skip(message)
 
     db_name = f"wtos_test_{uuid.uuid4().hex[:12]}"
     admin = create_engine(_SERVER_URL, isolation_level="AUTOCOMMIT")

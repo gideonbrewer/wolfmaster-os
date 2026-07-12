@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -55,12 +56,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_reset = sub.add_parser(
         "database-reset-dev",
-        help="Drop and recreate the schema (blocked outside development)",
+        help="Drop and recreate the schema (blocked outside development "
+        "and outside local dev-named databases)",
     )
     p_reset.add_argument(
         "--yes",
         action="store_true",
         help="Confirm destruction of all data in the development database",
+    )
+    p_reset.add_argument(
+        "--force-unsafe-reset",
+        action="store_true",
+        help="Override the local-host/dev-name safety checks (still requires "
+        "--confirm-database naming the exact target database)",
+    )
+    p_reset.add_argument(
+        "--confirm-database",
+        metavar="NAME",
+        default=None,
+        help="Second confirmation for --force-unsafe-reset: must equal the "
+        "target database name exactly",
     )
     return parser
 
@@ -106,31 +121,97 @@ def _cmd_database_upgrade(_: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_database_reset_dev(args: argparse.Namespace) -> int:
-    """Drop and recreate all tables. Fails closed outside development."""
+# Reset safety (audit finding M5): environment gating alone is not enough —
+# a dev-configured machine pointing at a shared database must still refuse.
+_RESET_ALLOWED_HOSTS = {"localhost", "127.0.0.1", "::1", "db"}
+_RESET_DEV_NAME = re.compile(r"(dev|test|local|scratch|sandbox)", re.IGNORECASE)
+
+
+def _reset_refusal_reason(database_url: str, args: argparse.Namespace) -> str | None:
+    """Why a reset must be refused, or None if it may proceed.
+
+    Passwords are never included in any message: URLs are rendered via
+    SQLAlchemy's default masking.
+    """
+    import os
+
+    from sqlalchemy.engine import make_url
+
+    if os.environ.get("WTOS_ENVIRONMENT") != "development":
+        return (
+            "WTOS_ENVIRONMENT must be EXPLICITLY set to 'development' "
+            f"(currently: {os.environ.get('WTOS_ENVIRONMENT') or 'unset'})"
+        )
     settings = get_settings()
     if not settings.is_development:
+        return f"settings environment is {settings.environment.value}, not development"
+
+    try:
+        url = make_url(database_url)
+    except Exception:
+        return "database URL is missing or malformed"
+    if url.host is None or url.database is None:
+        return "database URL is missing a host or database name"
+
+    host_ok = url.host in _RESET_ALLOWED_HOSTS
+    name_ok = bool(_RESET_DEV_NAME.search(url.database))
+    if host_ok and name_ok:
+        return None
+
+    # Override path: explicit destructive flag + exact-name confirmation.
+    if args.force_unsafe_reset:
+        if args.confirm_database != url.database:
+            return (
+                f"--force-unsafe-reset requires --confirm-database {url.database!r} "
+                f"(target: host={url.host} database={url.database})"
+            )
         print(
-            "REFUSED: database-reset-dev is only available when "
-            f"WTOS_ENVIRONMENT=development (current: {settings.environment.value}).",
+            f"WARNING: forced reset of host={url.host} database={url.database}",
             file=sys.stderr,
         )
+        return None
+
+    problems = []
+    if not host_ok:
+        problems.append(f"host {url.host!r} is not a local development host")
+    if not name_ok:
+        problems.append(
+            f"database name {url.database!r} does not look like a development/test database"
+        )
+    return "; ".join(problems) + " (use --force-unsafe-reset with --confirm-database)"
+
+
+def _cmd_database_reset_dev(args: argparse.Namespace) -> int:
+    """Drop and recreate all tables. Fails closed outside development
+    environments AND outside local dev-named databases (M5)."""
+    settings = get_settings()
+    reason = _reset_refusal_reason(settings.database_url, args)
+    if reason is not None:
+        print(f"REFUSED: {reason}", file=sys.stderr)
         return 3
     if not args.yes:
         print("Refusing to reset without --yes (this destroys all data).", file=sys.stderr)
         return 2
 
     from alembic import command
+    from sqlalchemy.engine import make_url
 
     from wolf_trading_os.database import get_engine
     from wolf_trading_os.database.orm import Base
 
+    url = make_url(settings.database_url)
+    print(f"Resetting host={url.host} database={url.database}", file=sys.stderr)
     engine = get_engine()
     Base.metadata.drop_all(engine)
     with engine.begin() as conn:
         conn.exec_driver_sql("DROP TABLE IF EXISTS alembic_version")
     command.upgrade(_alembic_config(), "head")
-    logger.warning("database_reset_dev_complete", environment=settings.environment.value)
+    logger.warning(
+        "database_reset_dev_complete",
+        environment=settings.environment.value,
+        host=url.host,
+        database=url.database,
+    )
     return 0
 
 

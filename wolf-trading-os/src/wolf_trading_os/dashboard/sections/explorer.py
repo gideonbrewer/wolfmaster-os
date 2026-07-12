@@ -7,7 +7,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from wolf_trading_os.dashboard.data import cached_trades
+from wolf_trading_os.dashboard.data import trades_or_error
 from wolf_trading_os.services.csv_export import safe_csv_bytes
 
 _DISPLAY_COLUMNS = [
@@ -47,7 +47,9 @@ def _multiselect_filter(
 
 def render() -> None:
     st.header("Trade explorer")
-    df = cached_trades()
+    df = trades_or_error()
+    if df is None:
+        return
     if df.empty:
         st.info("No trades imported yet.")
         return

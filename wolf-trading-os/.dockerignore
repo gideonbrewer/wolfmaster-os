@@ -1,0 +1,46 @@
+# Build-context hygiene (audit finding M7). Even though the Dockerfile
+# COPYs specific paths only, keep the context minimal and make sure a
+# future `COPY . .` can never bake secrets or junk into an image.
+
+# VCS
+.git
+.gitignore
+
+# Environments / secrets — .env must NEVER enter an image
+.env
+.env.*
+!.env.example
+.venv
+venv
+
+# Python caches / build artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+build
+dist
+
+# Tooling caches
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Tests and fixtures (not needed at runtime)
+tests
+
+# IDE / OS
+.idea
+.vscode
+.DS_Store
+
+# Local data, exports, uploads
+data
+*.db
+*.sqlite*
+*.csv
+exports
+uploads
+tmp
