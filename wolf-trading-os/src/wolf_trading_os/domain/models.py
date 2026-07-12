@@ -55,6 +55,7 @@ class CanonicalTrade(BaseModel):
     # Identity
     trade_id: UUID = Field(default_factory=uuid4)
     fingerprint: str  # deterministic hash of identifying source fields
+    fingerprint_version: str = "oa2"  # algorithm version (see fingerprint.py)
     source: TradeSource
 
     # Strategy / provenance

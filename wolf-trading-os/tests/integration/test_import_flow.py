@@ -102,16 +102,26 @@ class TestDuplicatePrevention:
         assert summary.rows_duplicate == 2
         assert _count_trades(clean_database) == 14
 
-    def test_duplicate_rows_within_single_file(self, clean_database: str, tmp_path: Path) -> None:
+    def test_repeated_rows_within_single_file_are_distinct_trades(
+        self, clean_database: str, tmp_path: Path
+    ) -> None:
+        # Identical rows inside ONE export are genuinely separate trades
+        # (occurrence-indexed fingerprints); re-importing the same file
+        # still deduplicates. See ADR-016.
         source = (FIXTURES / "option_alpha_overlap.csv").read_text()
         lines = source.strip().splitlines()
         doubled = "\n".join([lines[0], *lines[1:], *lines[1:]]) + "\n"
         target = tmp_path / "doubled.csv"
         target.write_text(doubled)
-        summary = OptionAlphaImporter(clean_database).import_files([target])
+        importer = OptionAlphaImporter(clean_database)
+        summary = importer.import_files([target])
         assert summary.rows_received == 8
-        assert summary.rows_accepted == 4
-        assert summary.rows_duplicate == 4
+        assert summary.rows_accepted == 8
+        assert summary.rows_duplicate == 0
+        assert any("repeated identical source rows" in w for w in summary.files[0].file_warnings)
+        resummary = importer.import_files([target])
+        assert resummary.rows_accepted == 0
+        assert resummary.rows_duplicate == 8
 
 
 class TestMalformedInput:

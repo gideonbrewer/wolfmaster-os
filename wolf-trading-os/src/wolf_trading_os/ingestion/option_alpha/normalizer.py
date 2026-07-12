@@ -25,7 +25,11 @@ from wolf_trading_os.domain import (
 )
 from wolf_trading_os.ingestion.option_alpha import values
 from wolf_trading_os.ingestion.option_alpha.bot_parser import parse_bot_name
-from wolf_trading_os.ingestion.option_alpha.fingerprint import compute_fingerprint
+from wolf_trading_os.ingestion.option_alpha.fingerprint import (
+    FINGERPRINT_VERSION_V2,
+    compute_fingerprint_v1,
+    compute_fingerprint_v2,
+)
 
 # Option Alpha `type` column -> (instrument type, direction, asset class)
 _TYPE_MAP: dict[str, tuple[InstrumentType, Direction]] = {
@@ -68,6 +72,11 @@ class RowOutcome:
     trade: CanonicalTrade | None = None
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    # Raw row + legacy fingerprint, kept so the importer can assign
+    # per-file occurrence fingerprints and deduplicate against rows
+    # imported before the oa2 migration.
+    raw_row: dict[str, str | None] = field(default_factory=dict)
+    legacy_fingerprint: str | None = None
 
     @property
     def accepted(self) -> bool:
@@ -76,7 +85,7 @@ class RowOutcome:
 
 def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome:
     """Convert one raw (canonical-keyed) CSV row into a CanonicalTrade."""
-    outcome = RowOutcome(row_number=row_number)
+    outcome = RowOutcome(row_number=row_number, raw_row=dict(raw_row))
 
     def optional(parser: Any, column: str) -> Any:
         try:
@@ -200,8 +209,12 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
 
     raw_payload = {k: v for k, v in raw_row.items() if v is not None}
 
+    outcome.legacy_fingerprint = compute_fingerprint_v1(raw_row)
     outcome.trade = CanonicalTrade(
-        fingerprint=compute_fingerprint(raw_row),
+        # occurrence=1 base fingerprint; the importer reassigns the
+        # occurrence index for repeated identical rows within one file.
+        fingerprint=compute_fingerprint_v2(raw_row),
+        fingerprint_version=FINGERPRINT_VERSION_V2,
         source=TradeSource.OPTION_ALPHA,
         strategy_family=attrs.strategy_family,
         strategy_name=attrs.strategy_name,

@@ -57,6 +57,11 @@ class TradeRow(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     fingerprint: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    # Fingerprint algorithm version ("oa1" legacy, "oa2" current); rows
+    # imported before the oa2 migration are backfilled as "oa1".
+    fingerprint_version: Mapped[str] = mapped_column(
+        String(8), nullable=False, server_default="oa1"
+    )
     source: Mapped[str] = mapped_column(String(32), nullable=False)
     import_batch_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("import_batches.id", ondelete="SET NULL"), nullable=True

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from wolf_trading_os.database import session_scope
@@ -23,9 +24,10 @@ from wolf_trading_os.database.repository import (
     create_import_batch,
     existing_fingerprints,
     finalize_import_batch,
-    trade_to_row,
+    insert_trades_on_conflict,
 )
-from wolf_trading_os.domain import TradeSource
+from wolf_trading_os.domain import CanonicalTrade, TradeSource
+from wolf_trading_os.ingestion.option_alpha.fingerprint import compute_fingerprint_v2
 from wolf_trading_os.ingestion.option_alpha.normalizer import RowOutcome, normalize_row
 from wolf_trading_os.ingestion.option_alpha.schema import missing_required, normalize_headers
 from wolf_trading_os.logging import get_logger
@@ -51,6 +53,7 @@ class FileImportResult(BaseModel):
     rows_duplicate: int = 0
     rejected_rows: list[RowIssue] = Field(default_factory=list)
     warnings: list[RowIssue] = Field(default_factory=list)
+    file_warnings: list[str] = Field(default_factory=list)
     unknown_columns: list[str] = Field(default_factory=list)
 
 
@@ -144,22 +147,40 @@ class OptionAlphaImporter:
 
         result.rows_received = len(outcomes)
 
-        with session_scope(self._database_url) as session:
-            batch = create_import_batch(
-                session,
-                source=TradeSource.OPTION_ALPHA.value,
-                filename=filename,
-                file_sha256=file_sha256,
-            )
-            self._persist_outcomes(session, outcomes, result, batch_id=batch.id)
-            finalize_import_batch(
-                batch,
+        try:
+            with session_scope(self._database_url) as session:
+                batch = create_import_batch(
+                    session,
+                    source=TradeSource.OPTION_ALPHA.value,
+                    filename=filename,
+                    file_sha256=file_sha256,
+                )
+                self._persist_outcomes(session, outcomes, result, batch_id=batch.id)
+                finalize_import_batch(
+                    batch,
+                    rows_received=result.rows_received,
+                    rows_accepted=result.rows_accepted,
+                    rows_rejected=result.rows_rejected,
+                    rows_duplicate=result.rows_duplicate,
+                    warnings=[w.model_dump() for w in result.warnings],
+                )
+        except SQLAlchemyError as exc:
+            # Secondary safety layer: application-level validation should
+            # prevent this. Never surface a raw stack trace or anything
+            # containing the connection URL to the caller.
+            log.error(
+                "import_database_error",
+                error_type=type(exc).__name__,
                 rows_received=result.rows_received,
-                rows_accepted=result.rows_accepted,
-                rows_rejected=result.rows_rejected,
-                rows_duplicate=result.rows_duplicate,
-                warnings=[w.model_dump() for w in result.warnings],
             )
+            result.ok = False
+            result.rows_accepted = 0
+            result.rows_duplicate = 0
+            result.error = (
+                f"database error while importing ({type(exc).__name__}); "
+                "the file was rolled back and no rows were stored"
+            )
+            return result
 
         log.info(
             "import_file_complete",
@@ -189,16 +210,58 @@ class OptionAlphaImporter:
                     RowIssue(row_number=outcome.row_number, messages=outcome.warnings)
                 )
 
-        fingerprints = [o.trade.fingerprint for o in accepted if o.trade is not None]
-        already_stored = existing_fingerprints(session, fingerprints)
-
-        seen_in_batch: set[str] = set()
+        # -- occurrence assignment: repeated identical rows within one file
+        # are genuinely distinct trades and get deterministic occ=k
+        # fingerprints (see fingerprint.py).
+        occurrence_counts: dict[str, int] = {}
+        candidates: list[tuple[CanonicalTrade, int]] = []
+        legacy_fps: list[str] = []
+        repeated_groups: set[str] = set()
         for outcome in accepted:
             trade = outcome.trade
             assert trade is not None
-            if trade.fingerprint in already_stored or trade.fingerprint in seen_in_batch:
+            base = trade.fingerprint  # occurrence=1 fingerprint
+            k = occurrence_counts.get(base, 0) + 1
+            occurrence_counts[base] = k
+            if k > 1:
+                repeated_groups.add(base)
+                trade = trade.model_copy(
+                    update={"fingerprint": compute_fingerprint_v2(outcome.raw_row, occurrence=k)}
+                )
+            candidates.append((trade, k))
+            if outcome.legacy_fingerprint is not None:
+                legacy_fps.append(outcome.legacy_fingerprint)
+
+        if repeated_groups:
+            result.file_warnings.append(
+                f"repeated identical source rows detected in {len(repeated_groups)} "
+                "group(s); each occurrence was preserved as a separate trade"
+            )
+
+        # -- legacy dedup: rows imported before the oa2 migration carry oa1
+        # fingerprints; match against them so old databases don't
+        # double-import on re-import.
+        stored_legacy = existing_fingerprints(session, legacy_fps, version="oa1")
+        to_insert: list[CanonicalTrade] = []
+        for outcome, (trade, occurrence) in zip(accepted, candidates, strict=True):
+            # Legacy oa1 dedup applies only to occurrence 1: the oa1
+            # algorithm stored at most one copy of identical rows, so
+            # later occurrences were never stored and must insert.
+            if (
+                occurrence == 1
+                and outcome.legacy_fingerprint is not None
+                and outcome.legacy_fingerprint in stored_legacy
+            ):
                 result.rows_duplicate += 1
-                continue
-            seen_in_batch.add(trade.fingerprint)
-            session.add(trade_to_row(trade, import_batch_id=batch_id))
-            result.rows_accepted += 1
+            else:
+                to_insert.append(trade)
+
+        # -- conflict-safe insert: the UNIQUE constraint is the final
+        # arbiter; losing a race to a concurrent import means "duplicate",
+        # never an exception.
+        inserted = insert_trades_on_conflict(session, to_insert, batch_id)
+        for trade in to_insert:
+            if trade.fingerprint in inserted:
+                result.rows_accepted += 1
+            else:
+                result.rows_duplicate += 1

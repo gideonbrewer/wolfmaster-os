@@ -111,6 +111,49 @@ import). Charts use a CVD-validated palette; polarity (blue/red)
 encodes P&L sign; raw vs normalized results are always shown as
 separate charts, never dual axes.
 
+## ADR-016: Fingerprint v2 (`oa2`) with occurrence indexing
+
+Remediation of audit findings H1/M1. The oa1 fingerprint silently
+dropped genuinely distinct trades whose 12 raw fields were identical
+(same-minute identical fills), collided paper/live rows distinguishable
+only by tags, and was sensitive to numeric formatting ("3" vs "3.0").
+
+`oa2` hashes normalized identity fields (source, botName, tags, symbol,
+description, expiration, openDate, closeDate, quantity, openPrice,
+closePrice, pnl) plus a deterministic per-file occurrence index for
+repeated identical rows: the k-th identical row in one file hashes with
+`occ=k`, so both trades are preserved while re-imports of the same file
+still deduplicate. Numeric fields are Decimal-canonicalized and
+timestamps ISO-canonicalized before hashing, so equivalent formatting
+deduplicates. Analytic/restatable fields (premium, risk, ror,
+returnPct, MFE/MAE, type, status) are deliberately excluded — changes
+to them are surfaced by the possible-correction detector rather than
+minting a new identity.
+
+Migration: `trades.fingerprint_version` records the algorithm ("oa1"
+backfilled for pre-existing rows, "oa2" for new imports). Imports also
+compute the legacy oa1 hash and deduplicate occurrence-1 rows against
+stored oa1 rows, so pre-migration databases do not double-import on
+re-import. Known limitations: (a) occurrence>1 rows re-imported into a
+legacy database insert as new trades — correct, because oa1 had dropped
+them; (b) occurrence indexing only distinguishes identical trades that
+appear in the SAME export file; the same two identical trades split
+across two different exports still collide (cross-file occurrence
+counting would break re-import dedup). Both are documented in
+data-model.md.
+
+## ADR-017: Conflict-safe trade insertion
+
+Remediation of audit finding H4. Trades are inserted with PostgreSQL
+`INSERT ... ON CONFLICT (fingerprint) DO NOTHING RETURNING fingerprint`.
+The unique constraint remains the final duplicate arbiter; an import
+that loses a race to a concurrent import reports the row as a duplicate
+instead of crashing with IntegrityError, and both imports persist their
+audit batch records. A sanitized `SQLAlchemyError` handler remains as a
+secondary layer: on unexpected database errors the file's transaction
+rolls back atomically and the summary reports a clean error naming only
+the exception class — never a stack trace or connection URL.
+
 ## ADR-015: Percent values stored in percent units as exported
 
 `return_pct`, `ror`, `mfe_pct`, `mae_pct` keep Option Alpha's percent
