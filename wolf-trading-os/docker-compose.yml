@@ -1,0 +1,38 @@
+# Wolf Trading OS — Phase 1 local stack: PostgreSQL + dashboard.
+# Usage: cp .env.example .env && docker compose up --build
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wolf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wolf}
+      POSTGRES_DB: ${POSTGRES_DB:-wolf_trading_os}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wolf} -d ${POSTGRES_DB:-wolf_trading_os}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WTOS_ENVIRONMENT: ${WTOS_ENVIRONMENT:-development}
+      WTOS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-wolf}:${POSTGRES_PASSWORD:-wolf}@db:5432/${POSTGRES_DB:-wolf_trading_os}
+      WTOS_LOG_FORMAT: ${WTOS_LOG_FORMAT:-json}
+      WTOS_LOG_LEVEL: ${WTOS_LOG_LEVEL:-INFO}
+    ports:
+      - "8501:8501"
+    volumes:
+      # Drop Option Alpha CSV exports into ./data on the host, then:
+      #   docker compose exec app wolf-trading-os import-option-alpha /data/<file>.csv
+      - ./data:/data:ro
+
+volumes:
+  pgdata:
