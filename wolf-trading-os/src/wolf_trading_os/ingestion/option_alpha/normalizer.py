@@ -179,15 +179,21 @@ def normalize_row(
 
     attrs = parse_bot_name(bot_name)
     parse_sources: dict[str, ParseSource] = dict(attrs.parse_sources)
+    outcome.warnings.extend(attrs.warnings)
 
-    # Environment: bot name first, tags as fallback.
+    # Environment: bot name first, exact tags as fallback; conflicting
+    # tags fail closed to UNKNOWN with a warning.
     environment = attrs.environment
     if environment is TradeEnvironment.UNKNOWN and tags:
         lowered = {t.lower() for t in tags}
-        if "live" in lowered and "paper" not in lowered:
+        if "live" in lowered and "paper" in lowered:
+            outcome.warnings.append(
+                "tags contain both 'live' and 'paper'; environment stored as unknown"
+            )
+        elif "live" in lowered:
             environment = TradeEnvironment.LIVE
             parse_sources["environment"] = ParseSource.TAGS
-        elif "paper" in lowered and "live" not in lowered:
+        elif "paper" in lowered:
             environment = TradeEnvironment.PAPER
             parse_sources["environment"] = ParseSource.TAGS
 

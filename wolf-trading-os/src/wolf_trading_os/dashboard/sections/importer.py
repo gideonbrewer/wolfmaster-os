@@ -41,6 +41,17 @@ def render() -> None:
         cols[2].metric("Rows rejected", result.rows_rejected)
         cols[3].metric("Duplicates skipped", result.rows_duplicate)
 
+        for warning in result.file_warnings:
+            st.warning(warning)
+        if result.possible_corrections:
+            st.warning(
+                "Possible corrected re-exports detected — both versions were "
+                "kept. Review the pairs below."
+            )
+            st.dataframe(
+                pd.DataFrame([c.model_dump() for c in result.possible_corrections]),
+                use_container_width=True,
+            )
         if result.unknown_columns:
             st.info(f"Ignored unrecognized columns: {', '.join(result.unknown_columns)}")
         if result.rejected_rows:

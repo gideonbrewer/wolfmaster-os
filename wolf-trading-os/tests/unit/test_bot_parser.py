@@ -1,4 +1,9 @@
-"""Bot-name parsing: family, delta, DTE, timeframe, contracts, environment."""
+"""Bot-name parsing: family, delta, DTE, timeframe, contracts, environment.
+
+Environment markers must be DELIMITED ([Live], (paper), "- Live",
+"Live:") — brand words are never environment markers (H2). Conflicting
+attribute matches fail closed to None/UNKNOWN with warnings (M8).
+"""
 
 from __future__ import annotations
 
@@ -30,6 +35,17 @@ class TestDeltaParsing:
     def test_absent_stays_none(self, name: str) -> None:
         assert parse_bot_name(name).target_delta is None
 
+    def test_equivalent_notations_do_not_conflict(self) -> None:
+        # 0.50Δ and "50 delta" are the same value -> no conflict.
+        attrs = parse_bot_name("Hulk 0.50Δ 50 delta")
+        assert attrs.target_delta == Decimal("0.5")
+        assert not attrs.warnings
+
+    def test_conflicting_deltas_fail_closed(self) -> None:
+        attrs = parse_bot_name("Hulk 0.50Δ and 0.65Δ variant")
+        assert attrs.target_delta is None
+        assert any("target_delta" in w for w in attrs.warnings)
+
 
 class TestDteParsing:
     @pytest.mark.parametrize(
@@ -41,6 +57,11 @@ class TestDteParsing:
         assert attrs.dte_setting == expected
         assert attrs.parse_sources["dte_setting"] is ParseSource.BOT_NAME
 
+    def test_conflicting_dtes_fail_closed(self) -> None:
+        attrs = parse_bot_name("Hulk 0DTE 2DTE hybrid")
+        assert attrs.dte_setting is None
+        assert any("dte_setting" in w for w in attrs.warnings)
+
     def test_absent(self) -> None:
         assert parse_bot_name("Hulk 0.5Δ").dte_setting is None
 
@@ -50,7 +71,7 @@ class TestTimeframeParsing:
         ("name", "expected"),
         [
             ("Banshee Swing v2", "swing"),
-            ("SPY intraday scalper", "intraday"),
+            ("SPY 30 delta scalper bot", "intraday"),
             ("Wheel weekly", "weekly"),
             ("Multi-Day breakout", "multi-day"),
         ],
@@ -64,12 +85,15 @@ class TestTimeframeParsing:
         assert attrs.parse_sources["timeframe"] is ParseSource.BOT_NAME
 
     def test_0dte_derived_from_dte_setting(self) -> None:
-        # "0 DTE" (with space) is a DTE setting, not the literal 0DTE token;
-        # the timeframe is then derived from dte_setting == 0.
         attrs = parse_bot_name("Hulk 0 DTE 0.5Δ")
         assert attrs.dte_setting == 0
         assert attrs.timeframe == "0DTE"
         assert attrs.parse_sources["timeframe"] is ParseSource.DERIVED
+
+    def test_conflicting_timeframes_fail_closed(self) -> None:
+        attrs = parse_bot_name("Swing weekly hybrid bot")
+        assert attrs.timeframe is None
+        assert any("timeframe" in w for w in attrs.warnings)
 
     def test_absent(self) -> None:
         assert parse_bot_name("Hulk 2DTE").timeframe is None
@@ -83,38 +107,82 @@ class TestContractCount:
     def test_parsed(self, name: str, expected: int) -> None:
         assert parse_bot_name(name).contract_count_setting == expected
 
+    def test_conflicting_counts_fail_closed(self) -> None:
+        attrs = parse_bot_name("Hulk 2x 5 contracts")
+        assert attrs.contract_count_setting is None
+        assert any("contract_count_setting" in w for w in attrs.warnings)
+
 
 class TestEnvironment:
-    def test_live(self) -> None:
-        assert parse_bot_name("Hulk [Live]").environment is TradeEnvironment.LIVE
+    @pytest.mark.parametrize(
+        ("name", "expected"),
+        [
+            ("Hulk [Live]", TradeEnvironment.LIVE),
+            ("Hulk [ live ]", TradeEnvironment.LIVE),
+            ("Hulk (Paper)", TradeEnvironment.PAPER),
+            ("Hulk - Paper", TradeEnvironment.PAPER),
+            ("Hulk - Live", TradeEnvironment.LIVE),
+            ("Live: Hulk momentum", TradeEnvironment.LIVE),
+            ("HULK [LIVE]", TradeEnvironment.LIVE),
+        ],
+    )
+    def test_delimited_markers(self, name: str, expected: TradeEnvironment) -> None:
+        assert parse_bot_name(name).environment is expected
 
-    def test_paper(self) -> None:
-        assert parse_bot_name("Hulk paper").environment is TradeEnvironment.PAPER
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "Live Wire Momentum",  # brand word, not a marker (H2)
+            "Paper Tiger",
+            "Deliver 0DTE",
+            "Papertrail Swing",
+            "Hulk live",  # bare word: not delimited -> not a marker
+        ],
+    )
+    def test_brand_words_stay_unknown(self, name: str) -> None:
+        assert parse_bot_name(name).environment is TradeEnvironment.UNKNOWN
 
-    def test_contradictory_markers_stay_unknown(self) -> None:
-        assert parse_bot_name("live paper test").environment is TradeEnvironment.UNKNOWN
+    def test_contradictory_markers_stay_unknown_with_warning(self) -> None:
+        attrs = parse_bot_name("Hulk [Live] (paper) test")
+        assert attrs.environment is TradeEnvironment.UNKNOWN
+        assert any("live/paper" in w for w in attrs.warnings)
 
     def test_absent(self) -> None:
-        assert parse_bot_name("Hulk 0DTE").environment is TradeEnvironment.UNKNOWN
-        assert "environment" not in parse_bot_name("Hulk 0DTE").parse_sources
-
-    def test_no_substring_match(self) -> None:
-        # "Delivery" contains "live" but is not an environment marker.
-        assert parse_bot_name("Delivery bot").environment is TradeEnvironment.UNKNOWN
+        attrs = parse_bot_name("Hulk 0DTE")
+        assert attrs.environment is TradeEnvironment.UNKNOWN
+        assert "environment" not in attrs.parse_sources
 
 
 class TestFamilyAndVersion:
     def test_family(self) -> None:
-        attrs = parse_bot_name("Hulk 0DTE 0.50Δ 3x [Live]")
-        assert attrs.strategy_family == "Hulk"
+        assert parse_bot_name("Hulk 0DTE 0.50Δ 3x [Live]").strategy_family == "Hulk"
 
     def test_multiword_family(self) -> None:
         assert parse_bot_name("Iron Wolf 1DTE").strategy_family == "Iron Wolf"
+
+    def test_brand_words_kept_in_family(self) -> None:
+        assert parse_bot_name("Live Wire Momentum").strategy_family == "Live Wire Momentum"
+        assert parse_bot_name("Paper Tiger").strategy_family == "Paper Tiger"
+
+    def test_env_marker_not_in_family(self) -> None:
+        assert parse_bot_name("Hulk [Live] 0DTE").strategy_family == "Hulk"
 
     def test_version(self) -> None:
         attrs = parse_bot_name("Banshee Swing v2 30 delta 5x")
         assert attrs.strategy_version == "v2"
         assert attrs.strategy_family == "Banshee"
+
+    def test_unrelated_numbers_ignored(self) -> None:
+        attrs = parse_bot_name("Area 51 breakout")
+        assert attrs.strategy_family == "Area"
+        assert attrs.target_delta is None
+        assert attrs.dte_setting is None
+        assert attrs.contract_count_setting is None
+
+    def test_whitespace_tolerated(self) -> None:
+        attrs = parse_bot_name("   Hulk   0DTE   0.50Δ   [Live]  ")
+        assert attrs.strategy_family == "Hulk"
+        assert attrs.environment is TradeEnvironment.LIVE
 
     def test_empty_name(self) -> None:
         attrs = parse_bot_name(None)

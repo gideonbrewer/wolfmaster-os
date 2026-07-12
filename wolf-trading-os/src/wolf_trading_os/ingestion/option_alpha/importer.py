@@ -24,6 +24,7 @@ from wolf_trading_os.database.repository import (
     create_import_batch,
     existing_fingerprints,
     finalize_import_batch,
+    find_possible_corrections,
     insert_trades_on_conflict,
 )
 from wolf_trading_os.domain import CanonicalTrade, TradeSource
@@ -43,6 +44,17 @@ class RowIssue(BaseModel):
     messages: list[str]
 
 
+class PossibleCorrection(BaseModel):
+    """A newly imported trade that may be a corrected re-export of an
+    existing stored trade (H6). Both records are kept; nothing is
+    merged or deleted automatically."""
+
+    existing_trade_id: str
+    existing_fingerprint: str
+    new_fingerprint: str
+    differing_fields: list[str]
+
+
 class FileImportResult(BaseModel):
     filename: str
     file_sha256: str
@@ -55,6 +67,7 @@ class FileImportResult(BaseModel):
     rejected_rows: list[RowIssue] = Field(default_factory=list)
     warnings: list[RowIssue] = Field(default_factory=list)
     file_warnings: list[str] = Field(default_factory=list)
+    possible_corrections: list[PossibleCorrection] = Field(default_factory=list)
     unknown_columns: list[str] = Field(default_factory=list)
 
 
@@ -292,11 +305,26 @@ class OptionAlphaImporter:
         # arbiter; losing a race to a concurrent import means "duplicate",
         # never an exception.
         inserted = insert_trades_on_conflict(session, to_insert, batch_id)
+        inserted_trades = []
         for trade in to_insert:
             if trade.fingerprint in inserted:
                 result.rows_accepted += 1
+                inserted_trades.append(trade)
             else:
                 result.rows_duplicate += 1
+
+        # Possible-correction detection (H6): newly inserted trades that
+        # share candidate identity with an existing row but differ
+        # materially. Re-imports of the corrected file are duplicates and
+        # never reach this check again.
+        for correction in find_possible_corrections(session, inserted_trades):
+            result.possible_corrections.append(PossibleCorrection(**correction))
+        if result.possible_corrections:
+            result.file_warnings.append(
+                f"possible_correction: {len(result.possible_corrections)} newly "
+                "imported trade(s) match an existing trade's identity but differ "
+                "materially — both records were kept (see possible_corrections)"
+            )
 
 
 # --------------------------------------------------------------------------

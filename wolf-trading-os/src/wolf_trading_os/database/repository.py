@@ -128,3 +128,68 @@ def finalize_import_batch(
     batch.rows_rejected = rows_rejected
     batch.rows_duplicate = rows_duplicate
     batch.warnings = warnings
+
+
+def find_possible_corrections(
+    session: Session,
+    trades: list[CanonicalTrade],
+) -> list[dict[str, Any]]:
+    """Detect stored trades that a newly inserted trade may CORRECT (H6).
+
+    Candidate-correction identity (documented in data-model.md): source,
+    bot_name, underlying_symbol, contract_description, expires_at,
+    opened_at, quantity. When an existing row shares that identity but a
+    different fingerprint AND differs materially (closed_at, exit_price,
+    realized_pnl, return_fraction, mfe_fraction, mae_fraction, status),
+    both records are kept and a `possible_correction` warning is
+    emitted. Records are never silently merged or deleted; full
+    supersession/versioning is deferred (docs/roadmap.md).
+    """
+    material_fields = (
+        "closed_at",
+        "exit_price",
+        "realized_pnl",
+        "return_fraction",
+        "mfe_fraction",
+        "mae_fraction",
+        "status",
+    )
+    corrections: list[dict[str, Any]] = []
+    for trade in trades:
+        rows = session.execute(
+            select(TradeRow).where(
+                TradeRow.source == trade.source.value,
+                TradeRow.bot_name.is_(trade.bot_name)
+                if trade.bot_name is None
+                else TradeRow.bot_name == trade.bot_name,
+                TradeRow.underlying_symbol == trade.underlying_symbol,
+                TradeRow.contract_description.is_(trade.contract_description)
+                if trade.contract_description is None
+                else TradeRow.contract_description == trade.contract_description,
+                TradeRow.expires_at.is_(trade.expires_at)
+                if trade.expires_at is None
+                else TradeRow.expires_at == trade.expires_at,
+                TradeRow.opened_at == trade.opened_at,
+                TradeRow.quantity == trade.quantity,
+                TradeRow.fingerprint != trade.fingerprint,
+            )
+        ).scalars()
+        for row in rows:
+            differing = []
+            for field in material_fields:
+                stored = getattr(row, field)
+                incoming = getattr(trade, field)
+                if field == "status":
+                    incoming = trade.status.value
+                if stored != incoming:
+                    differing.append(field)
+            if differing:
+                corrections.append(
+                    {
+                        "existing_trade_id": str(row.trade_id),
+                        "existing_fingerprint": row.fingerprint,
+                        "new_fingerprint": trade.fingerprint,
+                        "differing_fields": differing,
+                    }
+                )
+    return corrections

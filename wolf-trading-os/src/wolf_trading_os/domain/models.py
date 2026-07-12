@@ -46,6 +46,9 @@ class StrategyAttributes(BaseModel):
     contract_count_setting: int | None = None
     environment: TradeEnvironment = TradeEnvironment.UNKNOWN
     parse_sources: dict[str, ParseSource] = Field(default_factory=dict)
+    # Parse conflicts and other non-fatal issues encountered while
+    # extracting attributes (surfaced as row warnings by the importer).
+    warnings: tuple[str, ...] = ()
 
 
 class CanonicalTrade(BaseModel):

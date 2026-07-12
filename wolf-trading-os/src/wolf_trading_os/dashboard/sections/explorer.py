@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from wolf_trading_os.dashboard.data import cached_trades
+from wolf_trading_os.services.csv_export import safe_csv_bytes
 
 _DISPLAY_COLUMNS = [
     "opened_at",
@@ -98,7 +99,7 @@ def render() -> None:
 
     st.download_button(
         "Export filtered trades as CSV",
-        shown.to_csv(index=False).encode("utf-8"),
+        safe_csv_bytes(shown),  # formula-injection protected (M2)
         file_name="wolf-trading-os-trades.csv",
         mime="text/csv",
     )
