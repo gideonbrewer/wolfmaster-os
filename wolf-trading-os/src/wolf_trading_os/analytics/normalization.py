@@ -7,7 +7,7 @@ make the distinction explicit. Definitions in docs/analytics-definitions.md:
 - per-contract P&L: realized_pnl / quantity, per trade
 - capital deployed: risk when present, else |premium| (per trade)
 - P&L per $1,000 deployed: realized_pnl / capital_deployed * 1000
-- equal-weighted return: mean of per-trade return_pct (each trade counts
+- equal-weighted return: mean of per-trade return_fraction (each trade counts
   once regardless of size)
 """
 
@@ -34,8 +34,8 @@ class NormalizedMetrics:
     avg_pnl_per_1k_deployed: float | None  # mean of per-trade values
     avg_return_on_risk: float | None
     # Equal-weighted
-    equal_weighted_avg_return_pct: float | None
-    equal_weighted_median_return_pct: float | None
+    equal_weighted_avg_return_fraction: float | None
+    equal_weighted_median_return_fraction: float | None
     trades_with_quantity: int
     trades_with_capital: int
 
@@ -83,7 +83,11 @@ def normalized_metrics(df: pd.DataFrame) -> NormalizedMetrics:
         capital[df.loc[capital.index, "realized_pnl"].notna()] if len(capital) else capital
     )
 
-    returns = df["return_pct"].dropna() if "return_pct" in df.columns else pd.Series(dtype=float)
+    returns = (
+        df["return_fraction"].dropna()
+        if "return_fraction" in df.columns
+        else pd.Series(dtype=float)
+    )
     ror = (
         df["return_on_risk"].dropna() if "return_on_risk" in df.columns else pd.Series(dtype=float)
     )
@@ -105,8 +109,8 @@ def normalized_metrics(df: pd.DataFrame) -> NormalizedMetrics:
         pnl_per_1k_deployed=aggregate_per_1k,
         avg_pnl_per_1k_deployed=float(per_1k.mean()) if len(per_1k) else None,
         avg_return_on_risk=float(ror.mean()) if len(ror) else None,
-        equal_weighted_avg_return_pct=float(returns.mean()) if len(returns) else None,
-        equal_weighted_median_return_pct=float(returns.median()) if len(returns) else None,
+        equal_weighted_avg_return_fraction=float(returns.mean()) if len(returns) else None,
+        equal_weighted_median_return_fraction=float(returns.median()) if len(returns) else None,
         trades_with_quantity=len(ppc),
         trades_with_capital=len(per_1k),
     )

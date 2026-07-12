@@ -12,6 +12,7 @@ without schema change.
 | --- | --- | --- |
 | `trade_id` | UUID PK | internal identity |
 | `fingerprint` | varchar(64), **UNIQUE**, indexed | deterministic dedup key (below) |
+| `fingerprint_version` | varchar(8), not null | fingerprint algorithm: `oa1` (legacy, pre-migration rows) or `oa2` |
 | `source` | varchar | `option_alpha` (Phase 1) |
 | `import_batch_id` | FK → import_batches | audit linkage (SET NULL on batch delete) |
 | `strategy_family` | varchar, nullable | parsed from bot name (e.g. "Hulk") |
@@ -33,8 +34,8 @@ without schema change.
 | `premium` | numeric(20,4), nullable | premium / capital deployed |
 | `risk` | numeric(20,4), nullable | max defined risk |
 | `realized_pnl` | numeric(20,4), nullable | NULL ⇒ open/unresolved; excluded from performance metrics |
-| `return_pct`, `return_on_risk` | numeric(12,4), nullable | percent units (12.5 = +12.5%) |
-| `mfe_pct`, `mae_pct` | numeric(12,4), nullable | from `highReturnPct` / `lowReturnPct` |
+| `return_fraction`, `return_on_risk` | numeric(14,8), nullable | DECIMAL FRACTIONS (0.125 = +12.5%), ADR-018 |
+| `mfe_fraction`, `mae_fraction` | numeric(14,8), nullable | from `highReturnPct` / `lowReturnPct`, decimal fractions |
 | `mfe_at`, `mae_at` | timestamp (no tz), nullable | excursion timestamps |
 | `underlying_entry_price`, `underlying_exit_price` | numeric, nullable | from `underlyingOpen/Close` |
 | `timeframe` | varchar, nullable | parsed token (`0DTE`, `swing`, …) |
@@ -54,29 +55,45 @@ One row per import attempt of one file: `source`, `filename`,
 `file_sha256`, `rows_received/accepted/rejected/duplicate`, `warnings`
 (JSONB), `created_at`.
 
-## Fingerprint (duplicate prevention)
+## Fingerprint (duplicate prevention) — v2 (`oa2`)
 
-`fingerprint = sha256("oa1" + 0x1F-joined values of the fixed field list)`
+`fingerprint = sha256("oa2" + 0x1F-joined normalized identity values + "occ=k")`
 
-Field list (frozen; see `ingestion/option_alpha/fingerprint.py`):
+Identity fields (frozen; see `ingestion/option_alpha/fingerprint.py`):
 
 ```
-botName, type, description, symbol, quantity, openDate, closeDate,
-expiration, openPrice, closePrice, premium, pnl
+source, botName, tags, symbol, description,
+expiration, openDate, closeDate,          (ISO-canonicalized)
+quantity, openPrice, closePrice, pnl      (Decimal-canonicalized)
 ```
+
+Deliberately excluded (restatable analytics — changes are surfaced by
+the possible-correction detector instead): type, status, premium, risk,
+ror, returnPct, ev, alpha, highReturnPct/lowReturnPct (+dates),
+daysInTrade, underlyingOpen/underlyingClose.
 
 Properties:
 
-- Values are whitespace-trimmed; missing and empty are equivalent.
-- Columns outside the list don't affect the fingerprint, so re-exports
-  with added/removed optional columns still deduplicate.
-- The `oa1` version prefix makes future algorithm changes explicit.
-- Enforced by an application pre-check **and** a database UNIQUE
-  constraint — concurrent imports cannot slip duplicates through.
+- Numeric fields hash equally across formatting ("3" == "3.0" == "$3");
+  timestamps hash equally across formats; strings are trimmed; missing
+  and empty are equivalent.
+- `occ=k` is the 1-based occurrence index of the row among identical
+  rows in the SAME file, so repeated identical source rows are
+  preserved as distinct trades while re-imports still deduplicate
+  (ADR-016). The importer warns whenever occurrences > 1 are detected.
+- Enforced by `INSERT .. ON CONFLICT DO NOTHING` against the UNIQUE
+  constraint — concurrent imports cannot slip duplicates through or
+  crash (ADR-017).
+- `fingerprint_version` records the algorithm per row. Legacy `oa1`
+  rows (pre-migration) still deduplicate: imports compute the oa1 hash
+  as well and skip occurrence-1 rows already stored as oa1.
 
-Known limitation: two genuinely distinct trades identical in *all*
-twelve fields would collide. With open/close timestamps at minute
-precision this is not a realistic occurrence in Option Alpha exports.
+Known limitations (documented, accepted): (a) two identical trades
+split across two *different* export files still collide — occurrence
+indexing is per-file by design, because cross-file counting would break
+re-import dedup; (b) a corrected re-export (e.g. restated pnl) mints a
+new fingerprint — the possible-correction detector flags these instead
+of silently merging or duplicating.
 
 ## Timezone policy
 
@@ -91,3 +108,18 @@ therefore reflect exchange session time. Audit columns
 A NULL means "the source did not confidently provide this" — never a
 default. Performance metrics operate only on rows where the relevant
 inputs are non-null (documented per metric in analytics-definitions.md).
+
+## Return-unit convention
+
+Returns/excursions are decimal fractions end to end (0.125 = +12.5%).
+`%`-suffixed cells are divided by 100 at parse time. Files whose
+`ror` values are ~100x `pnl/risk` are rejected as percent-point exports
+(no silent conversion); individually inconsistent rows produce import
+warnings. See ADR-018.
+
+## Date-order convention
+
+Slash dates parse under the file-level `--date-order` option (default
+MDY, the confirmed Option Alpha convention). Any cell valid only under
+the opposite order rejects the whole file (ADR-019). ISO-8601 is always
+accepted, including explicit UTC offsets.

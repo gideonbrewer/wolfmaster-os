@@ -40,6 +40,14 @@ def build_parser() -> argparse.ArgumentParser:
         "import-option-alpha", help="Import one or more Option Alpha CSV exports"
     )
     p_import.add_argument("files", nargs="+", type=Path, help="CSV file paths")
+    p_import.add_argument(
+        "--date-order",
+        choices=["MDY", "DMY"],
+        default="MDY",
+        help="Slash-date convention of the export (default MDY, the "
+        "confirmed Option Alpha format); contradictory in-file evidence "
+        "rejects the file",
+    )
 
     sub.add_parser("run-dashboard", help="Launch the Streamlit dashboard")
 
@@ -78,7 +86,7 @@ def _cmd_import_option_alpha(args: argparse.Namespace) -> int:
         print(f"error: file(s) not found: {', '.join(map(str, missing))}", file=sys.stderr)
         return 2
 
-    summary = OptionAlphaImporter().import_files(args.files)
+    summary = OptionAlphaImporter(date_order=args.date_order).import_files(args.files)
     print(json.dumps(summary.as_report(), indent=2, default=str))
     return 0 if all(f.ok for f in summary.files) else 1
 

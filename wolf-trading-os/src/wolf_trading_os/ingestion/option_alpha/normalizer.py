@@ -83,13 +83,31 @@ class RowOutcome:
         return self.trade is not None and not self.errors
 
 
-def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome:
-    """Convert one raw (canonical-keyed) CSV row into a CanonicalTrade."""
+def normalize_row(
+    raw_row: dict[str, str | None],
+    row_number: int,
+    date_order: values.DateOrder = "MDY",
+) -> RowOutcome:
+    """Convert one raw (canonical-keyed) CSV row into a CanonicalTrade.
+
+    Every numeric field goes through its field-specific parser AND a
+    range check against the database column precision, so a corrupt
+    value rejects (or warns on) exactly one row — never the file, and
+    never a database error.
+    """
     outcome = RowOutcome(row_number=row_number, raw_row=dict(raw_row))
 
-    def optional(parser: Any, column: str) -> Any:
+    def optional_ts(column: str) -> dt.datetime | None:
         try:
-            return parser(raw_row.get(column))
+            parsed = values.parse_timestamp(raw_row.get(column), date_order)
+        except ValueError as exc:
+            outcome.warnings.append(f"{column}: {exc}")
+            return None
+        return parsed.local if parsed is not None else None
+
+    def optional_num(parser: Any, column: str, field: str) -> Decimal | None:
+        try:
+            return values.check_range(field, parser(raw_row.get(column)))
         except ValueError as exc:
             outcome.warnings.append(f"{column}: {exc}")
             return None
@@ -101,7 +119,8 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
 
     opened_at: dt.datetime | None = None
     try:
-        opened_at = values.parse_timestamp(raw_row.get("openDate"))
+        opened_ts = values.parse_timestamp(raw_row.get("openDate"), date_order)
+        opened_at = opened_ts.local if opened_ts is not None else None
     except ValueError as exc:
         outcome.errors.append(f"openDate: {exc}")
     if opened_at is None and not outcome.errors:
@@ -109,7 +128,7 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
 
     quantity: Decimal | None = None
     try:
-        quantity = values.parse_decimal(raw_row.get("quantity"))
+        quantity = values.check_range("quantity", values.parse_quantity(raw_row.get("quantity")))
     except ValueError as exc:
         outcome.errors.append(f"quantity: {exc}")
     if quantity is not None and quantity <= 0:
@@ -117,7 +136,7 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
 
     pnl: Decimal | None = None
     try:
-        pnl = values.parse_decimal(raw_row.get("pnl"))
+        pnl = values.check_range("realized_pnl", values.parse_money(raw_row.get("pnl")))
     except ValueError as exc:
         outcome.errors.append(f"pnl: {exc}")
 
@@ -136,22 +155,23 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
     assert symbol is not None and opened_at is not None
 
     # --- optional fields: warn on failure, never invent ------------------
-    closed_at = optional(values.parse_timestamp, "closeDate")
-    expires_at = optional(values.parse_timestamp, "expiration")
-    mfe_at = optional(values.parse_timestamp, "highReturnPctDate")
-    mae_at = optional(values.parse_timestamp, "lowReturnPctDate")
+    closed_at = optional_ts("closeDate")
+    expires_at = optional_ts("expiration")
+    mfe_at = optional_ts("highReturnPctDate")
+    mae_at = optional_ts("lowReturnPctDate")
 
-    entry_price = optional(values.parse_decimal, "openPrice")
-    exit_price = optional(values.parse_decimal, "closePrice")
-    premium = optional(values.parse_decimal, "premium")
-    risk = optional(values.parse_decimal, "risk")
-    return_pct = optional(values.parse_decimal, "returnPct")
-    return_on_risk = optional(values.parse_decimal, "ror")
-    mfe_pct = optional(values.parse_decimal, "highReturnPct")
-    mae_pct = optional(values.parse_decimal, "lowReturnPct")
-    underlying_open = optional(values.parse_decimal, "underlyingOpen")
-    underlying_close = optional(values.parse_decimal, "underlyingClose")
-    days_in_trade = optional(values.parse_decimal, "daysInTrade")
+    entry_price = optional_num(values.parse_money, "openPrice", "entry_price")
+    exit_price = optional_num(values.parse_money, "closePrice", "exit_price")
+    premium = optional_num(values.parse_money, "premium", "premium")
+    risk = optional_num(values.parse_money, "risk", "risk")
+    # Returns/excursions: canonical decimal fractions (ADR-018).
+    return_fraction = optional_num(values.parse_return, "returnPct", "return_fraction")
+    return_on_risk = optional_num(values.parse_return, "ror", "return_on_risk")
+    mfe_fraction = optional_num(values.parse_return, "highReturnPct", "mfe_fraction")
+    mae_fraction = optional_num(values.parse_return, "lowReturnPct", "mae_fraction")
+    underlying_open = optional_num(values.parse_money, "underlyingOpen", "underlying_entry_price")
+    underlying_close = optional_num(values.parse_money, "underlyingClose", "underlying_exit_price")
+    days_in_trade = optional_num(values.parse_quantity, "daysInTrade", "days_in_trade")
 
     bot_name = values.clean_str(raw_row.get("botName"))
     description = values.clean_str(raw_row.get("description"))
@@ -238,10 +258,10 @@ def normalize_row(raw_row: dict[str, str | None], row_number: int) -> RowOutcome
         premium=premium,
         risk=risk,
         realized_pnl=pnl,
-        return_pct=return_pct,
+        return_fraction=return_fraction,
         return_on_risk=return_on_risk,
-        mfe_pct=mfe_pct,
-        mae_pct=mae_pct,
+        mfe_fraction=mfe_fraction,
+        mae_fraction=mae_fraction,
         mfe_at=mfe_at,
         mae_at=mae_at,
         underlying_entry_price=underlying_open,

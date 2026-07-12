@@ -70,7 +70,7 @@ def grouped_metrics(df: pd.DataFrame, by: str) -> pd.DataFrame:
                 "win_rate": m.win_rate,
                 "profit_factor": m.profit_factor,
                 "expectancy": m.expectancy,
-                "avg_return_pct": m.avg_return_pct,
+                "avg_return_fraction": m.avg_return_fraction,
                 "gross_profit": m.gross_profit,
                 "gross_loss": m.gross_loss,
                 "per_contract_total_pnl": float(ppc.sum()) if len(ppc) else None,

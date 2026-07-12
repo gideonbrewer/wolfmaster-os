@@ -24,7 +24,7 @@ def _df() -> pd.DataFrame:
             "quantity": [3.0, 1.0, None, 2.0],
             "risk": [600.0, None, 500.0, 400.0],
             "premium": [None, -250.0, 100.0, None],
-            "return_pct": [50.0, -40.0, 10.0, None],
+            "return_fraction": [50.0, -40.0, 10.0, None],
             "return_on_risk": [50.0, -40.0, 10.0, None],
             "opened_at": [base + dt.timedelta(days=i) for i in range(4)],
             "closed_at": [base + dt.timedelta(days=i, hours=2) for i in range(4)],
@@ -68,11 +68,11 @@ class TestCapital:
 class TestEqualWeighted:
     def test_mean_of_returns(self) -> None:
         m = normalized_metrics(_df())
-        assert m.equal_weighted_avg_return_pct == pytest.approx((50 - 40 + 10) / 3)
+        assert m.equal_weighted_avg_return_fraction == pytest.approx((50 - 40 + 10) / 3)
         assert m.avg_return_on_risk == pytest.approx((50 - 40 + 10) / 3)
 
     def test_empty(self) -> None:
         m = normalized_metrics(pd.DataFrame())
         assert m.raw_total_pnl == 0.0
         assert m.per_contract_total_pnl is None
-        assert m.equal_weighted_avg_return_pct is None
+        assert m.equal_weighted_avg_return_fraction is None

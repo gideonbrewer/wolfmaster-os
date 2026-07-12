@@ -126,24 +126,31 @@ def histogram_chart(values: pd.Series, title: str, x_title: str) -> go.Figure:
 def excursion_scatter(df: pd.DataFrame, excursion_col: str, title: str, x_title: str) -> go.Figure:
     """MFE/MAE (x) vs realized return (y), colored by outcome polarity."""
     fig = _fig(title)
-    sub = df[[excursion_col, "return_pct", "underlying_symbol"]].dropna(
-        subset=[excursion_col, "return_pct"]
+    sub = df[[excursion_col, "return_fraction", "underlying_symbol"]].dropna(
+        subset=[excursion_col, "return_fraction"]
+    )
+    # Stored values are decimal fractions; render as percent points.
+    sub = sub.assign(
+        **{
+            excursion_col: sub[excursion_col] * 100,
+            "return_fraction": sub["return_fraction"] * 100,
+        }
     )
     if not sub.empty:
         fig.add_scatter(
             x=sub[excursion_col],
-            y=sub["return_pct"],
+            y=sub["return_fraction"],
             mode="markers",
             marker={
                 "size": 9,
-                "color": polarity_colors(sub["return_pct"]),
+                "color": polarity_colors(sub["return_fraction"]),
                 "line": {"color": "#ffffff", "width": 1},
             },
             text=sub["underlying_symbol"],
             hovertemplate=f"%{{text}}<br>{x_title}: %{{x:.1f}}%<br>Realized: %{{y:.1f}}%<extra></extra>",
         )
-        lo = float(min(sub[excursion_col].min(), sub["return_pct"].min(), 0))
-        hi = float(max(sub[excursion_col].max(), sub["return_pct"].max(), 0))
+        lo = float(min(sub[excursion_col].min(), sub["return_fraction"].min(), 0))
+        hi = float(max(sub[excursion_col].max(), sub["return_fraction"].max(), 0))
         fig.add_scatter(
             x=[lo, hi],
             y=[lo, hi],

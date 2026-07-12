@@ -29,8 +29,8 @@ class CoreMetrics:
     gross_loss: float  # positive magnitude
     profit_factor: float | None  # gross_profit / gross_loss; None if no losses
     expectancy: float | None  # mean P&L per trade
-    avg_return_pct: float | None
-    median_return_pct: float | None
+    avg_return_fraction: float | None
+    median_return_fraction: float | None
     best_trade_pnl: float | None
     worst_trade_pnl: float | None
     max_consecutive_wins: int
@@ -58,8 +58,8 @@ def core_metrics(df: pd.DataFrame) -> CoreMetrics:
             gross_loss=0.0,
             profit_factor=None,
             expectancy=None,
-            avg_return_pct=None,
-            median_return_pct=None,
+            avg_return_fraction=None,
+            median_return_fraction=None,
             best_trade_pnl=None,
             worst_trade_pnl=None,
             max_consecutive_wins=0,
@@ -83,8 +83,8 @@ def core_metrics(df: pd.DataFrame) -> CoreMetrics:
     profit_factor = gross_profit / gross_loss if gross_loss > 0 else None
 
     returns = (
-        df.loc[pnl.index, "return_pct"].dropna()
-        if "return_pct" in df.columns
+        df.loc[pnl.index, "return_fraction"].dropna()
+        if "return_fraction" in df.columns
         else pd.Series(dtype=float)
     )
 
@@ -108,8 +108,8 @@ def core_metrics(df: pd.DataFrame) -> CoreMetrics:
         gross_loss=gross_loss,
         profit_factor=profit_factor,
         expectancy=float(pnl.mean()),
-        avg_return_pct=float(returns.mean()) if len(returns) else None,
-        median_return_pct=float(returns.median()) if len(returns) else None,
+        avg_return_fraction=float(returns.mean()) if len(returns) else None,
+        median_return_fraction=float(returns.median()) if len(returns) else None,
         best_trade_pnl=float(pnl.max()),
         worst_trade_pnl=float(pnl.min()),
         max_consecutive_wins=max_wins,

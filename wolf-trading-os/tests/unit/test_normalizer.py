@@ -27,11 +27,11 @@ VALID_ROW: dict[str, str | None] = {
     "closePrice": "0.85",
     "premium": "645.00",
     "pnl": "390.00",
-    "ror": "60.47",
-    "returnPct": "60.47",
+    "ror": "0.6047",
+    "returnPct": "0.6047",
     "risk": "645.00",
-    "highReturnPct": "85.20",
-    "lowReturnPct": "-32.50",
+    "highReturnPct": "0.852",
+    "lowReturnPct": "-0.325",
     "highReturnPctDate": "01/05/26 12:45",
     "lowReturnPctDate": "01/05/26 10:05",
     "expiration": "01/07/26",
@@ -62,8 +62,8 @@ class TestValidRow:
         assert trade.target_delta == Decimal("0.5")
         assert trade.dte_setting == 0
         assert trade.contract_count_setting == 3
-        assert trade.mfe_pct == Decimal("85.20")
-        assert trade.mae_pct == Decimal("-32.50")
+        assert trade.mfe_fraction == Decimal("0.852")
+        assert trade.mae_fraction == Decimal("-0.325")
         assert trade.tags == ("0dte", "momentum")
 
     def test_dte_at_entry_derived(self) -> None:
@@ -120,7 +120,7 @@ class TestTolerance:
         outcome = normalize_row({**VALID_ROW, "highReturnPct": "not-a-number"}, 1)
         assert outcome.accepted
         assert outcome.trade is not None
-        assert outcome.trade.mfe_pct is None
+        assert outcome.trade.mfe_fraction is None
         assert any("highReturnPct" in w for w in outcome.warnings)
 
     def test_unrecognized_type_warns(self) -> None:

@@ -21,7 +21,13 @@ def _fmt_num(value: float | None, digits: int = 2) -> str:
 
 
 def _fmt_pct_unit(value: float | None, digits: int = 1) -> str:
+    """Format a value already expressed in percent points."""
     return f"{value:.{digits}f}%" if value is not None else "—"
+
+
+def _fmt_fraction(value: float | None, digits: int = 1) -> str:
+    """Format a decimal fraction (0.125) as percent points (12.5%)."""
+    return f"{value * 100:.{digits}f}%" if value is not None else "—"
 
 
 def render() -> None:
@@ -54,13 +60,13 @@ def render() -> None:
 
     row2 = st.columns(5)
     row2[0].metric("Max drawdown", _fmt_usd(eq.max_drawdown))
-    row2[1].metric("Avg MFE", _fmt_pct_unit(exc.avg_mfe_pct))
+    row2[1].metric("Avg MFE", _fmt_fraction(exc.avg_mfe_fraction))
     row2[2].metric(
         "MFE capture ratio",
         _fmt_num(exc.mfe_capture_ratio),
         help="mean(realized return) / mean(MFE) over trades with positive MFE",
     )
-    row2[3].metric("Avg MAE", _fmt_pct_unit(exc.avg_mae_pct))
+    row2[3].metric("Avg MAE", _fmt_fraction(exc.avg_mae_fraction))
     with row2[4]:
         st.metric("Open trades excluded", str(open_count))
         if pd.notna(date_lo):
@@ -79,7 +85,7 @@ def render() -> None:
     cols[2].metric("P&L per $1k deployed", _fmt_usd(norm.pnl_per_1k_deployed))
     cols[3].metric(
         "Equal-weighted avg return",
-        _fmt_pct_unit(norm.equal_weighted_avg_return_pct),
+        _fmt_fraction(norm.equal_weighted_avg_return_fraction),
     )
 
     st.divider()

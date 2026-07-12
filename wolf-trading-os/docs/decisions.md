@@ -154,8 +154,34 @@ secondary layer: on unexpected database errors the file's transaction
 rolls back atomically and the summary reports a clean error naming only
 the exception class — never a stack trace or connection URL.
 
-## ADR-015: Percent values stored in percent units as exported
+## ADR-015: Percent values stored in percent units as exported — SUPERSEDED by ADR-018
 
-`return_pct`, `ror`, `mfe_pct`, `mae_pct` keep Option Alpha's percent
-units (12.5 = +12.5%). No silent conversion to fractions; the unit is
-documented in the data model and analytics definitions.
+Originally return columns kept "percent units" (12.5 = +12.5%). The
+audit (M3) established that real Option Alpha exports use decimal
+fractions (0.125 = 12.5%), making the original convention both wrong
+for real data and vulnerable to silent 100x errors. Superseded.
+
+## ADR-018: Returns are canonical decimal fractions
+
+Remediation of audit finding M3. All return/excursion values
+(`return_fraction`, `return_on_risk`, `mfe_fraction`, `mae_fraction`,
+NUMERIC(14,8)) store DECIMAL FRACTIONS: 0.125 == +12.5%. Parsing is
+field-specific: `parse_return` accepts fractions as exported and
+divides `%`-suffixed values by 100; money and quantity fields have
+their own parsers and never strip `%`. Displays multiply by 100 at
+render time only. A file-level consistency check compares `ror` to
+`pnl/risk`: a file whose ratios cluster around 100x is rejected outright
+(percent-point export detected — no silent adjustment is ever applied),
+and individually inconsistent rows get warnings. Migration
+`7b41c2ad9c03` renames the columns and converts pre-existing
+percent-unit rows in place.
+
+## ADR-019: Slash dates parse under an explicit file-level date order
+
+Remediation of audit finding M4. ISO-8601 dates are always accepted
+(including explicit UTC offsets). Slash dates are inherently ambiguous
+(02/03/26), so they parse only under a file-level `date_order` option —
+"MDY" by default, the confirmed Option Alpha convention; `--date-order
+DMY` for day-first exports. Before parsing, the importer scans every
+date cell: any cell valid ONLY under the opposite order is contradictory
+evidence and rejects the whole file. Individual cells are never guessed.

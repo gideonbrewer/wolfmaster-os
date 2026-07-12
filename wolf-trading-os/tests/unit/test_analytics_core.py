@@ -16,7 +16,7 @@ def _df(pnls: list[float | None], returns: list[float | None] | None = None) -> 
     return pd.DataFrame(
         {
             "realized_pnl": pnls,
-            "return_pct": returns if returns is not None else [None] * n,
+            "return_fraction": returns if returns is not None else [None] * n,
             "opened_at": [base + dt.timedelta(days=i) for i in range(n)],
             "closed_at": [base + dt.timedelta(days=i, hours=4) for i in range(n)],
         }
@@ -40,8 +40,8 @@ class TestCoreMetrics:
         assert m.gross_loss == 300
         assert m.profit_factor == pytest.approx(400 / 300)
         assert m.expectancy == pytest.approx(20)
-        assert m.avg_return_pct == pytest.approx(2.0)
-        assert m.median_return_pct == pytest.approx(0.0)
+        assert m.avg_return_fraction == pytest.approx(2.0)
+        assert m.median_return_fraction == pytest.approx(0.0)
         assert m.best_trade_pnl == 300
         assert m.worst_trade_pnl == -200
 

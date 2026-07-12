@@ -19,7 +19,7 @@ def _df() -> pd.DataFrame:
             "quantity": [1.0, 1.0, 2.0, 3.0, 1.0],
             "target_delta": [0.5, 0.5, 0.6, None, 0.5],
             "underlying_symbol": ["SPY", "SPY", "QQQ", "NVDA", "SPY"],
-            "return_pct": [10.0, -5.0, 20.0, 30.0, None],
+            "return_fraction": [10.0, -5.0, 20.0, 30.0, None],
             "opened_at": [base + dt.timedelta(days=i) for i in range(5)],
             "closed_at": [base + dt.timedelta(days=i, hours=3) for i in range(5)],
             "tags": [["a", "b"], ["a"], ["b"], [], ["a"]],

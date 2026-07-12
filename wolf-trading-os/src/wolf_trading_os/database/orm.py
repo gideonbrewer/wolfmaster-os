@@ -92,11 +92,13 @@ class TradeRow(Base):
     premium: Mapped[Decimal | None] = mapped_column(Numeric(20, 4))
     risk: Mapped[Decimal | None] = mapped_column(Numeric(20, 4))
     realized_pnl: Mapped[Decimal | None] = mapped_column(Numeric(20, 4))
-    return_pct: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
-    return_on_risk: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    # Returns/excursions are DECIMAL FRACTIONS (0.125 == 12.5%), not
+    # percent points — see docs/analytics-definitions.md (ADR-018).
+    return_fraction: Mapped[Decimal | None] = mapped_column(Numeric(14, 8))
+    return_on_risk: Mapped[Decimal | None] = mapped_column(Numeric(14, 8))
 
-    mfe_pct: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
-    mae_pct: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    mfe_fraction: Mapped[Decimal | None] = mapped_column(Numeric(14, 8))
+    mae_fraction: Mapped[Decimal | None] = mapped_column(Numeric(14, 8))
     mfe_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=False))
     mae_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=False))
 

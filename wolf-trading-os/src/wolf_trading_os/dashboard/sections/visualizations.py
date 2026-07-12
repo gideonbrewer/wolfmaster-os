@@ -31,7 +31,7 @@ def render() -> None:
         st.plotly_chart(charts.drawdown_chart(eq.curve), use_container_width=True)
         st.plotly_chart(
             charts.histogram_chart(
-                closed["return_pct"].dropna(), "Return distribution", "Return (%)"
+                closed["return_fraction"].dropna() * 100, "Return distribution", "Return (%)"
             ),
             use_container_width=True,
         )
@@ -80,12 +80,12 @@ def render() -> None:
         col1, col2 = st.columns(2)
         with col1:
             st.plotly_chart(
-                charts.excursion_scatter(closed, "mfe_pct", "MFE vs realized return", "MFE"),
+                charts.excursion_scatter(closed, "mfe_fraction", "MFE vs realized return", "MFE"),
                 use_container_width=True,
             )
         with col2:
             st.plotly_chart(
-                charts.excursion_scatter(closed, "mae_pct", "MAE vs realized return", "MAE"),
+                charts.excursion_scatter(closed, "mae_fraction", "MAE vs realized return", "MAE"),
                 use_container_width=True,
             )
 

@@ -1,8 +1,9 @@
 """Canonical trade model (Pydantic v2).
 
 This is the single internal representation every import source must map
-into. Monetary values use Decimal; percentages are stored as percent
-units (e.g. 12.5 == +12.5%). Fields that cannot be confidently parsed
+into. Monetary values use Decimal; returns and excursions are stored as
+DECIMAL FRACTIONS (0.125 == +12.5%) and only rendered as percentages
+at display time (ADR-018). Fields that cannot be confidently parsed
 from a source are left as None — values are never invented — and the
 provenance of derived fields is recorded in `parse_sources`.
 """
@@ -87,12 +88,12 @@ class CanonicalTrade(BaseModel):
     premium: Decimal | None = None  # premium received/paid or capital deployed
     risk: Decimal | None = None  # max defined risk (capital at risk)
     realized_pnl: Decimal | None = None
-    return_pct: Decimal | None = None  # percent units
-    return_on_risk: Decimal | None = None  # percent units
+    return_fraction: Decimal | None = None  # decimal fraction (0.125 == 12.5%)
+    return_on_risk: Decimal | None = None  # decimal fraction
 
-    # Excursions (percent units, relative to the same base as return_pct)
-    mfe_pct: Decimal | None = None
-    mae_pct: Decimal | None = None
+    # Excursions (decimal fractions, same base as return_fraction)
+    mfe_fraction: Decimal | None = None
+    mae_fraction: Decimal | None = None
     mfe_at: dt.datetime | None = None
     mae_at: dt.datetime | None = None
 

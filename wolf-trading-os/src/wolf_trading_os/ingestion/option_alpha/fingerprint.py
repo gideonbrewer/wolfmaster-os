@@ -107,7 +107,7 @@ def _norm_numeric(value: str | None) -> str:
     if value is None or not value.strip():
         return ""
     try:
-        parsed = values.parse_decimal(value)
+        parsed = values.parse_money(value)
     except ValueError:
         return value.strip()
     if parsed is None:
@@ -127,7 +127,7 @@ def _norm_timestamp(value: str | None) -> str:
         return value.strip()
     if parsed is None:
         return ""
-    return parsed.isoformat()
+    return parsed.local.isoformat()
 
 
 def compute_fingerprint_v1(raw_row: dict[str, str | None]) -> str:

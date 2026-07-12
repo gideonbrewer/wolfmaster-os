@@ -25,10 +25,10 @@ _DISPLAY_COLUMNS = [
     "premium",
     "risk",
     "realized_pnl",
-    "return_pct",
+    "return_fraction",
     "return_on_risk",
-    "mfe_pct",
-    "mae_pct",
+    "mfe_fraction",
+    "mae_fraction",
     "environment",
     "tags",
 ]
