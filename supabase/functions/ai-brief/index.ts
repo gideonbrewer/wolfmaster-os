@@ -7,7 +7,7 @@ const cors = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const MODEL = "claude-haiku-4-5-20251001";
+const MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5.4-mini";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return json({ ok: true });
@@ -42,31 +42,30 @@ Deno.serve(async (req) => {
       }
     }
 
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) return json({ error: "missing_anthropic_key" }, 500);
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!apiKey) return json({ error: "missing_openai_key" }, 500);
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${apiKey}`,
         "content-type": "application/json",
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 360,
-        system:
-          "You are WolfMaster, a terse personal chief-of-staff. Write a 2-4 sentence command brief for the operator's day. Be specific and grounded only in the data provided. Never invent names, tasks, numbers, or events. Lead with what matters most. Optionally end with one sharp suggestion. No greeting, no markdown.",
-        messages: [{ role: "user", content: buildPrompt(digest) }],
+        max_output_tokens: 360,
+        instructions:
+          "You are WolfMaster, a terse personal chief-of-staff. Return exactly two bullet lines, each a distinct topic or action for the operator's day. Bullet 1 should be the highest-leverage next action. Bullet 2 should be the most important risk, relationship, calendar, or follow-up signal. Be specific and grounded only in the data provided. Never invent names, tasks, numbers, or events. No greeting, no paragraph, no extra commentary.",
+        input: buildPrompt(digest),
       }),
     });
 
     if (!response.ok) {
-      return json({ error: "claude_failed", detail: await response.text() }, 502);
+      return json({ error: "openai_failed", detail: await response.text() }, 502);
     }
 
     const data = await response.json();
-    const brief = String(data?.content?.[0]?.text || "").trim();
+    const brief = String(data?.output_text || data?.output?.flatMap((item: any) => item.content || []).find((part: any) => part.type === "output_text")?.text || "").trim();
     if (!brief) return json({ error: "empty_brief" }, 502);
 
     await supabase.from("ai_briefs").upsert({

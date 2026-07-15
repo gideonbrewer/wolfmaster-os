@@ -29,16 +29,16 @@ python3 -m http.server 8000      # open http://localhost:8000
 
 ## AI Command Brief
 
-The NOW brief uses `supabase/functions/ai-brief` for a real Claude-written brief
+The NOW brief uses `supabase/functions/ai-brief` for a real OpenAI-written brief
 when the user is signed in. The existing deterministic brief remains the fallback
-if the function is not deployed, the user is offline/logged out, or Claude fails.
+if the function is not deployed, the user is offline/logged out, or the AI call fails.
 
 One-time Supabase setup:
 
 ```bash
 supabase login
 supabase link --project-ref cgbyfooxstxinttfvwzq
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxx
+supabase secrets set OPENAI_API_KEY=sk-xxxxx
 supabase functions deploy ai-brief
 ```
 
