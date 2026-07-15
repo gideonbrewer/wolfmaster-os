@@ -1410,9 +1410,6 @@ function commandBriefBullets(text,fallbackItems=[]){
 function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,careerTasks,comms,calendarEvents,habits,errands,build,reflect}){
   const pDone=(todos||[]).filter(t=>t.done).length, pTotal=(todos||[]).length||3;
   const awaiting=(comms||[]).filter(c=>['Sent','Follow-up','Follow Up'].includes(c.phase)).length;
-  const familyNames=FAMILY_NAMES;
-  const familyTxt=c=>`${c.title||''} ${c.name||''} ${c.notes||''}`;
-  const familyMember=familyNames.find(n=>(comms||[]).some(c=>new RegExp(`\\b${n}\\b`,'i').test(familyTxt(c))&&c.phase!=='Closed'));
   const openTasks=[...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career')];
   const meetings=(calendarEvents||[]).filter(e=>!e.date||String(e.date).slice(0,10)===todayStr()||e.day==='Today').length;
   const momentumData=momentumModel({habits,todos});
@@ -1421,6 +1418,7 @@ function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,care
   const next=(todos||[]).find(t=>!t.done) || openTasks.find(t=>String(t.priority||t.ccPriority||'').toLowerCase()==='now') || (careerLeads||[]).find(t=>!t.done) || openTasks[0];
   const recommendation=next?asTitle(next):'Everything critical is clear — get ahead.';
   const briefSignals=buildPrioritizedSignals({comms,tasks,careerTasks,errands,build,todos,reflect},3);
+  const familySignal=briefSignals.find(s=>s.tag==='family');
   const alsoLine=briefSignals.map(s=>s.short).join('; ');
   const [fullBrief,setFullBrief]=useState(false);
   const [aiBrief,setAiBrief]=useState(null);
@@ -1442,7 +1440,7 @@ function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,care
   const detailWhy=pDone<pTotal?'It is the first unfinished Daily Top 3 item, so it protects the day before lower-priority inputs take over.':openTasks.length?'Daily Top 3 is clear, so the next open urgent task becomes the highest-leverage move.':'No urgent execution item is open right now.';
   const detailRisk=deepSignals.length?deepSignals.slice(0,2).map(s=>s.short||s.label).join('; '):awaiting?`${awaiting} reply${awaiting===1?'':'ies'} still awaiting follow-up.`:'No major slipping signal detected.';
   const detailOrder=[recommendation,...deepSignals.map(s=>s.short||s.label)].filter(Boolean).slice(0,3).join(' → ');
-  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2><div className="meta">Here's what matters today.</div>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing…':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Top 3" value={`${pDone}/${pTotal}`} color={C.accent} onClick={()=>document.querySelector('.wm-top3')?.scrollIntoView({behavior:'smooth',block:'start'})}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Mail" value={awaiting} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','All')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familyMember?'Needs':'OK'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Next</div><strong>{recommendation}</strong></div><button className="primary-btn wm-execute" onClick={()=>document.querySelector('.wm-top3')?.scrollIntoView({behavior:'smooth',block:'start'})}>Execute →</button></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
+  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2><div className="meta">Here's what matters today.</div>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing…':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Top 3" value={`${pDone}/${pTotal}`} color={C.accent} onClick={()=>document.querySelector('.wm-top3')?.scrollIntoView({behavior:'smooth',block:'start'})}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Mail" value={awaiting} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','All')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familySignal?'Needs':'OK'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Next</div><strong>{recommendation}</strong></div><button className="primary-btn wm-execute" onClick={()=>document.querySelector('.wm-top3')?.scrollIntoView({behavior:'smooth',block:'start'})}>Execute →</button></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
 }
 function NowCommandPrompts({todos,setTodos,tasks,careerTasks,errands,comms,build,reflect,onNavigate}){
   const [prompt,setPrompt]=useState('next');
@@ -1619,7 +1617,7 @@ function calendarEventPriority(event, people=[]){
 // Family, People, Build, and Review/cadence, ranks by weight, and returns the
 // top few. Dynamic data first; a seeded preview set only appears when no real
 // signal exists. Each signal carries an avatar descriptor + actionable label.
-function buildPrioritizedSignals({comms=[],tasks=[],careerTasks=[],errands=[],build=[],todos=[],reflect=[]}={},limit=5){
+function buildPrioritizedSignals({comms=[],tasks=[],careerTasks=[],errands=[],build=[],todos=[],reflect=[],includePreview=true}={},limit=5){
   const txt=c=>`${c.title||''} ${c.name||''} ${c.notes||''}`;
   // Family = real family names or explicit family phrases only — never the generic
   // substring "family" (which lives inside org/app names like "FamilyApp").
@@ -1653,7 +1651,7 @@ function buildPrioritizedSignals({comms=[],tasks=[],careerTasks=[],errands=[],bu
   const reviewedToday=(reflect||[]).some(r=>r.type==='weekly-review'&&String(r.date||'').slice(0,10)===todayStr());
   if(!reviewedToday&&day>=4){ out.push({id:'sig-review',name:'Weekly Review',label:'Weekly Review — due Sunday',short:'Weekly Review is due Sunday',tag:'review',weight:50,mark:'✦'}); }
   let signals=out.sort((a,b)=>b.weight-a.weight).slice(0,limit);
-  if(!signals.length){
+  if(!signals.length&&includePreview){
     signals=[
       {id:'s-fam',name:'Frederick',label:'Frederick needs dedicated time this week',short:'Frederick still needs dedicated time this week',tag:'family',assetDir:'family',mark:'F'},
       {id:'s-ppl',name:'Tim Ward',label:'Tim Ward — 43 days since contact',short:'Tim Ward has not been contacted in 43 days',tag:'people',assetDir:'people',mark:'TW'},
@@ -1744,16 +1742,16 @@ function MomentumRing({score}){ const r=15.5, c=2*Math.PI*r, off=c*(1-Math.min(M
 // entity from buildPrioritizedSignals (real data first, seeded preview otherwise),
 // with a domain accent. Tapping routes to the closest existing tab. No persistence.
 function NowDomainSignals({comms,tasks,careerTasks,errands,build,todos,reflect,onNavigate}){
-  const signals=buildPrioritizedSignals({comms,tasks,careerTasks,errands,build,todos,reflect},8);
+  const signals=buildPrioritizedSignals({comms,tasks,careerTasks,errands,build,todos,reflect,includePreview:false},8);
   const pick=tag=>signals.find(s=>s.tag===tag);
   const fam=pick('family'), ppl=pick('people'), bld=pick('build');
   const cards=[
-    {key:'family',label:'FAMILY STATUS',name:fam?fam.name:'Frederick',
-     icon:'heart',signal:fam?fam.short:'1:1 needed this week',mark:fam?fam.mark:'F',assetDir:fam?fam.assetDir:'family',photo:fam?fam.photo:null,go:'career'},
-    {key:'people',label:'PEOPLE SIGNALS',name:ppl?ppl.name:'Tim Ward',
-     icon:'users',signal:ppl?ppl.short:'43 days since contact',mark:ppl?ppl.mark:'TW',assetDir:ppl?ppl.assetDir:'people',photo:ppl?ppl.photo:null,go:'career'},
-    {key:'build',label:'BUILD SIGNALS',name:bld?bld.name:'WolfLock',
-     icon:'trending',signal:bld?bld.short:'auth branch pending',mark:bld?bld.mark:'WL',assetDir:bld?bld.assetDir:'ventures',photo:bld?bld.photo:null,go:'more'}
+    {key:'family',label:'FAMILY STATUS',name:fam?fam.name:'Family',
+     icon:'heart',signal:fam?fam.short:'All clear',mark:fam?fam.mark:'✓',assetDir:fam?fam.assetDir:'family',photo:fam?fam.photo:null,go:'career'},
+    {key:'people',label:'PEOPLE SIGNALS',name:ppl?ppl.name:'People',
+     icon:'users',signal:ppl?ppl.short:'All clear',mark:ppl?ppl.mark:'✓',assetDir:ppl?ppl.assetDir:'people',photo:ppl?ppl.photo:null,go:'career'},
+    {key:'build',label:'BUILD SIGNALS',name:bld?bld.name:'Build',
+     icon:'trending',signal:bld?bld.short:'All clear',mark:bld?bld.mark:'✓',assetDir:bld?bld.assetDir:'ventures',photo:bld?bld.photo:null,go:'more'}
   ];
   return <section className="glass card wm-domain-section"><div className="wm-domain-section-head"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="spark" size={13} /> Attention Signals</div></div><div className="wm-domains">{cards.map(c=>(
     <button type="button" key={c.key} className={`glass card wm-domain wm-domain-${c.key}`} aria-label={c.label} title={c.label} onClick={()=>onNavigate&&onNavigate(c.go)}>
