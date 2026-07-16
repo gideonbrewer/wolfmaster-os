@@ -58,3 +58,20 @@ alter table google_gmail_tokens enable row level security;
 
 -- Intentionally no user-facing policies. Edge Functions read/write this table
 -- with the Supabase service role so Gmail refresh tokens never reach the app.
+
+create table if not exists google_contacts_tokens (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  provider text not null default 'contacts',
+  email text,
+  access_token text not null,
+  refresh_token text,
+  scope text,
+  token_type text,
+  expires_at timestamptz,
+  updated_at timestamptz default now()
+);
+
+alter table google_contacts_tokens enable row level security;
+
+-- Intentionally no user-facing policies. Edge Functions read/write this table
+-- with the Supabase service role so Google Contacts refresh tokens never reach the app.
