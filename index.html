@@ -901,6 +901,32 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .life-toggle-row{display:flex;gap:8px;flex-wrap:wrap}
 .life-toggle{min-height:34px;padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:var(--text-mid);font-size:11px;font-weight:800}
 .life-toggle.active{border-color:rgba(147,242,10,.4);background:var(--accent-soft);color:var(--accent)}
+.exec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.exec-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.exec-card{padding:13px;border-radius:18px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026);display:grid;gap:9px;min-width:0}
+.exec-card.warn{border-color:rgba(255,204,102,.2);background:rgba(255,204,102,.045)}
+.exec-card.danger{border-color:rgba(255,91,122,.22);background:rgba(255,91,122,.045)}
+.exec-card b{font-size:13px;line-height:1.25}
+.exec-card small{color:var(--text-mid);font-size:10.5px;line-height:1.35}
+.exec-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.exec-pill{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;border-radius:999px;padding:4px 8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text-mid);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.exec-pill.p1{color:var(--danger);border-color:rgba(255,91,122,.22);background:rgba(255,91,122,.08)}
+.exec-pill.p2{color:var(--warn);border-color:rgba(255,204,102,.22);background:rgba(255,204,102,.08)}
+.exec-pill.p3{color:var(--accent);border-color:rgba(147,242,10,.2);background:rgba(147,242,10,.07)}
+.exec-list{display:grid;gap:8px}
+.exec-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.065);background:rgba(0,0,0,.16)}
+.exec-row b{font-size:12.5px;line-height:1.25}
+.exec-row small{display:block;color:var(--text-mid);font-size:10.5px;line-height:1.35;margin-top:2px}
+.exec-actions{display:flex;gap:7px;flex-wrap:wrap}
+.exec-import-box{display:grid;gap:9px}
+.exec-import-box textarea{min-height:190px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px}
+.exec-result-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.exec-result{padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
+.exec-result span{display:block;color:var(--text-dim);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.exec-result b{display:block;margin-top:4px;font-size:18px}
+.exec-brief{white-space:pre-wrap;color:rgba(245,242,235,.9);font-size:12px;line-height:1.5}
+.exec-conflict{border-color:rgba(255,204,102,.22);background:rgba(255,204,102,.045)}
+@media (max-width:640px){.exec-grid,.exec-grid.three,.exec-result-grid{grid-template-columns:1fr}.exec-row{grid-template-columns:1fr}.exec-actions .ghost-btn,.exec-actions .primary-btn{width:100%;justify-content:center}.exec-import-box textarea{min-height:150px}}
 .review-memory-drawers{display:grid;gap:8px}
 .review-memory-drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .review-mini-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:10px}
@@ -1152,7 +1178,211 @@ const LIFEMETRICSINIT={
   bills:'',
   financeNote:''
 };
+const EXEC_DOMAINS=['WolfLock','Purple Atlas','WolfMaster','Career and Relationships','Money and Administration','Marriage','Family Travel',"Boys' Development",'Family Systems','House','Personal Systems','Trading and Wealth'];
+const EXEC_GUARDRAILS=[
+  'No discretionary manual trading.',
+  'Automated trading must remain isolated, rules-based and measurable.',
+  'WolfLock V2 survey is the current highest-leverage strategic priority.',
+  'Notion remains the durable source of truth.',
+  'WolfMaster is the executive decision and attention layer.',
+  'Maximum three major outcomes per day.',
+  'Waiting items must have review dates.',
+  'One major house sprint per weekend.',
+  'House projects cannot displace WolfLock, marriage or the boys.',
+  'Completed items leave the active dashboard but remain in history.',
+  'Capture first; classify during review.',
+  'Do not repeatedly redesign plans instead of executing them.'
+];
+const EXEC_TYPES=['task','project','milestone','waiting','scheduled','decision','guardrail','note'];
+const EXEC_STATUSES=['inbox','next','active','waiting','scheduled','blocked','completed','deferred','archived'];
+const EXEC_PRIORITIES=['P1','P2','P3'];
+const EXEC_CANONICAL=['wolfmaster','notion','calendar','gmail','reminders','external'];
+function initialExecutiveSyncPacket(){ return {
+  packetVersion:'1.0', generatedAt:'2026-07-17', sourceSystem:'chatgpt',
+  domains:EXEC_DOMAINS,
+  today:[
+    {title:'Finalize the WolfLock V2 survey',domain:'WolfLock',type:'milestone',status:'active',priority:'P1',owner:'Gideon',nextAction:'Review the final questions, test the mobile experience and prepare the distribution list.',canonicalSystem:'notion'},
+    {title:'Complete the money and deadline sprint',domain:'Money and Administration',type:'milestone',status:'next',priority:'P1',owner:'Gideon',nextAction:"Complete Hanover, LMCU, Delta, Ele's Place and Northwestern Ombuds actions.",canonicalSystem:'wolfmaster'},
+    {title:'Hold family calendar planning session with Erin',domain:'Marriage',type:'scheduled',status:'next',priority:'P1',owner:'Gideon',nextAction:'Schedule a 30-minute meeting to select date nights, vacation windows and birthday-trip dates.',canonicalSystem:'calendar'}
+  ],
+  items:[
+    {title:'Call Hanover about insurance refund',domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Email Hanover proof of Fairview closing',domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Deposit check at LMCU',domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Send Delta receipts',domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:"Pay Ele's Place sponsorship",domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Contact Northwestern Ombuds regarding tuition bill',domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',nextAction:'Prepare and send a concise escalation packet documenting the failed Winter 2026 Grad PLUS origination and lack of specific notice before graduation.',canonicalSystem:'notion'},
+    {title:'Follow up with Raj about final Belmont consulting check',domain:'Money and Administration',type:'waiting',status:'waiting',priority:'P1',owner:'Gideon',waitingOn:'Raj',reviewDate:'2026-07-17',canonicalSystem:'notion'},
+    {title:"Finish George's UTMA taxes",domain:'Money and Administration',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Draft response regarding medical benefits',domain:'Money and Administration',type:'task',status:'next',priority:'P2',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Assign AMEX cards by expense category',domain:'Money and Administration',type:'task',status:'next',priority:'P2',owner:'Gideon',canonicalSystem:'notion'},
+    {title:"Email Grebner's contact",domain:'Purple Atlas',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Determine Duggan follow-up objective',domain:'Career and Relationships',type:'task',status:'next',priority:'P1',owner:'Gideon',nextAction:'Decide the relationship objective before drafting outreach.',canonicalSystem:'notion'},
+    {title:'Send Duggan campaign thank-you notes',domain:'Career and Relationships',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Follow up with Kelley Cawthorne',domain:'Career and Relationships',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Reply to Crafted Law',domain:'Career and Relationships',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Email Joey Barone about WolfLock sponsorship',domain:'WolfLock',type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'gmail'},
+    {title:'Create WolfLock LLC',domain:'WolfLock',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Create Purple Atlas LLC',domain:'Purple Atlas',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Add substantive content to PurpleAtlas.io',domain:'Purple Atlas',type:'milestone',status:'next',priority:'P2',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Launch WolfMaster V0',domain:'WolfMaster',type:'milestone',status:'active',priority:'P1',owner:'Gideon',nextAction:'Ship one reliable daily briefing and one trusted task workflow.',canonicalSystem:'wolfmaster'},
+    {title:"Finalize and print boys' training plans",domain:"Boys' Development",type:'milestone',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Schedule golf with Frederick',domain:"Boys' Development",type:'scheduled',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'calendar'},
+    {title:'Schedule a special day with Graham',domain:"Boys' Development",type:'scheduled',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'calendar'},
+    {title:"Select gymnastics coach for Graham's flip-throw progression",domain:"Boys' Development",type:'waiting',status:'waiting',priority:'P2',owner:'Gideon',waitingOn:'Gymnastics facilities',nextAction:'Review responses and schedule three to five private tumbling sessions.',canonicalSystem:'gmail'},
+    {title:'Schedule date with Erin',domain:'Marriage',type:'scheduled',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'calendar'},
+    {title:'Select couples-vacation dates',domain:'Marriage',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'calendar'},
+    {title:'Select family-vacation dates',domain:'Family Travel',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'calendar'},
+    {title:"Plan Graham's 10th-birthday trip",domain:'Family Travel',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:"Plan Frederick's 10th-birthday trip",domain:'Family Travel',type:'project',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Revamp family DAKboard',domain:'Family Systems',type:'project',status:'next',priority:'P2',owner:'Gideon',nextAction:'Configure a clean family dashboard with calendar, sports, chores, meals, reminders and travel countdowns.',canonicalSystem:'wolfmaster'},
+    {title:"Create kids' daily and weekly chore lists",domain:'Family Systems',type:'project',status:'next',priority:'P2',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Finish TV wall',domain:'House',type:'task',status:'next',priority:'P3',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Complete driveway and fence cleanup sprint',domain:'House',type:'milestone',status:'next',priority:'P3',owner:'Gideon',description:'Remove driveway rust, remove fence weeds, add dirt near the deck and move the golf net.',canonicalSystem:'wolfmaster'},
+    {title:'Restore basketball court markings and decals',domain:'House',type:'milestone',status:'next',priority:'P3',owner:'Gideon',canonicalSystem:'wolfmaster'},
+    {title:'Consolidate notebooks',domain:'Personal Systems',type:'project',status:'next',priority:'P2',owner:'Gideon',nextAction:'Move decisions and reference material into Notion and actionable items into the trusted task system.',canonicalSystem:'notion'},
+    {title:'Revise LinkedIn profile',domain:'Career and Relationships',type:'task',status:'next',priority:'P2',owner:'Gideon',canonicalSystem:'wolfmaster'}
+  ],
+  guardrails:[
+    {title:'No discretionary manual trading',domain:'Trading and Wealth',type:'guardrail',status:'active',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Do not attempt to rapidly recover the $175,000 realized loss',domain:'Trading and Wealth',type:'guardrail',status:'active',priority:'P1',owner:'Gideon',canonicalSystem:'notion'},
+    {title:'Automated trading must remain isolated and rules-based',domain:'Trading and Wealth',type:'guardrail',status:'active',priority:'P1',owner:'Gideon',canonicalSystem:'notion'}
+  ]
+};}
 const CALENDAR=[{day:'Sun',date:15,today:true,events:[{t:'9:30',text:'Market open',c:C.good},{t:'2pm',text:'WolfLock standup',c:C.teal},{t:'5pm',text:'Family dinner',c:C.pink}]},{day:'Mon',date:16,today:false,events:[{t:'8am',text:'Advisory call',c:C.info}]},{day:'Tue',date:17,today:false,events:[{t:'10am',text:'Soccer Graham',c:C.warn},{t:'3pm',text:'Options review',c:C.good}]},{day:'Wed',date:18,today:false,events:[]},{day:'Thu',date:19,today:false,events:[{t:'12pm',text:'Hulk V3 review',c:C.good},{t:'6pm',text:'Date night',c:C.pink}]},{day:'Fri',date:20,today:false,events:[{t:'Family game night',text:'',c:C.pink}]},{day:'Sat',date:21,today:false,events:[{t:'8am',text:'Soccer tournament',c:C.warn},{t:'1pm',text:'Team lunch',c:C.info}]}];
+function execNormText(v){ return String(v||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+function execCleanDomain(domain){ const d=String(domain||'Personal Systems').replace(/[’‘]/g,"'").trim(); const hit=EXEC_DOMAINS.find(x=>execNormText(x)===execNormText(d)); return hit||d||'Personal Systems'; }
+function execPriority(p){ const up=String(p||'P3').toUpperCase(); return EXEC_PRIORITIES.includes(up)?up:'P3'; }
+function execStatus(s,type){ const low=String(s||'').toLowerCase(); if(EXEC_STATUSES.includes(low)) return low; if(type==='waiting') return 'waiting'; if(type==='scheduled') return 'scheduled'; if(type==='guardrail'||type==='decision') return 'active'; return 'inbox'; }
+function execType(t){ const low=String(t||'task').toLowerCase(); return EXEC_TYPES.includes(low)?low:'task'; }
+function execCanonical(c){ const low=String(c||'wolfmaster').toLowerCase(); return EXEC_CANONICAL.includes(low)?low:'external'; }
+function execFingerprint(item){ return ['wmexec',execNormText(item.title),execNormText(item.domain),execNormText(item.type),execNormText(item.projectId||item.project||''),execNormText(item.owner||'')].filter(Boolean).join('|'); }
+function execIdentity(item){ return item.sourceSystem&&item.sourceId?`${item.sourceSystem}:${item.sourceId}`:execFingerprint(item); }
+function normalizeExecutiveItem(raw,packet={},section='items'){
+  const type=execType(raw.type||section.replace(/s$/,''));
+  const sourceSystem=String(raw.sourceSystem||packet.sourceSystem||'manual').toLowerCase();
+  const normalized={
+    id:raw.id||null,
+    title:String(raw.title||raw.text||'Untitled').trim(),
+    description:raw.description||raw.notes||'',
+    domain:execCleanDomain(raw.domain),
+    type,
+    status:execStatus(raw.status,type),
+    priority:execPriority(raw.priority),
+    owner:raw.owner||'Gideon',
+    nextAction:raw.nextAction||'',
+    dueDate:raw.dueDate||raw.date||'',
+    reviewDate:raw.reviewDate||'',
+    scheduledStart:raw.scheduledStart||raw.start||'',
+    scheduledEnd:raw.scheduledEnd||raw.end||'',
+    sourceSystem,
+    sourceId:raw.sourceId||raw.externalId||'',
+    sourceUrl:raw.sourceUrl||raw.url||'',
+    canonicalSystem:execCanonical(raw.canonicalSystem),
+    projectId:raw.projectId||raw.project||'',
+    personId:raw.personId||raw.person||'',
+    blockedBy:raw.blockedBy||'',
+    waitingOn:raw.waitingOn||'',
+    lastUpdatedAt:raw.lastUpdatedAt||packet.generatedAt||new Date().toISOString(),
+    lastSyncedAt:new Date().toISOString(),
+    completedAt:raw.completedAt||'',
+    archivedAt:raw.archivedAt||'',
+    metadata:{...(raw.metadata||{}), packetVersion:packet.packetVersion||'', importedSection:section}
+  };
+  if(type==='waiting'&&!normalized.reviewDate) normalized.reviewDate=todayStr();
+  normalized.identity=execIdentity(normalized);
+  normalized.fingerprint=execFingerprint(normalized);
+  return normalized;
+}
+function executiveItemsFromPacket(packet){
+  const p=packet||{};
+  const all=[...(p.today||[]).map(x=>({...x,metadata:{...(x.metadata||{}),today:true}})),...(p.priorities||[]),...(p.tasks||[]),...(p.projects||[]),...(p.waiting||[]),...(p.scheduled||[]),...(p.decisions||[]),...(p.guardrails||[]),...(p.people||[]).map(x=>({...x,type:'note',domain:x.domain||'Career and Relationships',metadata:{...(x.metadata||{}),person:true}})),...(p.items||[])];
+  EXEC_GUARDRAILS.forEach(title=>all.push({title,domain:title.toLowerCase().includes('trading')?'Trading and Wealth':'Personal Systems',type:'guardrail',status:'active',priority:'P1',owner:'Gideon',canonicalSystem:'notion',sourceSystem:'wolfmaster',sourceId:`guardrail-${execNormText(title)}`}));
+  return all.map(raw=>normalizeExecutiveItem(raw,p,raw.type?`${raw.type}s`:'items')).filter(x=>x.title&&x.title!=='Untitled');
+}
+function execComparable(item){
+  const copy={...item};
+  delete copy.id; delete copy.lastSyncedAt; delete copy.lastUpdatedAt; delete copy.identity; delete copy.fingerprint; delete copy.metadata;
+  return JSON.stringify(copy);
+}
+function mergeExecutiveItems(prevItems=[],incomingItems=[]){
+  const now=new Date().toISOString();
+  const items=(prevItems||[]).map(x=>({...x,identity:x.identity||execIdentity(x),fingerprint:x.fingerprint||execFingerprint(x)}));
+  const byIdentity=new Map(items.map((x,i)=>[x.identity,i]));
+  const byFingerprint=new Map(items.map((x,i)=>[x.fingerprint,i]));
+  const conflicts=[], audit=[], result={created:0,updated:0,skipped:0,conflicted:0};
+  incomingItems.forEach(incoming=>{
+    const idx=byIdentity.has(incoming.identity)?byIdentity.get(incoming.identity):byFingerprint.get(incoming.fingerprint);
+    if(idx==null){
+      const created={...incoming,id:incoming.id||`exec-${Date.now()}-${items.length}`,lastSyncedAt:now};
+      items.push(created); byIdentity.set(created.identity,items.length-1); byFingerprint.set(created.fingerprint,items.length-1);
+      audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'created',itemId:created.id,title:created.title,sourceSystem:created.sourceSystem});
+      result.created++; return;
+    }
+    const current=items[idx];
+    if(execComparable(current)===execComparable(incoming)){ result.skipped++; return; }
+    const currentCanonical=execCanonical(current.canonicalSystem);
+    const incomingCanonical=execCanonical(incoming.canonicalSystem);
+    const protectedSystem=currentCanonical!=='wolfmaster'&&currentCanonical!==incomingCanonical;
+    const conflictFields=['title','description','domain','type','status','priority','owner','nextAction','dueDate','reviewDate','scheduledStart','scheduledEnd','canonicalSystem','projectId','personId','blockedBy','waitingOn','sourceUrl'].filter(k=>String(current[k]||'')&&String(incoming[k]||'')&&String(current[k]||'')!==String(incoming[k]||''));
+    if(protectedSystem&&conflictFields.length){
+      conflicts.push({id:`conf-${Date.now()}-${conflicts.length}`,at:now,itemId:current.id,title:current.title,fields:conflictFields,current,incoming,status:'open'});
+      audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'conflict',itemId:current.id,title:current.title,fields:conflictFields});
+      result.conflicted++; return;
+    }
+    const merged={...current,...incoming,id:current.id,metadata:{...(current.metadata||{}),...(incoming.metadata||{})},lastSyncedAt:now};
+    items[idx]=merged;
+    audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'updated',itemId:merged.id,title:merged.title,sourceSystem:incoming.sourceSystem});
+    result.updated++;
+  });
+  return {items,conflicts,audit,result};
+}
+function importExecutivePacket(currentExec={},packet){
+  const incoming=executiveItemsFromPacket(packet);
+  const merged=mergeExecutiveItems(currentExec.items||[],incoming);
+  const domains=[...new Set([...(currentExec.domains||[]),...EXEC_DOMAINS,...(packet.domains||[]).map(execCleanDomain),...incoming.map(x=>x.domain)])];
+  return {domains,items:merged.items,conflicts:[...(currentExec.conflicts||[]),...merged.conflicts],auditLog:[...(merged.audit||[]),...(currentExec.auditLog||[])].slice(0,120),lastImportResult:{...merged.result,totalIncoming:incoming.length,at:new Date().toISOString(),sourceSystem:packet.sourceSystem||'unknown'},lastImportedAt:new Date().toISOString()};
+}
+function execDaysUntil(iso){ if(!iso) return 9999; const d=new Date(String(iso).slice(0,10)+'T00:00:00'); const n=new Date(todayStr()+'T00:00:00'); return Math.round((d-n)/86400000); }
+function scoreExecutiveItem(item){
+  let score=0, reasons=[];
+  const p=execPriority(item.priority); if(p==='P1'){score+=45;reasons.push('explicit P1');} else if(p==='P2'){score+=24;reasons.push('explicit P2');} else {score+=8;reasons.push('P3');}
+  const due=execDaysUntil(item.dueDate||item.reviewDate); if(due<0){score+=35;reasons.push('overdue/review date passed');} else if(due===0){score+=28;reasons.push('due today');} else if(due<=3){score+=16;reasons.push('deadline near');}
+  if(item.domain==='Money and Administration'){score+=22;reasons.push('money/admin consequence');}
+  if(['Marriage',"Boys' Development",'Family Systems','Family Travel'].includes(item.domain)){score+=20;reasons.push('family/relationship importance');}
+  if(['WolfLock','Purple Atlas','WolfMaster'].includes(item.domain)){score+=18;reasons.push('strategic leverage');}
+  if(item.waitingOn||item.status==='waiting'){score+=15;reasons.push('external dependency'); if(item.reviewDate&&execDaysUntil(item.reviewDate)<=0){score+=18;reasons.push('waiting review date exceeded');}}
+  if(item.status==='blocked'||item.blockedBy){score+=22;reasons.push('blocked');}
+  if(['task','milestone'].includes(item.type)&&item.status!=='completed') { score+=8; reasons.push('can move today'); }
+  if(item.domain==='House') { score-=18; reasons.push('house work capped below strategic/family/financial work'); }
+  return {score:Math.max(0,score),reason:`Ranked ${p} because ${reasons.slice(0,3).join(', ')}.`};
+}
+function activeExecutiveItems(exec){ return (exec?.items||[]).filter(x=>!x.completedAt&&!x.archivedAt&&!['completed','archived'].includes(x.status)); }
+function executiveDashboardModel(exec,calendarEvents=[]){
+  const active=activeExecutiveItems(exec).map(x=>({...x,rank:scoreExecutiveItem(x)})).sort((a,b)=>b.rank.score-a.rank.score);
+  const today=active.filter(x=>x.metadata?.today||x.priority==='P1').slice(0,3);
+  const mustDo=active.filter(x=>x.type==='task'&&x.domain==='Money and Administration').slice(0,5);
+  const waiting=active.filter(x=>x.type==='waiting'||x.status==='waiting'||x.waitingOn).slice(0,8);
+  const scheduled=[...active.filter(x=>x.type==='scheduled'||x.status==='scheduled'),...(calendarEvents||[]).slice(0,4).map(e=>({id:`cal-${e.id||e.title}`,title:e.title||e.text||'Calendar item',domain:'Calendar',type:'scheduled',scheduledStart:e.date||e.time||'',priority:'P2',rank:{score:40,reason:'Calendar commitment.'}}))].slice(0,6);
+  const projects=active.filter(x=>['project','milestone'].includes(x.type)).slice(0,6);
+  const atRisk=active.filter(x=>x.status==='blocked'||x.blockedBy||execDaysUntil(x.reviewDate)<0||execDaysUntil(x.dueDate)<0||!x.nextAction&&['active','next'].includes(x.status)).slice(0,6);
+  const decisions=(exec?.items||[]).filter(x=>['decision','guardrail'].includes(x.type)&&!x.archivedAt).slice(0,8);
+  return {today,mustDo,waiting,scheduled,projects,atRisk,decisions,active};
+}
+function generateExecutiveDailyBrief(exec,calendarEvents=[]){
+  const m=executiveDashboardModel(exec,calendarEvents);
+  const line=x=>x?.title||'Clear';
+  return [
+    `Today: ${m.today.map(line).slice(0,3).join('; ')||'No major outcomes selected.'}`,
+    `Calendar: ${m.scheduled.slice(0,3).map(line).join('; ')||'No scheduled commitments imported.'}`,
+    `Urgent money/admin: ${m.mustDo.slice(0,3).map(line).join('; ')||'No urgent money/admin item surfaced.'}`,
+    `Waiting follow-up: ${m.waiting.slice(0,3).map(x=>`${x.waitingOn||x.owner||'Someone'} - ${x.title}`).join('; ')||'No waiting loops due.'}`,
+    `Strategic priority: ${line(m.active.find(x=>['WolfLock','Purple Atlas','WolfMaster'].includes(x.domain)))}`,
+    `Family/relationship: ${line(m.active.find(x=>['Marriage',"Boys' Development",'Career and Relationships'].includes(x.domain)))}`,
+    `Risk/bottleneck: ${line(m.atRisk[0])}`,
+    `Do not get distracted by: house or low-leverage admin unless the P1 money/family/strategic items are protected.`
+  ].join('\n');
+}
 const CALENDAR_DB_TABLE='calendar_connections';
 const CALENDAR_PROVIDER='google';
 const CALENDAR_FALLBACK_URL='https://calendar.google.com/calendar/u/0/r';
@@ -1343,7 +1573,7 @@ function App(){
   const visibleSyncText=!isOnline?'Offline':syncState==='syncing'?'Syncing…':dirty&&syncState!=='error'?'Unsaved':syncState==='error'?(syncText&&syncText!=='Ready'?syncText:'Save error'):'Saved';
   const syncTitle=!isOnline?'You are offline. Reconnect to sync changes.':dirty?'Tap to force-save now.':'All changes are saved to Supabase.';
   const handleSignOut=async()=>{ if(signingOut) return; if(!isOnline){ setSyncState('offline'); setSyncText('Offline — reconnect before signing out'); return; } try{ setSigningOut(true); await saveAllNow('before sign out'); clearStoredSession(); setSession(null); }catch(e){ setSyncState('error'); setSyncText(e.message||'Save failed — still signed in'); } finally{ setSigningOut(false); } };
-  return <div className="app-shell"><div className="bg-glow bg-glow-a"></div><div className="bg-glow bg-glow-b"></div><header className="topbar refined"><div className="brand-wrap"><div className="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M4 18 9 6l3.2 6 2-4 5.8 10"/><path d="M4 18h16"/></svg></div><div><h1>WolfMaster OS</h1><p>Personal Command Center</p></div></div><div className="top-right"><button type="button" className={`wm-bell ${visibleSyncState}`} title={syncTitle} onClick={()=>saveAllNow('manual sync').catch(e=>{ setSyncState('error'); setSyncText(e.message||'Save failed'); })}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span className={`dot ${visibleSyncState}`}></span></button><div className="wm-user-wrap"><button type="button" className="wm-user" title="Account" onClick={()=>setUserMenu(o=>!o)}><Avatar name="Gideon" assetDir="user" mark="GB" /></button>{userMenu?<><div className="wm-user-backdrop" onClick={()=>setUserMenu(false)}></div><div className="wm-user-menu glass"><div className="wm-user-menu-row"><span className={`dot ${visibleSyncState}`}></span><span>{visibleSyncText}{lastSynced?` · ${lastSynced}`:''}</span></div><button type="button" className="ghost-btn" onClick={()=>{ saveAllNow('manual sync').catch(e=>{ setSyncState('error'); setSyncText(e.message||'Save failed'); }); }}>Sync now</button><button type="button" className="ghost-btn" onClick={downloadBackup}>Export backup</button><button type="button" className="ghost-btn" onClick={handleSignOut} disabled={signingOut}>{signingOut?'Saving…':'Sign out'}</button></div></>:null}</div></div></header><main className="main v3">{tab==='now' && <NowScreen session={session} onNavigate={go} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} careerLeads={careerLeads} setCareerLeads={setCareerLeads} careerPipeline={careerPipeline} setCareerPipeline={setCareerPipeline} tasks={tasks} setTasks={setTasks} careerTasks={careerTasks} setCareerTasks={setCareerTasks} errands={errands} setErrands={setErrands} comms={comms} emailItems={emailItems} habits={habits} reflect={reflect} setReflect={setReflect} build={build} calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} />}{tab==='plan' && <PlanScreen navTarget={navTarget} onNavigate={go} planExtras={planExtras} setPlanExtras={setPlanExtras} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} careerTasks={careerTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} habits={habits} setHabits={setHabits} calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailItems={emailItems} emailStatus={emailStatus} emailMessage={emailMessage} emailAccount={emailAccount} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} />}{tab==='career' && <CareerScreen navTarget={navTarget} people={people} setPeople={setPeople} calendarEvents={calendarEvents} emailItems={emailItems} careerLeads={careerLeads} setCareerLeads={setCareerLeads} careerPipeline={careerPipeline} setCareerPipeline={setCareerPipeline} careerTasks={careerTasks} setCareerTasks={setCareerTasks} careerComms={careerComms} setCareerComms={setCareerComms} syncState={syncState} syncText={syncText} lastSynced={lastSynced} onSaveNow={saveCareerNow} contactsStatus={contactsStatus} contactsMessage={contactsMessage} contactsLoading={contactsLoading} onConnectGoogleContacts={onConnectGoogleContacts} onSyncGoogleContacts={onSyncGoogleContacts} />}{tab==='track' && <TrackLifeScreen navTarget={navTarget} habits={habits} setHabits={setHabits} goals={goals} setGoals={setGoals} reviewData={reviewData} setReviewData={setReviewData} todos={todos} weeklyTop={weekly} people={people} buildData={buildData} onNavigate={go} />}{tab==='more' && <BuildScreen buildData={buildData} setBuildData={setBuildData} habits={habits} onNavigate={go} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} />}</main><nav className="tabs fixed-tabs">{tabs.map(([id,label],i)=><button key={id} type="button" className={`tab ${tab===id?'active':''}`} onClick={()=>go(id)}><div className="tab-icon"><Icon name={['home','grid','users','trending','bars'][i]} size={20} /></div><span>{label}</span></button>)}</nav></div>;
+  return <div className="app-shell"><div className="bg-glow bg-glow-a"></div><div className="bg-glow bg-glow-b"></div><header className="topbar refined"><div className="brand-wrap"><div className="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M4 18 9 6l3.2 6 2-4 5.8 10"/><path d="M4 18h16"/></svg></div><div><h1>WolfMaster OS</h1><p>Personal Command Center</p></div></div><div className="top-right"><button type="button" className={`wm-bell ${visibleSyncState}`} title={syncTitle} onClick={()=>saveAllNow('manual sync').catch(e=>{ setSyncState('error'); setSyncText(e.message||'Save failed'); })}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span className={`dot ${visibleSyncState}`}></span></button><div className="wm-user-wrap"><button type="button" className="wm-user" title="Account" onClick={()=>setUserMenu(o=>!o)}><Avatar name="Gideon" assetDir="user" mark="GB" /></button>{userMenu?<><div className="wm-user-backdrop" onClick={()=>setUserMenu(false)}></div><div className="wm-user-menu glass"><div className="wm-user-menu-row"><span className={`dot ${visibleSyncState}`}></span><span>{visibleSyncText}{lastSynced?` · ${lastSynced}`:''}</span></div><button type="button" className="ghost-btn" onClick={()=>{ saveAllNow('manual sync').catch(e=>{ setSyncState('error'); setSyncText(e.message||'Save failed'); }); }}>Sync now</button><button type="button" className="ghost-btn" onClick={downloadBackup}>Export backup</button><button type="button" className="ghost-btn" onClick={handleSignOut} disabled={signingOut}>{signingOut?'Saving…':'Sign out'}</button></div></>:null}</div></div></header><main className="main v3">{tab==='now' && <NowScreen session={session} onNavigate={go} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} careerLeads={careerLeads} setCareerLeads={setCareerLeads} careerPipeline={careerPipeline} setCareerPipeline={setCareerPipeline} tasks={tasks} setTasks={setTasks} careerTasks={careerTasks} setCareerTasks={setCareerTasks} errands={errands} setErrands={setErrands} comms={comms} emailItems={emailItems} habits={habits} reflect={reflect} setReflect={setReflect} build={build} reviewData={reviewData} calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} />}{tab==='plan' && <PlanScreen navTarget={navTarget} onNavigate={go} planExtras={planExtras} setPlanExtras={setPlanExtras} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} careerTasks={careerTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} habits={habits} setHabits={setHabits} calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailItems={emailItems} emailStatus={emailStatus} emailMessage={emailMessage} emailAccount={emailAccount} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} />}{tab==='career' && <CareerScreen navTarget={navTarget} people={people} setPeople={setPeople} calendarEvents={calendarEvents} emailItems={emailItems} careerLeads={careerLeads} setCareerLeads={setCareerLeads} careerPipeline={careerPipeline} setCareerPipeline={setCareerPipeline} careerTasks={careerTasks} setCareerTasks={setCareerTasks} careerComms={careerComms} setCareerComms={setCareerComms} syncState={syncState} syncText={syncText} lastSynced={lastSynced} onSaveNow={saveCareerNow} contactsStatus={contactsStatus} contactsMessage={contactsMessage} contactsLoading={contactsLoading} onConnectGoogleContacts={onConnectGoogleContacts} onSyncGoogleContacts={onSyncGoogleContacts} />}{tab==='track' && <TrackLifeScreen navTarget={navTarget} habits={habits} setHabits={setHabits} goals={goals} setGoals={setGoals} reviewData={reviewData} setReviewData={setReviewData} todos={todos} setTodos={setTodos} weeklyTop={weekly} people={people} buildData={buildData} calendarEvents={calendarEvents} onNavigate={go} />}{tab==='more' && <BuildScreen buildData={buildData} setBuildData={setBuildData} habits={habits} onNavigate={go} todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} />}</main><nav className="tabs fixed-tabs">{tabs.map(([id,label],i)=><button key={id} type="button" className={`tab ${tab===id?'active':''}`} onClick={()=>go(id)}><div className="tab-icon"><Icon name={['home','grid','users','trending','bars'][i]} size={20} /></div><span>{label}</span></button>)}</nav></div>;
 }
 function Splash({text}){ return <div className="auth-wrap"><div className="auth-box glass"><div className="auth-title">WolfMaster</div><p className="auth-sub">{text}</p></div></div>; }
 function AuthScreen({onAuth}){ const recovery=readRecoverySession(); const [mode,setMode]=useState(recovery?'reset':'signin'), [email,setEmail]=useState(''), [password,setPassword]=useState(''), [confirmPassword,setConfirmPassword]=useState(''), [error,setError]=useState(''), [notice,setNotice]=useState(recovery?'Enter a new password for WolfMaster.':''), [loading,setLoading]=useState(false), [success,setSuccess]=useState(false); const switchMode=next=>{ setMode(next); setError(''); setNotice(next==='signin'?'Use the same login on every device.':''); setPassword(''); setConfirmPassword(''); }; const submit=async()=>{ if(!email.trim()||!password.trim()){ setError('Please enter email and password'); return; } try{ setLoading(true); setError(''); setNotice(''); const result=await authPassword(email,password,mode); const usable=result.session || {access_token:result.data.access_token,refresh_token:result.data.refresh_token,expires_at:result.data.expires_at,user:result.data.user}; if(mode==='signup' && !usable?.access_token){ setSuccess(true); return; } onAuth(usable); }catch(e){ setError(e.message||'Auth failed'); } finally{ setLoading(false); } }; const sendReset=async()=>{ if(!email.trim()){ setError('Enter your email address first'); return; } try{ setLoading(true); setError(''); setNotice(''); await authSendPasswordReset(email); setNotice('Password reset email sent. Open the link in that email, then set a new password.'); }catch(e){ setError(e.message||'Could not send reset email'); } finally{ setLoading(false); } }; const updatePassword=async()=>{ if(!password.trim()||password.length<8){ setError('Use a password with at least 8 characters'); return; } if(password!==confirmPassword){ setError('Passwords do not match'); return; } try{ setLoading(true); setError(''); setNotice(''); await authUpdatePassword(recovery,password); setMode('signin'); setPassword(''); setConfirmPassword(''); setNotice('Password updated. Sign in with your new password.'); }catch(e){ setError(e.message||'Could not update password'); } finally{ setLoading(false); } }; return <div className="auth-wrap"><div className="auth-box glass"><div className="brand-wrap auth-brand"><div className="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M4 18 9 6l3.2 6 2-4 5.8 10"/><path d="M4 18h16"/></svg></div><div><div className="auth-title">WolfMaster</div><p className="auth-sub">Synced command center across desktop and mobile.</p></div></div>{success?<div className="empty">Account created. If email confirmation is on, confirm it and sign in.</div>:mode==='reset'?<div className="stack"><div className="empty">Set a new password for your WolfMaster account.</div><input className="text-input" type="password" placeholder="New password" value={password} onChange={e=>setPassword(e.target.value)} /><input className="text-input" type="password" placeholder="Confirm new password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&updatePassword()} />{error?<div className="error-text">{error}</div>:<div className="status-note">{notice||'Use at least 8 characters.'}</div>}<button className="primary-btn big" onClick={updatePassword} disabled={loading}>{loading?'Updating…':'Update Password'}</button><button className="ghost-btn" onClick={()=>switchMode('signin')}>Back to sign in</button></div>:<><div className="seg"><button className={mode==='signin'?'active':''} onClick={()=>switchMode('signin')}>Sign In</button><button className={mode==='signup'?'active':''} onClick={()=>switchMode('signup')}>Create Account</button></div><div className="stack"><input className="text-input" type="email" placeholder="Email address" value={email} onChange={e=>setEmail(e.target.value)} /><input className="text-input" type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} />{error?<div className="error-text">{error}</div>:<div className="status-note">{notice||'Use the same login on every device.'}</div>}<button className="primary-btn big" onClick={submit} disabled={loading}>{loading?'Working…':mode==='signin'?'Sign In':'Create Account'}</button>{mode==='signin'?<button className="ghost-btn" onClick={sendReset} disabled={loading}>Forgot password?</button>:null}</div></>}</div></div>; }
@@ -1877,10 +2107,17 @@ function NowDomainSignals({comms,tasks,careerTasks,errands,build,todos,reflect,o
     </button>
   ))}</div></section>;
 }
-function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,reflect,setReflect,build,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
+function ExecutiveDashboard({executive,calendarEvents,onNavigate,compact=false}){
+  const model=executiveDashboardModel(executive,calendarEvents);
+  const Section=({title,items,empty,kind})=><div className={`exec-card ${kind||''}`}><div className="exec-card-top"><span className="exec-pill">{title}</span><b>{items.length}</b></div><div className="exec-list">{items.slice(0,compact?3:6).map(item=><div className="exec-row" key={item.id||item.identity}><div><b>{item.title}</b><small>{item.waitingOn?`Waiting on ${item.waitingOn} · `:''}{item.reviewDate?`Review ${item.reviewDate} · `:''}{item.nextAction||item.rank?.reason||item.domain}</small></div><span className={`exec-pill ${String(item.priority||'P3').toLowerCase()}`}>{item.priority||'P3'}</span></div>)}{!items.length?<small>{empty}</small>:null}</div></div>;
+  if(!model.active.length) return <section className="glass card wm-panel"><div className="section-head"><div><div className="eyebrow" style={{color:C.accent}}>Executive Sync</div><div className="section-title">No sync packet imported yet</div><div className="meta">Use Review → Sync to import your structured packet.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Import</button></div></section>;
+  return <section className="glass card wm-panel"><div className="section-head"><div><div className="eyebrow" style={{color:C.accent}}>Executive Dashboard</div><div className="section-title">Attention layer</div><div className="meta">Ranked from stored executive items. Top outcomes are capped at three.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Sync</button></div><div className="exec-grid three"><Section title="Today" items={model.today} empty="No major outcomes." /><Section title="Must Do" items={model.mustDo} empty="No urgent admin." kind={model.mustDo.length?'warn':''} /><Section title="Waiting On" items={model.waiting} empty="No waiting loops." /></div>{!compact?<div className="exec-grid" style={{marginTop:10}}><Section title="Scheduled" items={model.scheduled} empty="No schedule items." /><Section title="Active Projects" items={model.projects} empty="No active projects." /><Section title="At Risk" items={model.atRisk} empty="Nothing at risk." kind={model.atRisk.length?'danger':''} /><Section title="Decisions" items={model.decisions} empty="No guardrails imported." /></div>:null}</section>;
+}
+function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact">
     <NowCommandBrief session={session} onNavigate={onNavigate} todos={todos} weekly={weekly} careerLeads={careerLeads} tasks={tasks} careerTasks={careerTasks} comms={comms||[]} emailItems={emailItems||[]} calendarEvents={calendarEvents} habits={habits||[]} errands={errands||[]} build={build||[]} reflect={reflect||[]} />
     <NowTop3Cards todos={todos} setTodos={setTodos} />
+    <ExecutiveDashboard executive={reviewData?.executive} calendarEvents={calendarEvents||[]} onNavigate={onNavigate} compact />
     <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowMomentumStrip habits={habits||[]} todos={todos||[]} />
     {/* Compact order: command, Top 3, signals, collapsed Momentum, then Timeline + Attention. */}
@@ -2310,12 +2547,46 @@ function LifeMetricsPanel({life,onChange}){
     <div className="life-metric-card"><h4>Finance</h4><div className="life-metric-row"><span>Cash</span><input className="text-input" value={life.cash||''} onChange={e=>patch({cash:e.target.value})} placeholder="$" /></div><div className="life-metric-row"><span>Burn</span><input className="text-input" value={life.burn||''} onChange={e=>patch({burn:e.target.value})} placeholder="$ / mo" /></div><div className="life-metric-row"><span>Bills</span><input className="text-input" value={life.bills||''} onChange={e=>patch({bills:e.target.value})} placeholder="due / clear" /></div><input className="text-input" value={life.financeNote||''} onChange={e=>patch({financeNote:e.target.value})} placeholder="Finance note" /></div>
   </div><div className="review-flow-actions"><span className="meta">{[num(life.sleepHours),life.sleepQuality,life.energy,life.workout?'workout':'',life.protein?'protein':'',num(life.cash),num(life.bills)].filter(Boolean).length} inputs logged today</span><button type="button" className="ghost-btn" onClick={()=>onChange({...LIFEMETRICSINIT,date:todayStr()})}>Reset today</button></div></section>;
 }
-function TrackLifeScreen({navTarget,habits,setHabits,goals,setGoals,reviewData,setReviewData,todos,weeklyTop,people,buildData,onNavigate}){
+function ExecutiveSyncPanel({executive,setExecutive,todos,setTodos,calendarEvents}){
+  const [input,setInput]=useState('');
+  const [message,setMessage]=useState('');
+  const exec=executive||{domains:EXEC_DOMAINS,items:[],conflicts:[],auditLog:[]};
+  const model=executiveDashboardModel(exec,calendarEvents);
+  const brief=generateExecutiveDailyBrief(exec,calendarEvents);
+  const importPacket=packet=>{
+    const next=importExecutivePacket(exec,packet);
+    setExecutive(next);
+    const today=executiveDashboardModel(next,calendarEvents).today.slice(0,3);
+    if(today.length) setTodos(prev=>today.map((x,i)=>({id:`exec-top3-${x.identity||x.id||i}`,text:x.title,goal:x.domain,done:false,executiveItemId:x.id})));
+    setMessage(`Imported ${next.lastImportResult.totalIncoming} items: ${next.lastImportResult.created} created, ${next.lastImportResult.updated} updated, ${next.lastImportResult.skipped} skipped, ${next.lastImportResult.conflicted} conflicts.`);
+  };
+  const parseAndImport=()=>{ try{ importPacket(JSON.parse(input)); }catch(e){ setMessage(`Import failed: ${e.message}`); } };
+  const loadSeed=()=>{ const packet=initialExecutiveSyncPacket(); setInput(JSON.stringify(packet,null,2)); importPacket(packet); };
+  const resolveConflict=(conflict,mode)=>{
+    const nextItems=(exec.items||[]).map(item=>{ if(item.id!==conflict.itemId) return item; if(mode==='incoming') return {...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'accepted_incoming'},lastSyncedAt:new Date().toISOString()}; if(mode==='merge') return {...item,...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'merged'},lastSyncedAt:new Date().toISOString()}; return {...item,metadata:{...(item.metadata||{}),conflictResolution:'kept_current'}}; });
+    const audit={id:`audit-${Date.now()}`,at:new Date().toISOString(),action:`conflict_${mode}`,itemId:conflict.itemId,title:conflict.title};
+    setExecutive({...exec,items:nextItems,conflicts:(exec.conflicts||[]).map(c=>c.id===conflict.id?{...c,status:`resolved:${mode}`}:c),auditLog:[audit,...(exec.auditLog||[])]});
+  };
+  const reconcile=(key,label)=>setExecutive({...exec,auditLog:[{id:`audit-${Date.now()}`,at:new Date().toISOString(),action:'evening_reconciliation',title:label,key},...(exec.auditLog||[])]});
+  return <div className="plan-stack">
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Executive Sync Packet</span><span className="rv-badge">{exec.items?.length||0} items</span></div><div className="glass card exec-import-box"><textarea className="text-area" value={input} onChange={e=>setInput(e.target.value)} placeholder="Paste structured JSON sync packet here..." /><div className="exec-actions"><button type="button" className="primary-btn" onClick={parseAndImport}>Import Sync Packet</button><button type="button" className="ghost-btn" onClick={loadSeed}>Load Initial Packet</button></div>{message?<div className="status-note">{message}</div>:null}<div className="meta">Adapters prepared: NotionAdapter, GoogleCalendarAdapter, GmailAdapter, RemindersAdapter, ChatGPTSyncPacketAdapter. Phase 1 supports paste/import only; no write-back without explicit approval.</div></div></section>
+    {exec.lastImportResult?<section className="plan-section"><div className="exec-result-grid">{['created','updated','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{exec.lastImportResult[k]||0}</b></div>)}</div></section>:null}
+    <ExecutiveDashboard executive={exec} calendarEvents={calendarEvents} />
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Daily Brief</span><span className="rv-badge good">Deterministic</span></div><div className="glass card"><div className="exec-brief">{brief}</div></div></section>
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Evening Reconciliation</span></div><div className="exec-grid three">{[['completed','What was completed?'],['moved','What meaningfully moved?'],['blocked','What became blocked?'],['waiting','What is now waiting?'],['scheduled','What needs scheduling?'],['tomorrow','What should win tomorrow?']].map(([k,label])=><button type="button" className="exec-card" key={k} onClick={()=>reconcile(k,label)}><b>{label}</b><small>Tap to capture during review. Keep it short.</small></button>)}</div></section>
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Weekly CEO Review</span></div><div className="exec-grid"><div className="exec-card"><b>Active Projects</b><small>{model.projects.map(x=>x.title).slice(0,4).join('; ')||'None'}</small></div><div className="exec-card danger"><b>Stalled / At Risk</b><small>{model.atRisk.map(x=>x.title).slice(0,4).join('; ')||'Clear'}</small></div><div className="exec-card"><b>Waiting Relationships</b><small>{model.waiting.map(x=>x.waitingOn||x.title).slice(0,4).join('; ')||'Clear'}</small></div><div className="exec-card"><b>Decisions / Guardrails</b><small>{model.decisions.map(x=>x.title).slice(0,4).join('; ')||'None imported'}</small></div></div></section>
+    {(exec.conflicts||[]).filter(c=>c.status==='open').length?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Conflict Review</span><span className="rv-badge warn">{(exec.conflicts||[]).filter(c=>c.status==='open').length}</span></div><div className="exec-list">{(exec.conflicts||[]).filter(c=>c.status==='open').map(c=><div className="exec-row exec-conflict" key={c.id}><div><b>{c.title}</b><small>Fields: {c.fields.join(', ')}. Current canonical system wins until approved.</small></div><div className="exec-actions"><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'current')}>Keep current</button><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'incoming')}>Accept incoming</button><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'merge')}>Merge</button></div></div>)}</div></section>:null}
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Audit Log</span><span className="rv-badge">{exec.auditLog?.length||0}</span></div><div className="exec-list">{(exec.auditLog||[]).slice(0,12).map(a=><div className="exec-row" key={a.id}><div><b>{a.action}</b><small>{a.title||a.itemId||''} · {a.at}</small></div></div>)}{!(exec.auditLog||[]).length?<div className="empty">No sync activity yet.</div>:null}</div></section>
+  </div>;
+}
+function TrackLifeScreen({navTarget,habits,setHabits,goals,setGoals,reviewData,setReviewData,todos,setTodos,weeklyTop,people,buildData,calendarEvents,onNavigate}){
   const [sub,setSub]=useState('overview');
   const [openRow,setOpenRow]=useState(null);
-  useEffect(()=>{ if(navTarget?.tab==='track'&&navTarget.sub){ setSub('overview'); setOpenRow(navTarget.sub); } },[navTarget?.stamp]);
+  useEffect(()=>{ if(navTarget?.tab==='track'&&navTarget.sub){ if(navTarget.sub==='sync') setSub('sync'); else { setSub('overview'); setOpenRow(navTarget.sub); } } },[navTarget?.stamp]);
   const data={...REVIEWDATAINIT,...(reviewData||{})};
   const patch=(fields)=>setReviewData(prev=>({...REVIEWDATAINIT,...(prev||{}),...fields}));
+  const executive=data.executive||{domains:EXEC_DOMAINS,items:[],conflicts:[],auditLog:[]};
+  const setExecutive=next=>patch({executive:next});
   const rawLife=data.lifeMetrics||{};
   const life=rawLife.date===todayStr()?{...LIFEMETRICSINIT,...rawLife}:{...LIFEMETRICSINIT,date:todayStr()};
   const setLife=next=>patch({lifeMetrics:{...LIFEMETRICSINIT,...next,date:todayStr()}});
@@ -2360,8 +2631,9 @@ function TrackLifeScreen({navTarget,habits,setHabits,goals,setGoals,reviewData,s
   const memoryBlock=<div className="review-field-grid"><ReviewMemory title="Decision Log" type="decision" items={data.decisions||[]} onChange={items=>patch({decisions:items})} /><ReviewMemory title="Wins & Lessons" type="win" items={data.wins||[]} onChange={items=>patch({wins:items})} /><ReviewMemory title="Journal" type="journal" items={data.journal||[]} onChange={items=>patch({journal:items})} /></div>;
   return <div className="plan-screen">
     <header className="plan-head"><div className="plan-head-titles"><h1 className="plan-title">Review</h1><p className="plan-sub">System memory.</p></div></header>
-    <div className="plan-pills">{[['overview','Now'],['daily','Day'],['weekly','Week'],['life','Life'],['log','Log']].map(([id,label])=><button type="button" key={id} className={`plan-pill ${sub===id?'active':''}`} onClick={()=>setSub(id)}>{label}</button>)}</div>
+    <div className="plan-pills">{[['overview','Now'],['sync','Sync'],['daily','Day'],['weekly','Week'],['life','Life'],['log','Log']].map(([id,label])=><button type="button" key={id} className={`plan-pill ${sub===id?'active':''}`} onClick={()=>setSub(id)}>{label}</button>)}</div>
     {sub==='overview' && <div className="plan-stack">{debriefBlock}{weeklyPulse}{operatingBlock}<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Memory</span><span className="rv-badge">{reviewsTotal}</span></div><div className="build-menu review-memory-drawers">{rows.slice(0,4).map(r=><div key={r.key}><button type="button" className="build-menu-row" onClick={()=>r.nav?(onNavigate&&onNavigate(r.nav)):setOpenRow(o=>o===r.key?null:r.key)}><span className="build-menu-ico"><BuildMenuIcon name={r.icon} /></span><span className="build-menu-label">{r.label}</span>{r.meta?<span className="build-menu-meta">{r.meta}</span>:null}{r.count!=null?<span className="build-menu-count">{r.count}</span>:null}<span className="build-menu-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={openRow===r.key&&!r.nav?"M6 15l6-6 6 6":"M9 18l6-6-6-6"}/></svg></span></button>{openRow===r.key && <div style={{marginTop:8,marginBottom:4}}>{r.key==='habits'?<HabitsView habits={habits} setHabits={setHabits} />:r.key==='goals'?<GoalsView goals={goals} setGoals={setGoals} />:r.key==='decisions'?<ReviewMemory title="Decision Log" type="decision" items={data.decisions||[]} onChange={items=>patch({decisions:items})} />:<div className="empty">Momentum history will build up as you track habits and reviews.</div>}</div>}</div>)}</div></section></div>}
+    {sub==='sync' && <ExecutiveSyncPanel executive={executive} setExecutive={setExecutive} todos={todos} setTodos={setTodos} calendarEvents={calendarEvents||[]} />}
     {sub==='daily' && <div className="plan-stack">{debriefBlock}</div>}
     {sub==='weekly' && <div className="plan-stack">{weeklyBlock}</div>}
     {sub==='life' && <div className="plan-stack">{lifeBlock}</div>}
