@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 const TYPES=['task','project','milestone','waiting','scheduled','decision','guardrail','note'];
 const STATUSES=['inbox','next','active','waiting','scheduled','blocked','completed','deferred','archived'];
 const CANONICAL=['wolfmaster','notion','calendar','gmail','reminders','external'];
+const PACKET_TYPES=['baseline','delta','reconciliation','correction','completion','emergency'];
 
 function norm(v){ return String(v||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+function stableHash(v){ const s=typeof v==='string'?v:JSON.stringify(v||{}); let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); }
+function packetType(packet){ const t=String(packet?.packetType||packet?.type||'delta').toLowerCase(); return PACKET_TYPES.includes(t)?t:'delta'; }
+function packetId(packet){ return String(packet?.packetId||packet?.id||`${packet?.sourceSystem||'manual'}:${packetType(packet)}:${packet?.generatedAt||'today'}:${stableHash({items:packet?.items,today:packet?.today})}`); }
 function type(v){ const x=String(v||'task').toLowerCase(); return TYPES.includes(x)?x:'task'; }
 function status(v,t){ const x=String(v||'').toLowerCase(); return STATUSES.includes(x)?x:t==='waiting'?'waiting':t==='scheduled'?'scheduled':'inbox'; }
 function canonical(v){ const x=String(v||'wolfmaster').toLowerCase(); return CANONICAL.includes(x)?x:'external'; }
@@ -54,5 +58,11 @@ assert.equal(meta.estimatedMinutes,10);
 assert.deepEqual(meta.requiredTools,['phone']);
 assert.equal(meta.focusLevel,'shallow');
 assert.equal(meta.batchEligible,true);
+
+const deltaPacket={packetType:'delta',packetId:'daily-delta-1',sourceSystem:'chatgpt',items:[{title:'Send Delta receipts'}]};
+assert.equal(packetType(deltaPacket),'delta');
+assert.equal(packetId(deltaPacket),'daily-delta-1');
+assert.equal(packetType({packetType:'seed'}),'delta');
+assert.equal(packetId({sourceSystem:'chatgpt',packetType:'completion',generatedAt:'2026-07-17',items:[{title:'Done'}]}),packetId({sourceSystem:'chatgpt',packetType:'completion',generatedAt:'2026-07-17',items:[{title:'Done'}]}));
 
 console.log('executive sync tests passed');

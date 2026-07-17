@@ -1270,6 +1270,7 @@ const EXEC_TYPES=['task','project','milestone','waiting','scheduled','decision',
 const EXEC_STATUSES=['inbox','next','active','waiting','scheduled','blocked','completed','deferred','archived'];
 const EXEC_PRIORITIES=['P1','P2','P3'];
 const EXEC_CANONICAL=['wolfmaster','notion','calendar','gmail','reminders','external'];
+const EXEC_PACKET_TYPES=['baseline','delta','reconciliation','correction','completion','emergency'];
 function initialExecutiveSyncPacket(){ return {
   packetVersion:'1.0', generatedAt:'2026-07-17', sourceSystem:'chatgpt',
   domains:EXEC_DOMAINS,
@@ -1324,6 +1325,9 @@ function initialExecutiveSyncPacket(){ return {
 };}
 const CALENDAR=[{day:'Sun',date:15,today:true,events:[{t:'9:30',text:'Market open',c:C.good},{t:'2pm',text:'WolfLock standup',c:C.teal},{t:'5pm',text:'Family dinner',c:C.pink}]},{day:'Mon',date:16,today:false,events:[{t:'8am',text:'Advisory call',c:C.info}]},{day:'Tue',date:17,today:false,events:[{t:'10am',text:'Soccer Graham',c:C.warn},{t:'3pm',text:'Options review',c:C.good}]},{day:'Wed',date:18,today:false,events:[]},{day:'Thu',date:19,today:false,events:[{t:'12pm',text:'Hulk V3 review',c:C.good},{t:'6pm',text:'Date night',c:C.pink}]},{day:'Fri',date:20,today:false,events:[{t:'Family game night',text:'',c:C.pink}]},{day:'Sat',date:21,today:false,events:[{t:'8am',text:'Soccer tournament',c:C.warn},{t:'1pm',text:'Team lunch',c:C.info}]}];
 function execNormText(v){ return String(v||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+function execStableHash(v){ const s=typeof v==='string'?v:JSON.stringify(v||{}); let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); }
+function execPacketType(packet){ const t=String(packet?.packetType||packet?.type||'delta').toLowerCase(); return EXEC_PACKET_TYPES.includes(t)?t:'delta'; }
+function execPacketId(packet){ return String(packet?.packetId||packet?.id||`${packet?.sourceSystem||'manual'}:${execPacketType(packet)}:${packet?.generatedAt||todayStr()}:${execStableHash({today:packet?.today,items:packet?.items,tasks:packet?.tasks,projects:packet?.projects,waiting:packet?.waiting,scheduled:packet?.scheduled,decisions:packet?.decisions,guardrails:packet?.guardrails,priorities:packet?.priorities})}`); }
 function execCleanDomain(domain){ const d=String(domain||'Personal Systems').replace(/[’‘]/g,"'").trim(); const hit=EXEC_DOMAINS.find(x=>execNormText(x)===execNormText(d)); return hit||d||'Personal Systems'; }
 function execPriority(p){ const up=String(p||'P3').toUpperCase(); return EXEC_PRIORITIES.includes(up)?up:'P3'; }
 function execStatus(s,type){ const low=String(s||'').toLowerCase(); if(EXEC_STATUSES.includes(low)) return low; if(type==='waiting') return 'waiting'; if(type==='scheduled') return 'scheduled'; if(type==='guardrail'||type==='decision') return 'active'; return 'inbox'; }
@@ -1393,7 +1397,7 @@ function mergeExecutiveItems(prevItems=[],incomingItems=[]){
   const items=(prevItems||[]).map(x=>({...x,identity:x.identity||execIdentity(x),fingerprint:x.fingerprint||execFingerprint(x)}));
   const byIdentity=new Map(items.map((x,i)=>[x.identity,i]));
   const byFingerprint=new Map(items.map((x,i)=>[x.fingerprint,i]));
-  const conflicts=[], audit=[], result={created:0,updated:0,skipped:0,conflicted:0};
+  const conflicts=[], audit=[], result={created:0,updated:0,completed:0,skipped:0,conflicted:0};
   incomingItems.forEach(incoming=>{
     const idx=byIdentity.has(incoming.identity)?byIdentity.get(incoming.identity):byFingerprint.get(incoming.fingerprint);
     if(idx==null){
@@ -1413,18 +1417,32 @@ function mergeExecutiveItems(prevItems=[],incomingItems=[]){
       audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'conflict',itemId:current.id,title:current.title,fields:conflictFields});
       result.conflicted++; return;
     }
+    const wasComplete=!!current.completedAt||current.status==='completed';
+    const nowComplete=!!incoming.completedAt||incoming.status==='completed';
     const merged={...current,...incoming,id:current.id,metadata:{...(current.metadata||{}),...(incoming.metadata||{})},lastSyncedAt:now};
     items[idx]=merged;
-    audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'updated',itemId:merged.id,title:merged.title,sourceSystem:incoming.sourceSystem});
-    result.updated++;
+    audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:nowComplete&&!wasComplete?'completed':'updated',itemId:merged.id,title:merged.title,sourceSystem:incoming.sourceSystem});
+    if(nowComplete&&!wasComplete) result.completed++; else result.updated++;
   });
   return {items,conflicts,audit,result};
 }
-function importExecutivePacket(currentExec={},packet){
+function importExecutivePacket(currentExec={},packet,options={}){
+  const packetId=execPacketId(packet);
+  const packetType=execPacketType(packet);
   const incoming=executiveItemsFromPacket(packet);
   const merged=mergeExecutiveItems(currentExec.items||[],incoming);
   const domains=[...new Set([...(currentExec.domains||[]),...EXEC_DOMAINS,...(packet.domains||[]).map(execCleanDomain),...incoming.map(x=>x.domain)])];
-  return {domains,items:merged.items,conflicts:[...(currentExec.conflicts||[]),...merged.conflicts],auditLog:[...(merged.audit||[]),...(currentExec.auditLog||[])].slice(0,120),lastImportResult:{...merged.result,totalIncoming:incoming.length,at:new Date().toISOString(),sourceSystem:packet.sourceSystem||'unknown'},lastImportedAt:new Date().toISOString()};
+  const at=new Date().toISOString();
+  const priorApplied=currentExec.appliedPackets||[];
+  const appliedEntry={packetId,packetType,at,sourceSystem:packet.sourceSystem||'unknown',generatedAt:packet.generatedAt||'',reprocessed:!!options.reprocess};
+  const importAudit={id:`audit-${Date.now()}-import`,at,action:options.reprocess?'packet_reprocessed':'packet_imported',title:`${packetType} · ${packetId}`,packetId,packetType};
+  return {domains,items:merged.items,conflicts:[...(currentExec.conflicts||[]),...merged.conflicts],auditLog:[importAudit,...(merged.audit||[]),...(currentExec.auditLog||[])].slice(0,160),appliedPackets:[appliedEntry,...priorApplied.filter(p=>p.packetId!==packetId)].slice(0,80),lastSuccessfulPacketId:packetId,lastSuccessfulImportAt:at,lastImportResult:{...merged.result,totalIncoming:incoming.length,at,sourceSystem:packet.sourceSystem||'unknown',packetId,packetType,reprocessed:!!options.reprocess},lastImportedAt:at,rollbackSnapshot:options.rollbackSnapshot||currentExec.rollbackSnapshot||null};
+}
+function previewExecutivePacket(currentExec={},packet){
+  const packetId=execPacketId(packet), packetType=execPacketType(packet);
+  const next=importExecutivePacket(currentExec,packet,{preview:true});
+  const already=(currentExec.appliedPackets||[]).some(p=>p.packetId===packetId);
+  return {packet,packetId,packetType,already,result:next.lastImportResult,next};
 }
 function execDaysUntil(iso){ if(!iso) return 9999; const d=new Date(String(iso).slice(0,10)+'T00:00:00'); const n=new Date(todayStr()+'T00:00:00'); return Math.round((d-n)/86400000); }
 function scoreExecutiveItem(item){
@@ -2829,18 +2847,26 @@ function MoneyControlPanel({money,onChange,executive}){
 function ExecutiveSyncPanel({executive,setExecutive,todos,setTodos,calendarEvents}){
   const [input,setInput]=useState('');
   const [message,setMessage]=useState('');
-  const exec=executive||{domains:EXEC_DOMAINS,items:[],conflicts:[],auditLog:[]};
+  const [preview,setPreview]=useState(null);
+  const exec=executive||{domains:EXEC_DOMAINS,items:[],conflicts:[],auditLog:[],appliedPackets:[]};
   const model=executiveDashboardModel(exec,calendarEvents);
   const brief=generateExecutiveDailyBrief(exec,calendarEvents);
-  const importPacket=packet=>{
-    const next=importExecutivePacket(exec,packet);
+  const applyPacket=(packet,{reprocess=false}={})=>{
+    const packetId=execPacketId(packet);
+    const already=(exec.appliedPackets||[]).some(p=>p.packetId===packetId);
+    if(already&&!reprocess){ setMessage(`Packet ${packetId} was already applied. Use Reprocess only if you intentionally want to run it again.`); return; }
+    const rollbackSource={...exec};
+    delete rollbackSource.rollbackSnapshot;
+    const next=importExecutivePacket(exec,packet,{reprocess,rollbackSnapshot:{at:new Date().toISOString(),packetId,executive:rollbackSource}});
     setExecutive(next);
     const today=executiveDashboardModel(next,calendarEvents).today.slice(0,3);
     if(today.length) setTodos(prev=>today.map((x,i)=>({id:`exec-top3-${x.identity||x.id||i}`,text:x.title,goal:x.domain,done:false,executiveItemId:x.id})));
-    setMessage(`Imported ${next.lastImportResult.totalIncoming} items: ${next.lastImportResult.created} created, ${next.lastImportResult.updated} updated, ${next.lastImportResult.skipped} skipped, ${next.lastImportResult.conflicted} conflicts.`);
+    setPreview(null);
+    setMessage(`Applied ${next.lastImportResult.packetType} packet ${next.lastImportResult.packetId}: ${next.lastImportResult.created} created, ${next.lastImportResult.updated} updated, ${next.lastImportResult.completed} completed, ${next.lastImportResult.skipped} skipped, ${next.lastImportResult.conflicted} conflicts.`);
   };
-  const parseAndImport=()=>{ try{ importPacket(JSON.parse(input)); }catch(e){ setMessage(`Import failed: ${e.message}`); } };
-  const loadSeed=()=>{ const packet=initialExecutiveSyncPacket(); setInput(JSON.stringify(packet,null,2)); importPacket(packet); };
+  const parsePreview=()=>{ try{ const packet=JSON.parse(input); const p=previewExecutivePacket(exec,packet); setPreview(p); setMessage(p.already?`Preview ready, but packet ${p.packetId} was already applied.`:`Preview ready for ${p.packetType} packet ${p.packetId}.`); }catch(e){ setPreview(null); setMessage(`Preview failed: ${e.message}`); } };
+  const loadSeed=()=>{ const packet={...initialExecutiveSyncPacket(),packetType:'baseline',packetId:'wolfmaster-bootstrap-baseline-2026-07-17'}; setInput(JSON.stringify(packet,null,2)); setPreview(null); setMessage('Bootstrap baseline loaded. Preview before applying; do not use this as recurring sync.'); };
+  const rollback=()=>{ const snap=exec.rollbackSnapshot; if(!snap?.executive){ setMessage('No rollback snapshot available.'); return; } const restored={...snap.executive,auditLog:[{id:`audit-${Date.now()}-rollback`,at:new Date().toISOString(),action:'rollback',title:`Rolled back packet ${snap.packetId}`},...(snap.executive.auditLog||[])]}; setExecutive(restored); setPreview(null); setMessage(`Rolled back last packet: ${snap.packetId}.`); };
   const resolveConflict=(conflict,mode)=>{
     const nextItems=(exec.items||[]).map(item=>{ if(item.id!==conflict.itemId) return item; if(mode==='incoming') return {...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'accepted_incoming'},lastSyncedAt:new Date().toISOString()}; if(mode==='merge') return {...item,...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'merged'},lastSyncedAt:new Date().toISOString()}; return {...item,metadata:{...(item.metadata||{}),conflictResolution:'kept_current'}}; });
     const audit={id:`audit-${Date.now()}`,at:new Date().toISOString(),action:`conflict_${mode}`,itemId:conflict.itemId,title:conflict.title};
@@ -2848,14 +2874,16 @@ function ExecutiveSyncPanel({executive,setExecutive,todos,setTodos,calendarEvent
   };
   const reconcile=(key,label)=>setExecutive({...exec,auditLog:[{id:`audit-${Date.now()}`,at:new Date().toISOString(),action:'evening_reconciliation',title:label,key},...(exec.auditLog||[])]});
   return <div className="plan-stack">
-    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Executive Sync Packet</span><span className="rv-badge">{exec.items?.length||0} items</span></div><div className="glass card exec-import-box"><textarea className="text-area" value={input} onChange={e=>setInput(e.target.value)} placeholder="Paste structured JSON sync packet here..." /><div className="exec-actions"><button type="button" className="primary-btn" onClick={parseAndImport}>Import Sync Packet</button><button type="button" className="ghost-btn" onClick={loadSeed}>Load Initial Packet</button></div>{message?<div className="status-note">{message}</div>:null}<div className="meta">Adapters prepared: NotionAdapter, GoogleCalendarAdapter, GmailAdapter, RemindersAdapter, ChatGPTSyncPacketAdapter. Phase 1 supports paste/import only; no write-back without explicit approval.</div></div></section>
-    {exec.lastImportResult?<section className="plan-section"><div className="exec-result-grid">{['created','updated','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{exec.lastImportResult[k]||0}</b></div>)}</div></section>:null}
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Executive Sync Packet</span><span className="rv-badge">{exec.items?.length||0} items</span></div><div className="glass card exec-import-box"><textarea className="text-area" value={input} onChange={e=>{setInput(e.target.value);setPreview(null);}} placeholder="Paste versioned JSON sync packet here. Use packetType + packetId for normal sync." /><div className="exec-actions"><button type="button" className="primary-btn" onClick={parsePreview}>Preview Packet</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet)} disabled={!preview||preview.already}>Apply Preview</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet,{reprocess:true})} disabled={!preview}>Reprocess</button><button type="button" className="ghost-btn" onClick={loadSeed}>Load Bootstrap Seed</button><button type="button" className="ghost-btn" onClick={rollback} disabled={!exec.rollbackSnapshot}>Rollback Last</button></div>{message?<div className="status-note">{message}</div>:null}<div className="meta">Seeds are bootstrap-only. Normal sync uses versioned idempotent packets: baseline, delta, reconciliation, correction, completion, or emergency. Already-applied packets are rejected unless explicitly reprocessed.</div></div></section>
+    {preview?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Import Preview</span><span className={`rv-badge ${preview.already?'warn':'good'}`}>{preview.packetType}</span></div><div className="exec-result-grid">{['created','updated','completed','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{preview.result[k]||0}</b></div>)}</div><div className="meta" style={{marginTop:8}}>Packet ID: {preview.packetId}{preview.already?' · already applied':''}</div></section>:null}
+    {exec.lastImportResult?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Last Successful Import</span><span className="rv-badge good">{exec.lastImportResult.packetType||'packet'}</span></div><div className="exec-result-grid">{['created','updated','completed','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{exec.lastImportResult[k]||0}</b></div>)}</div><div className="meta" style={{marginTop:8}}>Last packet: {exec.lastSuccessfulPacketId||exec.lastImportResult.packetId} · {exec.lastSuccessfulImportAt||exec.lastImportResult.at}</div></section>:null}
     <ExecutiveDashboard executive={exec} calendarEvents={calendarEvents} />
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Daily Brief</span><span className="rv-badge good">Deterministic</span></div><div className="glass card"><div className="exec-brief">{brief}</div></div></section>
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Evening Reconciliation</span></div><div className="exec-grid three">{[['completed','What was completed?'],['moved','What meaningfully moved?'],['blocked','What became blocked?'],['waiting','What is now waiting?'],['scheduled','What needs scheduling?'],['tomorrow','What should win tomorrow?']].map(([k,label])=><button type="button" className="exec-card" key={k} onClick={()=>reconcile(k,label)}><b>{label}</b><small>Tap to capture during review. Keep it short.</small></button>)}</div></section>
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Weekly CEO Review</span></div><div className="exec-grid"><div className="exec-card"><b>Active Projects</b><small>{model.projects.map(x=>x.title).slice(0,4).join('; ')||'None'}</small></div><div className="exec-card danger"><b>Stalled / At Risk</b><small>{model.atRisk.map(x=>x.title).slice(0,4).join('; ')||'Clear'}</small></div><div className="exec-card"><b>Waiting Relationships</b><small>{model.waiting.map(x=>x.waitingOn||x.title).slice(0,4).join('; ')||'Clear'}</small></div><div className="exec-card"><b>Decisions / Guardrails</b><small>{model.decisions.map(x=>x.title).slice(0,4).join('; ')||'None imported'}</small></div></div></section>
     {(exec.conflicts||[]).filter(c=>c.status==='open').length?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Conflict Review</span><span className="rv-badge warn">{(exec.conflicts||[]).filter(c=>c.status==='open').length}</span></div><div className="exec-list">{(exec.conflicts||[]).filter(c=>c.status==='open').map(c=><div className="exec-row exec-conflict" key={c.id}><div><b>{c.title}</b><small>Fields: {c.fields.join(', ')}. Current canonical system wins until approved.</small></div><div className="exec-actions"><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'current')}>Keep current</button><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'incoming')}>Accept incoming</button><button type="button" className="ghost-btn" onClick={()=>resolveConflict(c,'merge')}>Merge</button></div></div>)}</div></section>:null}
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Audit Log</span><span className="rv-badge">{exec.auditLog?.length||0}</span></div><div className="exec-list">{(exec.auditLog||[]).slice(0,12).map(a=><div className="exec-row" key={a.id}><div><b>{a.action}</b><small>{a.title||a.itemId||''} · {a.at}</small></div></div>)}{!(exec.auditLog||[]).length?<div className="empty">No sync activity yet.</div>:null}</div></section>
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Applied Packets</span><span className="rv-badge">{exec.appliedPackets?.length||0}</span></div><div className="exec-list">{(exec.appliedPackets||[]).slice(0,8).map(p=><div className="exec-row" key={`${p.packetId}-${p.at}`}><div><b>{p.packetType} · {p.packetId}</b><small>{p.sourceSystem||'unknown'} · {p.at}{p.reprocessed?' · reprocessed':''}</small></div></div>)}{!(exec.appliedPackets||[]).length?<div className="empty">No applied packets yet.</div>:null}</div></section>
   </div>;
 }
 function TrackLifeScreen({navTarget,habits,setHabits,goals,setGoals,reviewData,setReviewData,todos,setTodos,weeklyTop,people,buildData,calendarEvents,onNavigate}){
