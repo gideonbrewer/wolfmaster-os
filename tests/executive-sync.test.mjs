@@ -12,7 +12,7 @@ function fingerprint(item){ return ['wmexec',norm(item.title),norm(item.domain),
 function identity(item){ return item.sourceSystem&&item.sourceId?`${item.sourceSystem}:${item.sourceId}`:fingerprint(item); }
 function normalize(raw,packet={}){
   const t=type(raw.type);
-  const item={title:String(raw.title||'Untitled').trim(),domain:raw.domain||'Personal Systems',type:t,status:status(raw.status,t),priority:String(raw.priority||'P3').toUpperCase(),owner:raw.owner||'Gideon',nextAction:raw.nextAction||'',sourceSystem:String(raw.sourceSystem||packet.sourceSystem||'manual').toLowerCase(),sourceId:raw.sourceId||'',canonicalSystem:canonical(raw.canonicalSystem)};
+  const item={title:String(raw.title||'Untitled').trim(),domain:raw.domain||'Personal Systems',type:t,status:status(raw.status,t),priority:String(raw.priority||'P3').toUpperCase(),owner:raw.owner||'Gideon',nextAction:raw.nextAction||'',sourceSystem:String(raw.sourceSystem||packet.sourceSystem||'manual').toLowerCase(),sourceId:raw.sourceId||'',canonicalSystem:canonical(raw.canonicalSystem),actionMode:raw.actionMode||'',estimatedMinutes:raw.estimatedMinutes||'',location:raw.location||'',requiredTools:Array.isArray(raw.requiredTools)?raw.requiredTools:(raw.requiredTools?[raw.requiredTools]:[]),energyLevel:raw.energyLevel||'',focusLevel:raw.focusLevel||'',preferredTimeOfDay:raw.preferredTimeOfDay||'',batchEligible:raw.batchEligible!==undefined?!!raw.batchEligible:true,batchId:raw.batchId||'',preparationNeeded:raw.preparationNeeded||''};
   item.identity=identity(item); item.fingerprint=fingerprint(item); return item;
 }
 function comparable(item){ const c={...item}; delete c.id; delete c.identity; delete c.fingerprint; return JSON.stringify(c); }
@@ -47,5 +47,12 @@ assert.equal(conflict.items[0].nextAction,'');
 const update=merge(first.items,[{...packet[0],nextAction:'Accepted update',canonicalSystem:'notion'}]);
 assert.equal(update.result.updated,1);
 assert.equal(update.items[0].nextAction,'Accepted update');
+
+const meta=normalize({title:'Call Hanover',actionMode:'call',estimatedMinutes:10,requiredTools:['phone'],energyLevel:'low',focusLevel:'shallow',batchEligible:true});
+assert.equal(meta.actionMode,'call');
+assert.equal(meta.estimatedMinutes,10);
+assert.deepEqual(meta.requiredTools,['phone']);
+assert.equal(meta.focusLevel,'shallow');
+assert.equal(meta.batchEligible,true);
 
 console.log('executive sync tests passed');

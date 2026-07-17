@@ -129,6 +129,32 @@ body{background:linear-gradient(180deg,#08090c,#0b0d12 42%,#090a0d);letter-spaci
 .wm-stack-dots i.active{width:18px;background:var(--accent)}
 .wm-stack-nav button{min-height:34px;border-radius:999px;padding:7px 11px}
 @media (max-width:640px){.wm-priority-stack{padding:12px!important;border-radius:22px}.wm-stack-head{margin-bottom:9px}.wm-stack-title{font-size:10px;letter-spacing:.14em}.wm-stack-stage{min-height:198px}.wm-stack-card{min-height:178px;padding:13px;border-radius:19px;gap:9px}.wm-stack-card h3{font-size:17px;line-height:1.1}.wm-stack-next{padding:9px 10px}.wm-stack-next b{font-size:11.5px}.wm-stack-reason{font-size:10.5px}.wm-stack-actions{grid-template-columns:1fr 1fr 1fr;gap:6px}.wm-stack-actions button{min-height:34px;font-size:9.5px;padding:7px 5px}.wm-stack-nav{margin-top:8px}.wm-stack-domain,.wm-stack-priority{font-size:8px;padding:4px 7px}}
+/* Execution batching: groups compatible actions without changing priority rank. */
+.wm-batches{border-color:rgba(96,165,250,.18);background:radial-gradient(100% 120% at 0% 0%,rgba(96,165,250,.07),transparent 52%),linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.018))}
+.wm-batch-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.wm-batch-title{display:flex;align-items:center;gap:8px;color:var(--info);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.16em}
+.wm-batch-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.wm-batch-card{display:grid;gap:9px;text-align:left;color:var(--text);padding:12px;border-radius:17px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026);min-width:0}
+.wm-batch-card.featured{border-color:rgba(147,242,10,.22);background:radial-gradient(110% 140% at 0% 0%,rgba(147,242,10,.07),transparent 58%),rgba(255,255,255,.026)}
+.wm-batch-card b{font-size:14px;line-height:1.2;letter-spacing:-.02em}
+.wm-batch-card small{font-size:10.5px;color:var(--text-mid);line-height:1.3}
+.wm-batch-meta{display:flex;gap:6px;flex-wrap:wrap}
+.wm-batch-meta span{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:999px;padding:4px 7px;color:var(--text-mid)}
+.wm-batch-items{display:grid;gap:5px}
+.wm-batch-items span{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm-batch-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:2px}
+.wm-batch-actions button{min-height:34px;border-radius:12px;font-size:10px;font-weight:900}
+.wm-batch-detail{margin-top:10px;padding:12px;border-radius:18px;border:1px solid rgba(96,165,250,.18);background:rgba(96,165,250,.045);display:grid;gap:10px}
+.wm-batch-detail-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.wm-batch-detail h3{margin:0;font-size:16px;line-height:1.15}
+.wm-batch-progress{font-size:10px;color:var(--text-mid);font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.wm-batch-checklist,.wm-batch-tasklist{display:grid;gap:7px}
+.wm-batch-checklist div,.wm-batch-task{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px;border-radius:13px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.055)}
+.wm-batch-checklist span,.wm-batch-task span:first-child{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(96,165,250,.22);background:rgba(96,165,250,.08);color:var(--info);font-size:10px;font-weight:900}
+.wm-batch-task b{font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm-batch-task small{font-size:10px;color:var(--text-mid);white-space:nowrap}
+.wm-batch-empty{padding:12px;border-radius:16px;border:1px dashed rgba(96,165,250,.22);background:rgba(96,165,250,.035);color:var(--text-mid);font-size:12px;line-height:1.4}
+@media (max-width:640px){.wm-batches{padding:12px!important;border-radius:22px}.wm-batch-head{margin-bottom:9px}.wm-batch-title{font-size:10px;letter-spacing:.13em}.wm-batch-grid{grid-template-columns:1fr;gap:8px}.wm-batch-card{padding:11px;border-radius:16px}.wm-batch-card:nth-child(n+3){display:none}.wm-batch-card b{font-size:13px}.wm-batch-detail{padding:10px;border-radius:16px}.wm-batch-detail-head{display:grid}.wm-batch-checklist div,.wm-batch-task{grid-template-columns:22px minmax(0,1fr)}.wm-batch-task small{grid-column:2}.wm-batch-actions button{font-size:9.5px}}
 </style>
 <style>
 /* Calendar refinement */
@@ -1330,6 +1356,16 @@ function normalizeExecutiveItem(raw,packet={},section='items'){
     personId:raw.personId||raw.person||'',
     blockedBy:raw.blockedBy||'',
     waitingOn:raw.waitingOn||'',
+    actionMode:raw.actionMode||'',
+    estimatedMinutes:raw.estimatedMinutes||'',
+    location:raw.location||'',
+    requiredTools:Array.isArray(raw.requiredTools)?raw.requiredTools:(raw.requiredTools?[raw.requiredTools]:[]),
+    energyLevel:raw.energyLevel||'',
+    focusLevel:raw.focusLevel||'',
+    preferredTimeOfDay:raw.preferredTimeOfDay||'',
+    batchEligible:raw.batchEligible!==undefined?!!raw.batchEligible:true,
+    batchId:raw.batchId||'',
+    preparationNeeded:raw.preparationNeeded||'',
     lastUpdatedAt:raw.lastUpdatedAt||packet.generatedAt||new Date().toISOString(),
     lastSyncedAt:new Date().toISOString(),
     completedAt:raw.completedAt||'',
@@ -1371,7 +1407,7 @@ function mergeExecutiveItems(prevItems=[],incomingItems=[]){
     const currentCanonical=execCanonical(current.canonicalSystem);
     const incomingCanonical=execCanonical(incoming.canonicalSystem);
     const protectedSystem=currentCanonical!=='wolfmaster'&&currentCanonical!==incomingCanonical;
-    const conflictFields=['title','description','domain','type','status','priority','owner','nextAction','dueDate','reviewDate','scheduledStart','scheduledEnd','canonicalSystem','projectId','personId','blockedBy','waitingOn','sourceUrl'].filter(k=>String(current[k]||'')&&String(incoming[k]||'')&&String(current[k]||'')!==String(incoming[k]||''));
+    const conflictFields=['title','description','domain','type','status','priority','owner','nextAction','dueDate','reviewDate','scheduledStart','scheduledEnd','canonicalSystem','projectId','personId','blockedBy','waitingOn','sourceUrl','actionMode','estimatedMinutes','location','energyLevel','focusLevel','preferredTimeOfDay','batchEligible','batchId','preparationNeeded'].filter(k=>String(current[k]||'')&&String(incoming[k]||'')&&String(current[k]||'')!==String(incoming[k]||''));
     if(protectedSystem&&conflictFields.length){
       conflicts.push({id:`conf-${Date.now()}-${conflicts.length}`,at:now,itemId:current.id,title:current.title,fields:conflictFields,current,incoming,status:'open'});
       audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'conflict',itemId:current.id,title:current.title,fields:conflictFields});
@@ -2240,10 +2276,115 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
     <div className="wm-stack-nav"><button type="button" className="ghost-btn" onClick={()=>move(-1)}>← Prev</button><div className="wm-stack-dots">{visible.slice(0,8).map((c,i)=><i key={c.id} className={i===idx?'active':''}></i>)}</div><button type="button" className="ghost-btn" onClick={()=>move(1)}>Next →</button></div>
   </section>;
 }
+const BATCH_TEMPLATES={
+  calls:{title:'Calls Block',mode:'call',duration:60,focus:'shallow',objective:'Clear phone-based follow-ups in one pass.',prep:['Confirm phone numbers','Write one-line objective for each call','Decide voicemail fallback']},
+  messages:{title:'Email and Messages Block',mode:'email',duration:45,focus:'shallow',objective:'Clear replies, drafts and follow-ups without mixing in deep work.',prep:['Open Gmail/messages','Group replies by deadline','Draft before polishing']},
+  errands:{title:'Errands Block',mode:'errand',duration:60,focus:'shallow',objective:'Consolidate physical stops and bring-alongs.',prep:['Check addresses and hours','Gather items to bring','Order stops by proximity']},
+  scheduling:{title:'Calendar and Scheduling Block',mode:'schedule',duration:30,focus:'moderate',objective:'Book dates, meetings, activities and appointments.',prep:['Open calendar','List dependencies','Identify decisions needing Erin or another person']},
+  money:{title:'Money and Administration Block',mode:'computer_admin',duration:60,focus:'moderate',objective:'Clear payments, receipts, forms and account admin.',prep:['Open accounts/docs','Prioritize deadlines and financial consequences','Save confirmation numbers']},
+  deep:{title:'Deep Work Block',mode:'deep_work',duration:90,focus:'deep',objective:'Move one strategic outcome without admin noise.',prep:['Close inbox and messages','Open only required project material','Define done condition before starting']},
+  relationship:{title:'Relationship Block',mode:'relationship',duration:45,focus:'moderate',objective:'Handle thoughtful follow-ups with shared relationship context.',prep:['Review relationship objective','Write concise personal context','Decide next touchpoint']},
+  house:{title:'House Sprint',mode:'home_project',duration:150,focus:'moderate',objective:'Complete one contained home sprint with shared tools/location.',prep:['Pick one work zone','Gather tools/materials','Protect family/strategic commitments first']}
+};
+function inferExecutionMeta(item){
+  const title=asTitle(item), text=`${title} ${item.description||''} ${item.nextAction||''} ${item.domain||''}`.toLowerCase();
+  let actionMode=item.actionMode||item.metadata?.actionMode||'';
+  if(!actionMode){
+    if(/\b(call|phone|voicemail)\b/.test(text)) actionMode='call';
+    else if(/\b(email|reply|draft|send|inbox)\b/.test(text)) actionMode='email';
+    else if(/\b(text|sms|message)\b/.test(text)) actionMode='text';
+    else if(/\b(deposit|drop off|pick up|buy|store|lmcu|errand)\b/.test(text)) actionMode='errand';
+    else if(/\b(schedule|book|calendar|date|appointment|vacation)\b/.test(text)) actionMode='schedule';
+    else if(/\b(pay|receipt|insurance|tax|form|account|admin|ombuds|hanover|delta|amex|benefits)\b/.test(text)) actionMode='computer_admin';
+    else if(/\b(write|draft|positioning|survey|build|code|develop|finalize|strategy)\b/.test(text)) actionMode='deep_work';
+    else if(/\b(thank|follow up|follow-up|intro|coffee|relationship|sponsor)\b/.test(text)) actionMode='relationship';
+    else if(/\b(house|garage|driveway|fence|deck|wall|court|supplies)\b/.test(text)) actionMode='home_project';
+    else actionMode='planning';
+  }
+  const est=Number(item.estimatedMinutes||item.metadata?.estimatedMinutes)||({call:12,email:15,text:8,errand:25,schedule:15,computer_admin:20,deep_work:90,planning:25,writing:45,home_project:60,relationship:18}[actionMode]||20);
+  const focus=item.focusLevel||item.metadata?.focusLevel||({deep_work:'deep',writing:'deep',planning:'moderate',computer_admin:'moderate',home_project:'moderate'}[actionMode]||'shallow');
+  const energy=item.energyLevel||item.metadata?.energyLevel||(focus==='deep'?'high':focus==='moderate'?'medium':'low');
+  const tools=item.requiredTools?.length?item.requiredTools:(item.metadata?.requiredTools||({call:['phone'],email:['computer','gmail'],text:['phone'],errand:['car'],schedule:['calendar'],computer_admin:['computer'],deep_work:['computer'],home_project:['tools']}[actionMode]||[]));
+  return {...item,actionMode,estimatedMinutes:est,focusLevel:focus,energyLevel:energy,requiredTools:tools,location:item.location||item.metadata?.location||'',preparationNeeded:item.preparationNeeded||item.metadata?.preparationNeeded||'',batchEligible:item.batchEligible!==false};
+}
+function batchKeyFor(item){
+  const m=item.actionMode;
+  if(m==='call') return 'calls';
+  if(m==='email'||m==='text') return 'messages';
+  if(m==='errand') return 'errands';
+  if(m==='schedule'||m==='meeting') return 'scheduling';
+  if(m==='computer_admin') return String(item.domain||'').toLowerCase().includes('money')?'money':'money';
+  if(m==='deep_work'||m==='writing'||m==='planning') return 'deep';
+  if(m==='home_project') return 'house';
+  if(String(item.domain||'').toLowerCase().includes('relationship')) return 'relationship';
+  return null;
+}
+function taskScoreForBatch(item){
+  const rank=item.rank||scoreExecutiveItem(item);
+  let s=rank.score||0;
+  if(execPriority(item.priority)==='P1') s+=20;
+  if(item.dueDate&&execDaysUntil(item.dueDate)<=0) s+=16;
+  if(item.reviewDate&&execDaysUntil(item.reviewDate)<=0) s+=12;
+  if(item.waitingOn) s+=8;
+  if(String(item.domain||'')==='House') s-=18;
+  return s;
+}
+function actionItemsForBatching({executive,todos,tasks,careerTasks,errands,comms}){
+  const execItems=activeExecutiveItems(executive).filter(x=>['task','milestone','waiting','scheduled','project'].includes(x.type)).map(x=>({...x,source:'executive',rank:scoreExecutiveItem(x)}));
+  const top3=(todos||[]).filter(t=>!t.done).map((t,i)=>({id:`top3-${t.id}`,title:asTitle(t),domain:t.goal||'Daily Top 3',type:'task',priority:i===0?'P1':'P2',nextAction:'Complete Daily Top 3 outcome.',source:'top3',metadata:{top3:true},rank:{score:95-i*8,reason:'Daily Top 3 outcome.'}}));
+  const open=[...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career'),...(errands||[]).filter(e=>!e.done).map(e=>({...e,domain:'Errands',kind:'Errand'}))].map((t,i)=>({id:`task-${t.id||i}`,title:asTitle(t),domain:t.domain||t.goal||t.kind||'Task',type:'task',priority:String(t.priority||t.ccPriority||'').toLowerCase().includes('now')?'P1':taskIsOverdue(t)?'P1':taskDueToday(t)?'P2':'P3',dueDate:t.dueDate||'',nextAction:t.nextAction||t.notes||'',source:'task',rank:{score:(taskIsOverdue(t)?80:taskDueToday(t)?62:36)-i,reason:'Open task.'}}));
+  const followups=(comms||[]).filter(c=>c.phase!=='Closed').map((c,i)=>({id:`comm-${c.id||i}`,title:c.title||`${c.contact||c.name||'Contact'} follow-up`,domain:'Career and Relationships',type:'task',priority:['Sent','Follow-up','Follow Up'].includes(c.phase)?'P2':'P3',nextAction:c.notes||phaseLabel(c.phase||'Follow-up'),source:'comms',actionMode:c.type==='call'?'call':c.type==='text'?'text':'email',rank:{score:['Sent','Follow-up','Follow Up'].includes(c.phase)?58:38,reason:'Relationship communication loop.'}}));
+  const byTitle=new Map();
+  [...top3,...execItems,...open,...followups].map(inferExecutionMeta).forEach(item=>{ const key=execNormText(`${item.title} ${item.domain}`); const prev=byTitle.get(key); if(!prev||taskScoreForBatch(item)>taskScoreForBatch(prev)) byTitle.set(key,item); });
+  return [...byTitle.values()];
+}
+function generateExecutionBatches(args){
+  const items=actionItemsForBatching(args).filter(x=>x.batchEligible!==false&&!['completed','archived'].includes(x.status));
+  const primaryDeep=items.find(x=>x.metadata?.top3||(['WolfLock','Purple Atlas','WolfMaster'].includes(x.domain)&&execPriority(x.priority)==='P1'));
+  const groups={};
+  items.forEach(item=>{
+    const key=batchKeyFor(item); if(!key) return;
+    if(key!=='deep'&&item===primaryDeep) return;
+    if(item.focusLevel==='deep'&&key!=='deep') return;
+    (groups[key]||(groups[key]=[])).push(item);
+  });
+  if(primaryDeep) groups.deep=[primaryDeep];
+  return Object.entries(groups).map(([key,list])=>{
+    const tpl=BATCH_TEMPLATES[key]; if(!tpl||!list.length) return null;
+    const sorted=list.slice().sort((a,b)=>taskScoreForBatch(b)-taskScoreForBatch(a));
+    const cap=key==='deep'?1:key==='house'?4:key==='errands'?4:5;
+    const included=[]; let total=0, max=tpl.duration;
+    for(const item of sorted){ const est=Number(item.estimatedMinutes)||15; if(included.length>=cap) break; if(included.length&&total+est>max+15) continue; included.push(item); total+=est; }
+    if(!included.length) return null;
+    const topScore=Math.max(...included.map(taskScoreForBatch));
+    const duration=key==='deep'?Math.max(60,Math.min(120,total||tpl.duration)):Math.max(30,Math.min(key==='house'?180:90,Math.max(tpl.duration,total)));
+    const prep=[...tpl.prep,...included.map(x=>x.preparationNeeded).filter(Boolean)].slice(0,5);
+    return {id:`batch-${key}`,key,title:tpl.title,duration,totalMinutes:total,objective:tpl.objective,focus:tpl.focus,items:included,prep,score:topScore,why:`Grouped by ${tpl.mode.replace('_',' ')} mode, compatible focus level, and realistic ${duration}-minute block.`};
+  }).filter(Boolean).sort((a,b)=>{
+    const deepBoost=a.key==='deep'?-25:b.key==='deep'?25:0;
+    return deepBoost || b.score-a.score;
+  }).slice(0,4);
+}
+function RecommendedExecutionBlocks({executive,todos,tasks,careerTasks,errands,comms,calendarEvents,setCalendarEvents,onNavigate}){
+  const [openId,setOpenId]=useState(null);
+  const [hidden,setHidden]=useState({});
+  const [done,setDone]=useState({});
+  const batches=useMemo(()=>generateExecutionBatches({executive,todos,tasks,careerTasks,errands,comms}).filter(b=>!hidden[b.id]),[JSON.stringify({executive,todos,tasks,careerTasks,errands,comms,hidden})]);
+  const open=batches.find(b=>b.id===openId)||batches[0];
+  const fmtTime=mins=>{ const now=new Date(); now.setMinutes(Math.ceil(now.getMinutes()/30)*30,0,0); now.setMinutes(now.getMinutes()+30); return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; };
+  const schedule=batch=>{ if(!batch||!setCalendarEvents) return; setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:todayStr(),time:fmtTime(batch.duration),title:batch.title,note:`${batch.duration}m · ${batch.items.length} item${batch.items.length===1?'':'s'} · ${batch.objective}`,source:'manual'}])); setOpenId(batch.id); };
+  if(!batches.length) return <section className="glass card wm-batches"><div className="wm-batch-head"><div><div className="wm-batch-title"><Icon name="grid" size={13} /> Recommended Execution Blocks</div><div className="meta">No compatible blocks yet. Add tasks or import a sync packet with action metadata.</div></div></div></section>;
+  return <section className="glass card wm-batches">
+    <div className="wm-batch-head"><div><div className="wm-batch-title"><Icon name="grid" size={13} /> Recommended Execution Blocks</div><div className="meta">Priorities decide what wins. Blocks reduce context switching.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('plan','calendar')}>Calendar</button></div>
+    <div className="wm-batch-grid">{batches.slice(0,3).map((b,i)=><div className={`wm-batch-card ${i===0?'featured':''}`} key={b.id}><div className="wm-batch-meta"><span>{b.duration}m</span><span>{b.focus}</span><span>{b.items.length} items</span></div><b>{b.title}</b><small>{b.objective}</small><div className="wm-batch-items">{b.items.slice(0,3).map(x=><span key={x.id}>• {x.title}</span>)}</div><div className="wm-batch-actions"><button type="button" className="ghost-btn" onClick={()=>setOpenId(openId===b.id?null:b.id)}>{openId===b.id?'Hide':'Details'}</button><button type="button" className="primary-btn" onClick={()=>schedule(b)}>Schedule</button></div></div>)}</div>
+    {open?<div className="wm-batch-detail"><div className="wm-batch-detail-head"><div><h3>{open.title}</h3><div className="meta">{open.why}</div></div><div className="wm-batch-progress">{Object.keys(done).filter(k=>k.startsWith(open.id)).length}/{open.items.length} done</div></div><div className="wm-batch-checklist">{open.prep.map((p,i)=><div key={i}><span>{i+1}</span><b>{p}</b><small></small></div>)}</div><div className="wm-batch-tasklist">{open.items.map((item,i)=><button type="button" className="wm-batch-task" key={item.id} onClick={()=>setDone(d=>({...d,[`${open.id}-${item.id}`]:!d[`${open.id}-${item.id}`]}))}><span>{done[`${open.id}-${item.id}`]?'✓':i+1}</span><b>{item.title}</b><small>{item.estimatedMinutes}m · {item.domain}</small></button>)}</div><div className="wm-batch-actions"><button type="button" className="ghost-btn" onClick={()=>setHidden(h=>({...h,[open.id]:true}))}>Reject</button><button type="button" className="primary-btn" onClick={()=>schedule(open)}>Add to Calendar</button></div></div>:null}
+  </section>;
+}
 function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact">
     <NowCommandBrief session={session} onNavigate={onNavigate} todos={todos} weekly={weekly} careerLeads={careerLeads} tasks={tasks} careerTasks={careerTasks} comms={comms||[]} emailItems={emailItems||[]} calendarEvents={calendarEvents} habits={habits||[]} errands={errands||[]} build={build||[]} reflect={reflect||[]} />
     <NowTop3Cards todos={todos} setTodos={setTodos} />
+    <RecommendedExecutionBlocks executive={reviewData?.executive} todos={todos||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
     <NowPriorityStack executive={reviewData?.executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowMomentumStrip habits={habits||[]} todos={todos||[]} />
