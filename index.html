@@ -98,6 +98,37 @@ body{background:linear-gradient(180deg,#08090c,#0b0d12 42%,#090a0d);letter-spaci
 .wm-next strong{margin-top:2px!important;font-size:13.5px!important;line-height:1.2!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wm-next .wm-execute{min-height:34px!important;padding:7px 12px!important;border-radius:13px!important;font-size:12px!important}
 @media (max-width:640px){.wm-next{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;padding:8px 9px 8px 11px!important}.wm-next strong{font-size:12px!important}.wm-next .wm-execute{font-size:11px!important;padding:7px 10px!important}}
+/* Priority Stack: one-at-a-time executive triage cards for NOW. */
+.wm-priority-stack{position:relative;overflow:hidden;border-color:rgba(147,242,10,.2);background:radial-gradient(95% 110% at 100% 0%,rgba(147,242,10,.09),transparent 48%),linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.018))}
+.wm-stack-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.wm-stack-title{display:flex;align-items:center;gap:8px;color:var(--accent);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.17em}
+.wm-stack-count{font-size:10px;color:var(--text-dim);font-weight:900;text-transform:uppercase;letter-spacing:.12em}
+.wm-stack-stage{position:relative;min-height:210px;margin-top:2px}
+.wm-stack-shadow{position:absolute;left:18px;right:18px;height:82%;border-radius:22px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018);transform:translateY(var(--y)) scale(var(--s));opacity:var(--o);pointer-events:none}
+.wm-stack-card{position:relative;z-index:3;min-height:190px;display:grid;gap:12px;padding:16px;border-radius:22px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(20,25,34,.96),rgba(12,15,20,.96));box-shadow:0 18px 48px rgba(0,0,0,.28)}
+.wm-stack-card.p1{border-color:rgba(251,113,133,.28);box-shadow:inset 0 0 0 1px rgba(251,113,133,.08),0 18px 48px rgba(0,0,0,.28)}
+.wm-stack-card.p2{border-color:rgba(255,204,102,.24)}
+.wm-stack-card.p3{border-color:rgba(147,242,10,.2)}
+.wm-stack-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.wm-stack-domain{display:inline-flex;align-items:center;gap:6px;max-width:100%;border-radius:999px;padding:5px 9px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wm-stack-priority{border-radius:999px;padding:5px 9px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.wm-stack-priority.p1{color:var(--danger);background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.24)}
+.wm-stack-priority.p2{color:var(--warn);background:rgba(255,204,102,.09);border:1px solid rgba(255,204,102,.22)}
+.wm-stack-priority.p3{color:var(--accent);background:rgba(147,242,10,.08);border:1px solid rgba(147,242,10,.18)}
+.wm-stack-card h3{margin:0;font-size:22px;line-height:1.08;letter-spacing:-.035em;color:var(--text)}
+.wm-stack-next{display:grid;gap:4px;padding:11px 12px;border-radius:16px;border:1px solid rgba(147,242,10,.16);background:rgba(147,242,10,.055)}
+.wm-stack-next span{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:950}
+.wm-stack-next b{font-size:13px;line-height:1.3;color:var(--text)}
+.wm-stack-reason{display:flex;gap:8px;color:var(--text-mid);font-size:12px;line-height:1.35}
+.wm-stack-reason svg{flex:0 0 auto;color:var(--accent);margin-top:1px}
+.wm-stack-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:2px}
+.wm-stack-actions button{min-height:38px;border-radius:13px;font-size:11px;font-weight:900}
+.wm-stack-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.wm-stack-dots{display:flex;gap:5px;justify-content:center;align-items:center;min-width:0;flex:1}
+.wm-stack-dots i{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.16);transition:.18s}
+.wm-stack-dots i.active{width:18px;background:var(--accent)}
+.wm-stack-nav button{min-height:34px;border-radius:999px;padding:7px 11px}
+@media (max-width:640px){.wm-priority-stack{padding:12px!important;border-radius:22px}.wm-stack-head{margin-bottom:9px}.wm-stack-title{font-size:10px;letter-spacing:.14em}.wm-stack-stage{min-height:198px}.wm-stack-card{min-height:178px;padding:13px;border-radius:19px;gap:9px}.wm-stack-card h3{font-size:17px;line-height:1.1}.wm-stack-next{padding:9px 10px}.wm-stack-next b{font-size:11.5px}.wm-stack-reason{font-size:10.5px}.wm-stack-actions{grid-template-columns:1fr 1fr 1fr;gap:6px}.wm-stack-actions button{min-height:34px;font-size:9.5px;padding:7px 5px}.wm-stack-nav{margin-top:8px}.wm-stack-domain,.wm-stack-priority{font-size:8px;padding:4px 7px}}
 </style>
 <style>
 /* Calendar refinement */
@@ -2129,11 +2160,91 @@ function ExecutiveDashboard({executive,calendarEvents,onNavigate,compact=false})
   if(!model.active.length) return <section className="glass card wm-panel"><div className="section-head"><div><div className="eyebrow" style={{color:C.accent}}>Executive Sync</div><div className="section-title">No sync packet imported yet</div><div className="meta">Use Review → Sync to import your structured packet.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Import</button></div></section>;
   return <section className="glass card wm-panel"><div className="section-head"><div><div className="eyebrow" style={{color:C.accent}}>Executive Dashboard</div><div className="section-title">Attention layer</div><div className="meta">Ranked from stored executive items. Top outcomes are capped at three.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Sync</button></div><div className="exec-grid three"><Section title="Today" items={model.today} empty="No major outcomes." /><Section title="Must Do" items={model.mustDo} empty="No urgent admin." kind={model.mustDo.length?'warn':''} /><Section title="Waiting On" items={model.waiting} empty="No waiting loops." /></div>{!compact?<div className="exec-grid" style={{marginTop:10}}><Section title="Scheduled" items={model.scheduled} empty="No schedule items." /><Section title="Active Projects" items={model.projects} empty="No active projects." /><Section title="At Risk" items={model.atRisk} empty="Nothing at risk." kind={model.atRisk.length?'danger':''} /><Section title="Decisions" items={model.decisions} empty="No guardrails imported." /></div>:null}</section>;
 }
+function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerTasks,errands,comms,build,reflect,onNavigate}){
+  const [idx,setIdx]=useState(0);
+  const [dismissed,setDismissed]=useState({});
+  const cards=useMemo(()=>{
+    const model=executiveDashboardModel(executive,calendarEvents);
+    const fromExec=model.active.slice(0,18).map(item=>({
+      id:item.id||item.identity||item.title,
+      title:item.title,
+      domain:item.domain||'WolfMaster',
+      priority:item.priority||'P3',
+      nextAction:item.nextAction||item.description||item.rank?.reason||'Decide the next clean move.',
+      reason:item.rank?.reason||scoreExecutiveItem(item).reason,
+      type:item.type||'task',
+      source:'executive',
+      score:item.rank?.score||scoreExecutiveItem(item).score
+    }));
+    if(fromExec.length) return fromExec;
+    const fallbackTasks=[...(todos||[]).filter(t=>!t.done).map((t,i)=>({id:`top3-${t.id}`,title:asTitle(t),domain:t.goal||'Daily Top 3',priority:i===0?'P1':'P2',nextAction:'Execute this before lower-priority inputs take over.',reason:'Ranked because it is in your Daily Top 3.',type:'task',source:'top3',score:90-i*5})),...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career'),...(errands||[]).filter(e=>!e.done).map(e=>({...e,domain:'Errands',kind:'Errand'}))].map((t,i)=>({
+      id:`task-${t.id||i}`,
+      title:asTitle(t),
+      domain:t.domain||t.goal||t.kind||'Task',
+      priority:String(t.priority||t.ccPriority||'').toLowerCase().includes('now')?'P1':taskIsOverdue(t)?'P1':taskDueToday(t)?'P2':'P3',
+      nextAction:t.nextAction||t.notes||'Move this forward or intentionally defer it.',
+      reason:taskIsOverdue(t)?'Ranked because it is overdue.':taskDueToday(t)?'Ranked because it is due today.':'Ranked because it is open and actionable.',
+      type:'task',
+      source:'task',
+      score:(taskIsOverdue(t)?80:taskDueToday(t)?65:40)-i
+    }));
+    const signals=buildPrioritizedSignals({comms,tasks,careerTasks,errands,build,todos,reflect},5).map((s,i)=>({
+      id:`signal-${s.id}`,
+      title:s.label,
+      domain:s.tag==='family'?'Family':s.tag==='people'?'People':s.tag==='build'?'Build':'Review',
+      priority:s.weight>=80?'P1':s.weight>=60?'P2':'P3',
+      nextAction:s.short||s.label,
+      reason:`Ranked because ${s.tag} attention is currently surfaced by WolfMaster.`,
+      type:s.tag,
+      source:'signal',
+      score:s.weight||50-i
+    }));
+    return [...fallbackTasks,...signals].sort((a,b)=>b.score-a.score).slice(0,12);
+  },[JSON.stringify({executive,calendarEvents,todos,tasks,careerTasks,errands,comms,build,reflect})]);
+  const visible=cards.filter(c=>!dismissed[c.id]);
+  useEffect(()=>{ if(idx>=visible.length) setIdx(Math.max(0,visible.length-1)); },[idx,visible.length]);
+  const card=visible[idx];
+  const move=n=>setIdx(i=>visible.length?((i+n+visible.length)%visible.length):0);
+  const addTop3=()=>{
+    if(!card) return;
+    const title=card.title.trim();
+    if((todos||[]).some(t=>asTitle(t).toLowerCase()===title.toLowerCase())){ alert('Already in Daily Top 3.'); return; }
+    if((todos||[]).length>=3){ alert('Daily Top 3 is full. Complete or delete one first.'); return; }
+    setTodos([...(todos||[]),{id:Date.now()+Math.random(),text:title,title,goal:card.domain||'Today',done:false}]);
+  };
+  const dismiss=()=>{ if(!card) return; setDismissed(d=>({...d,[card.id]:true})); setIdx(i=>Math.min(i,Math.max(0,visible.length-2))); };
+  const openArea=()=>{
+    if(!card||!onNavigate) return;
+    const d=String(card.domain||'').toLowerCase();
+    if(d.includes('calendar')||card.type==='scheduled') onNavigate('plan','calendar');
+    else if(d.includes('family')||d.includes('marriage')||d.includes('career')||d.includes('relationship')||card.type==='people') onNavigate('career');
+    else if(d.includes('wolf')||d.includes('atlas')||d.includes('build')||d.includes('venture')||card.type==='project'||card.type==='milestone') onNavigate('more');
+    else if(d.includes('money')||d.includes('review')||card.type==='guardrail'||card.type==='decision') onNavigate('track');
+    else onNavigate('plan');
+  };
+  if(!visible.length) return <section className="glass card wm-priority-stack"><div className="wm-stack-head"><div><div className="wm-stack-title"><Icon name="spark" size={13} /> Priority Stack</div><div className="meta">No active cards. Import a sync packet or add items to Plan.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Sync</button></div></section>;
+  const priorityClass=String(card.priority||'P3').toLowerCase();
+  return <section className="glass card wm-priority-stack">
+    <div className="wm-stack-head"><div><div className="wm-stack-title"><Icon name="spark" size={13} /> Priority Stack</div><div className="meta">Flip through the attention queue, most urgent first.</div></div><div className="wm-stack-count">{idx+1} / {visible.length}</div></div>
+    <div className="wm-stack-stage">
+      <div className="wm-stack-shadow" style={{'--y':'12px','--s':'.96','--o':'.7'}}></div>
+      <div className="wm-stack-shadow" style={{'--y':'24px','--s':'.91','--o':'.38'}}></div>
+      <article className={`wm-stack-card ${priorityClass}`}>
+        <div className="wm-stack-top"><span className="wm-stack-domain"><Icon name={top3Icon(card.domain)} size={12} /> {card.domain}</span><span className={`wm-stack-priority ${priorityClass}`}>{card.priority}</span></div>
+        <h3>{card.title}</h3>
+        <div className="wm-stack-next"><span>Recommended next action</span><b>{card.nextAction}</b></div>
+        <div className="wm-stack-reason"><Icon name="target" size={14} /><span>{card.reason}</span></div>
+        <div className="wm-stack-actions"><button type="button" className="primary-btn" onClick={addTop3}>Top 3</button><button type="button" className="ghost-btn" onClick={openArea}>Open</button><button type="button" className="ghost-btn" onClick={dismiss}>Skip</button></div>
+      </article>
+    </div>
+    <div className="wm-stack-nav"><button type="button" className="ghost-btn" onClick={()=>move(-1)}>← Prev</button><div className="wm-stack-dots">{visible.slice(0,8).map((c,i)=><i key={c.id} className={i===idx?'active':''}></i>)}</div><button type="button" className="ghost-btn" onClick={()=>move(1)}>Next →</button></div>
+  </section>;
+}
 function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact">
     <NowCommandBrief session={session} onNavigate={onNavigate} todos={todos} weekly={weekly} careerLeads={careerLeads} tasks={tasks} careerTasks={careerTasks} comms={comms||[]} emailItems={emailItems||[]} calendarEvents={calendarEvents} habits={habits||[]} errands={errands||[]} build={build||[]} reflect={reflect||[]} />
     <NowTop3Cards todos={todos} setTodos={setTodos} />
-    <ExecutiveDashboard executive={reviewData?.executive} calendarEvents={calendarEvents||[]} onNavigate={onNavigate} compact />
+    <NowPriorityStack executive={reviewData?.executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowMomentumStrip habits={habits||[]} todos={todos||[]} />
     {/* Compact order: command, Top 3, signals, collapsed Momentum, then Timeline + Attention. */}
