@@ -483,8 +483,11 @@ body{background:linear-gradient(180deg,#08090c,#0b0d12 42%,#090a0d);letter-spaci
   .wm-mo-top-row small{font-size:10px}
   .wm-mo-strip-score b{font-size:26px}
   .wm-mo-strip .wm-mo-delta{font-size:10px}
-  .wm-tl-row{grid-template-columns:12px 50px 1fr auto;gap:8px}
-  .wm-tl-title{font-size:12px}
+  .wm-tl-row{grid-template-columns:12px minmax(0,1fr) auto;grid-template-rows:auto auto;gap:2px 8px;padding:8px 0}
+  .wm-tl-dot{grid-column:1;grid-row:1 / span 2;align-self:center}
+  .wm-tl-time{grid-column:2;grid-row:1;font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .wm-tl-title{grid-column:2 / -1;grid-row:2;font-size:12px;line-height:1.18;white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .wm-cal-priority,.wm-tl-len{grid-column:3;grid-row:1;align-self:start;font-size:8px;padding:2px 5px}
   .wm-debrief-row{grid-template-columns:16px 80px 1fr;gap:7px}
   .wm-debrief-label{font-size:11px}
   .wm-tile-face{padding:10px 11px;gap:9px}
