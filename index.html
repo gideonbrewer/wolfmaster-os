@@ -2444,13 +2444,13 @@ function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLea
   return <div className="wm-now wm-now-compact">
     <NowCommandBrief session={session} onNavigate={onNavigate} todos={todos} weekly={weekly} careerLeads={careerLeads} tasks={tasks} careerTasks={careerTasks} comms={comms||[]} emailItems={emailItems||[]} calendarEvents={calendarEvents} habits={habits||[]} errands={errands||[]} build={build||[]} reflect={reflect||[]} />
     <NowTop3Cards todos={todos} setTodos={setTodos} />
-    <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
-    <NowMomentumStrip habits={habits||[]} todos={todos||[]} />
-    {/* Command, commitments, radar. Optional planning queues stay collapsed below. */}
+    {/* Command, commitments, then radar. Momentum and optional queues sit below the fire list. */}
     <div className="wm-dashboard-grid wm-now-grid">
       <NowTimelinePanel calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} onNavigate={onNavigate} />
       <NowAttentionPanel tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} onNavigate={onNavigate} />
     </div>
+    <NowMomentumStrip habits={habits||[]} todos={todos||[]} />
+    <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <RecommendedExecutionBlocks drawer executive={reviewData?.executive} todos={todos||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
     <NowPriorityStack drawer executive={reviewData?.executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} onNavigate={onNavigate} />
   </div>;
