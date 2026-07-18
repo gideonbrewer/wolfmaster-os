@@ -130,31 +130,30 @@ body{background:linear-gradient(180deg,#08090c,#0b0d12 42%,#090a0d);letter-spaci
 .wm-stack-nav button{min-height:34px;border-radius:999px;padding:7px 11px}
 @media (max-width:640px){.wm-priority-stack{padding:12px!important;border-radius:22px}.wm-stack-head{margin-bottom:9px}.wm-stack-title{font-size:10px;letter-spacing:.14em}.wm-stack-stage{min-height:198px}.wm-stack-card{min-height:178px;padding:13px;border-radius:19px;gap:9px}.wm-stack-card h3{font-size:17px;line-height:1.1}.wm-stack-next{padding:9px 10px}.wm-stack-next b{font-size:11.5px}.wm-stack-reason{font-size:10.5px}.wm-stack-actions{grid-template-columns:1fr 1fr 1fr;gap:6px}.wm-stack-actions button{min-height:34px;font-size:9.5px;padding:7px 5px}.wm-stack-nav{margin-top:8px}.wm-stack-domain,.wm-stack-priority{font-size:8px;padding:4px 7px}}
 /* Execution batching: groups compatible actions without changing priority rank. */
-.wm-batches{border-color:rgba(96,165,250,.18);background:radial-gradient(100% 120% at 0% 0%,rgba(96,165,250,.07),transparent 52%),linear-gradient(180deg,rgba(255,255,255,.032),rgba(255,255,255,.018))}
-.wm-batch-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
-.wm-batch-title{display:flex;align-items:center;gap:8px;color:var(--info);font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.16em}
-.wm-batch-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-.wm-batch-card{display:grid;gap:9px;text-align:left;color:var(--text);padding:12px;border-radius:17px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026);min-width:0}
-.wm-batch-card.featured{border-color:rgba(147,242,10,.22);background:radial-gradient(110% 140% at 0% 0%,rgba(147,242,10,.07),transparent 58%),rgba(255,255,255,.026)}
-.wm-batch-card b{font-size:14px;line-height:1.2;letter-spacing:-.02em}
-.wm-batch-card small{font-size:10.5px;color:var(--text-mid);line-height:1.3}
-.wm-batch-meta{display:flex;gap:6px;flex-wrap:wrap}
-.wm-batch-meta span{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:999px;padding:4px 7px;color:var(--text-mid)}
-.wm-batch-items{display:grid;gap:5px}
-.wm-batch-items span{font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm-batches{padding:12px 14px!important;border-color:rgba(96,165,250,.14);background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.016))}
+.wm-batch-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
+.wm-batch-title{display:flex;align-items:center;gap:7px;color:var(--info);font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.15em}
+.wm-batch-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:1px;scrollbar-width:none}
+.wm-batch-strip::-webkit-scrollbar{display:none}
+.wm-batch-chip{flex:0 0 auto;min-width:118px;max-width:150px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;text-align:left;color:var(--text);padding:9px 10px;border-radius:15px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026)}
+.wm-batch-chip.active{border-color:rgba(147,242,10,.26);background:rgba(147,242,10,.065)}
+.wm-batch-chip b{font-size:12px;line-height:1.12;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm-batch-chip strong{font-size:12px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.wm-batch-chip small{grid-column:1 / -1;font-size:9px;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wm-batch-quiet{font-size:10px;color:var(--text-dim);font-weight:800;white-space:nowrap}
 .wm-batch-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:2px}
-.wm-batch-actions button{min-height:34px;border-radius:12px;font-size:10px;font-weight:900}
-.wm-batch-detail{margin-top:10px;padding:12px;border-radius:18px;border:1px solid rgba(96,165,250,.18);background:rgba(96,165,250,.045);display:grid;gap:10px}
+.wm-batch-actions button{min-height:32px;border-radius:12px;font-size:10px;font-weight:900}
+.wm-batch-detail{margin-top:10px;padding:11px;border-radius:17px;border:1px solid rgba(96,165,250,.16);background:rgba(96,165,250,.038);display:grid;gap:9px}
 .wm-batch-detail-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .wm-batch-detail h3{margin:0;font-size:16px;line-height:1.15}
 .wm-batch-progress{font-size:10px;color:var(--text-mid);font-weight:900;text-transform:uppercase;letter-spacing:.1em}
-.wm-batch-checklist,.wm-batch-tasklist{display:grid;gap:7px}
+.wm-batch-checklist,.wm-batch-tasklist{display:grid;gap:6px}
 .wm-batch-checklist div,.wm-batch-task{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px;border-radius:13px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.055)}
 .wm-batch-checklist span,.wm-batch-task span:first-child{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(96,165,250,.22);background:rgba(96,165,250,.08);color:var(--info);font-size:10px;font-weight:900}
 .wm-batch-task b{font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wm-batch-task small{font-size:10px;color:var(--text-mid);white-space:nowrap}
 .wm-batch-empty{padding:12px;border-radius:16px;border:1px dashed rgba(96,165,250,.22);background:rgba(96,165,250,.035);color:var(--text-mid);font-size:12px;line-height:1.4}
-@media (max-width:640px){.wm-batches{padding:12px!important;border-radius:22px}.wm-batch-head{margin-bottom:9px}.wm-batch-title{font-size:10px;letter-spacing:.13em}.wm-batch-grid{grid-template-columns:1fr;gap:8px}.wm-batch-card{padding:11px;border-radius:16px}.wm-batch-card:nth-child(n+3){display:none}.wm-batch-card b{font-size:13px}.wm-batch-detail{padding:10px;border-radius:16px}.wm-batch-detail-head{display:grid}.wm-batch-checklist div,.wm-batch-task{grid-template-columns:22px minmax(0,1fr)}.wm-batch-task small{grid-column:2}.wm-batch-actions button{font-size:9.5px}}
+@media (max-width:640px){.wm-batches{padding:11px 12px!important;border-radius:20px}.wm-batch-head{margin-bottom:8px}.wm-batch-title{font-size:9px;letter-spacing:.13em}.wm-batch-quiet{display:none}.wm-batch-chip{min-width:112px;padding:8px 9px;border-radius:14px}.wm-batch-chip b{font-size:11px}.wm-batch-chip strong{font-size:11px}.wm-batch-detail{padding:10px;border-radius:16px}.wm-batch-detail-head{display:grid}.wm-batch-checklist{display:none}.wm-batch-checklist div,.wm-batch-task{grid-template-columns:22px minmax(0,1fr)}.wm-batch-task small{grid-column:2}.wm-batch-actions button{font-size:9.5px}}
 </style>
 <style>
 /* Calendar refinement */
@@ -2388,13 +2387,13 @@ function RecommendedExecutionBlocks({executive,todos,tasks,careerTasks,errands,c
   const [hidden,setHidden]=useState({});
   const [done,setDone]=useState({});
   const batches=useMemo(()=>generateExecutionBatches({executive,todos,tasks,careerTasks,errands,comms}).filter(b=>!hidden[b.id]),[JSON.stringify({executive,todos,tasks,careerTasks,errands,comms,hidden})]);
-  const open=batches.find(b=>b.id===openId)||batches[0];
+  const open=batches.find(b=>b.id===openId)||null;
   const fmtTime=mins=>{ const now=new Date(); now.setMinutes(Math.ceil(now.getMinutes()/30)*30,0,0); now.setMinutes(now.getMinutes()+30); return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; };
   const schedule=batch=>{ if(!batch||!setCalendarEvents) return; setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:todayStr(),time:fmtTime(batch.duration),title:batch.title,note:`${batch.duration}m · ${batch.items.length} item${batch.items.length===1?'':'s'} · ${batch.objective}`,source:'manual'}])); setOpenId(batch.id); };
-  if(!batches.length) return <section className="glass card wm-batches"><div className="wm-batch-head"><div><div className="wm-batch-title"><Icon name="grid" size={13} /> Recommended Execution Blocks</div><div className="meta">No compatible blocks yet. Add tasks or import a sync packet with action metadata.</div></div></div></section>;
+  if(!batches.length) return <section className="glass card wm-batches"><div className="wm-batch-head"><div className="wm-batch-title"><Icon name="grid" size={13} /> Execution Blocks</div><span className="wm-batch-quiet">No compatible blocks</span></div></section>;
   return <section className="glass card wm-batches">
-    <div className="wm-batch-head"><div><div className="wm-batch-title"><Icon name="grid" size={13} /> Recommended Execution Blocks</div><div className="meta">Priorities decide what wins. Blocks reduce context switching.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('plan','calendar')}>Calendar</button></div>
-    <div className="wm-batch-grid">{batches.slice(0,3).map((b,i)=><div className={`wm-batch-card ${i===0?'featured':''}`} key={b.id}><div className="wm-batch-meta"><span>{b.duration}m</span><span>{b.focus}</span><span>{b.items.length} items</span></div><b>{b.title}</b><small>{b.objective}</small><div className="wm-batch-items">{b.items.slice(0,3).map(x=><span key={x.id}>• {x.title}</span>)}</div><div className="wm-batch-actions"><button type="button" className="ghost-btn" onClick={()=>setOpenId(openId===b.id?null:b.id)}>{openId===b.id?'Hide':'Details'}</button><button type="button" className="primary-btn" onClick={()=>schedule(b)}>Schedule</button></div></div>)}</div>
+    <div className="wm-batch-head"><div className="wm-batch-title"><Icon name="grid" size={13} /> Execution Blocks</div><span className="wm-batch-quiet">Batch the supporting work</span></div>
+    <div className="wm-batch-strip">{batches.slice(0,3).map(b=><button type="button" className={`wm-batch-chip ${open?.id===b.id?'active':''}`} key={b.id} onClick={()=>setOpenId(openId===b.id?null:b.id)}><b>{b.title.replace(' Block','').replace('Money and Administration','Money/Admin')}</b><strong>{b.duration}m</strong><small>{b.items.length} items · {b.focus}</small></button>)}</div>
     {open?<div className="wm-batch-detail"><div className="wm-batch-detail-head"><div><h3>{open.title}</h3><div className="meta">{open.why}</div></div><div className="wm-batch-progress">{Object.keys(done).filter(k=>k.startsWith(open.id)).length}/{open.items.length} done</div></div><div className="wm-batch-checklist">{open.prep.map((p,i)=><div key={i}><span>{i+1}</span><b>{p}</b><small></small></div>)}</div><div className="wm-batch-tasklist">{open.items.map((item,i)=><button type="button" className="wm-batch-task" key={item.id} onClick={()=>setDone(d=>({...d,[`${open.id}-${item.id}`]:!d[`${open.id}-${item.id}`]}))}><span>{done[`${open.id}-${item.id}`]?'✓':i+1}</span><b>{item.title}</b><small>{item.estimatedMinutes}m · {item.domain}</small></button>)}</div><div className="wm-batch-actions"><button type="button" className="ghost-btn" onClick={()=>setHidden(h=>({...h,[open.id]:true}))}>Reject</button><button type="button" className="primary-btn" onClick={()=>schedule(open)}>Add to Calendar</button></div></div>:null}
   </section>;
 }
