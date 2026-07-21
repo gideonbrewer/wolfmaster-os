@@ -903,6 +903,42 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .wt5-card .wt5-add .primary-btn{min-height:38px;padding:9px 13px;border-radius:13px;font-size:12px}
 @media (max-width:640px){.plan-screen .week-card{padding:11px 12px}.plan-screen .week-top{gap:9px}.plan-screen .week-ring-wrap{transform:none;margin-right:0}.plan-screen .week-ring-wrap .plan-ring{width:52px;height:52px}.plan-screen .plan-ring-pct{font-size:25px}.plan-screen .week-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.plan-screen .week-metric{padding:6px 5px;gap:4px;min-width:0}.plan-screen .week-metric-ico{display:none}.plan-screen .week-metric b{font-size:12px}.plan-screen .week-metric small{font-size:7.5px}.wt5-card .wt5-row{padding:7px 0}.wt5-card .wt5-text{font-size:12px}.wt5-card .wt5-add{grid-template-columns:minmax(0,1fr) auto}.wt5-card .wt5-add .primary-btn{width:auto}}
 
+/* PLAN — priority editing first */
+.plan-priority-board{display:grid;gap:10px}
+.plan-priority-hero{padding:13px!important;border-radius:19px!important;border-color:rgba(147,242,10,.2);background:radial-gradient(circle at 0 0,rgba(147,242,10,.075),transparent 46%),linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.018))}
+.plan-priority-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.plan-priority-title{display:grid;gap:3px;min-width:0}
+.plan-priority-title b{font-size:16px;line-height:1.1;letter-spacing:-.02em}
+.plan-priority-title small{font-size:10.5px;line-height:1.25;color:var(--text-mid)}
+.plan-priority-progress{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;border:1px solid rgba(147,242,10,.2);background:rgba(147,242,10,.07);color:var(--accent);border-radius:999px;padding:6px 9px;font-size:10px;font-weight:900}
+.plan-priority-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plan-priority-card{padding:11px!important;border-radius:17px!important;box-shadow:none!important;background:rgba(255,255,255,.025)}
+.plan-priority-card.daily{border-color:rgba(147,242,10,.2)}
+.plan-priority-card.weekly{border-color:rgba(167,139,250,.2)}
+.plan-priority-card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.plan-priority-card-head span{font-size:9px;font-weight:950;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+.plan-priority-card-head b{font-size:10px;color:var(--accent)}
+.plan-priority-list{display:grid;gap:6px}
+.plan-priority-row{display:grid;grid-template-columns:23px minmax(0,1fr) auto;gap:7px;align-items:center;min-height:38px;padding:7px;border-radius:13px;background:rgba(0,0,0,.13);border:1px solid rgba(255,255,255,.055)}
+.plan-priority-row.done .plan-priority-text{text-decoration:line-through;color:var(--text-dim)}
+.plan-priority-num{width:23px;height:23px;border-radius:999px;display:grid;place-items:center;background:rgba(147,242,10,.11);border:1px solid rgba(147,242,10,.22);color:var(--accent);font-size:10px;font-weight:900}
+.plan-priority-main{min-width:0;display:grid;gap:2px}
+.plan-priority-text{font-size:12px;line-height:1.2;color:var(--text);font-weight:750;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.plan-priority-tag{font-size:9px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-priority-actions{display:flex;gap:4px}
+.plan-priority-actions button{min-width:28px;height:28px;border-radius:10px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.025);color:var(--text-mid);font-size:10px;font-weight:900}
+.plan-priority-actions button.primary{background:rgba(147,242,10,.12);border-color:rgba(147,242,10,.24);color:var(--accent)}
+.plan-priority-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-top:8px}
+.plan-priority-add .text-input{min-height:36px;padding:8px 10px;border-radius:12px;font-size:12px}
+.plan-priority-add .primary-btn{min-height:36px;padding:8px 11px;border-radius:12px;font-size:11px}
+.plan-focus-inline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
+.plan-focus-inline input{min-height:36px;padding:8px 10px;border-radius:12px;font-size:12px}
+.plan-focus-inline span{font-size:10px;color:var(--text-mid);white-space:nowrap}
+.plan-support-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px -2px}
+.plan-support-head b{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+.plan-support-head small{font-size:10px;color:var(--text-dim)}
+@media (max-width:640px){.plan-priority-grid{grid-template-columns:1fr}.plan-priority-hero{padding:12px!important}.plan-priority-top{margin-bottom:8px}.plan-priority-title b{font-size:15px}.plan-priority-card{padding:10px!important}.plan-priority-row{grid-template-columns:22px minmax(0,1fr) auto;padding:6px}.plan-priority-text{font-size:11.5px}.plan-priority-actions button{width:27px;height:27px}.plan-focus-inline{grid-template-columns:1fr}.plan-focus-inline span{white-space:normal}}
+
 /* PEOPLE — relationship cards */
 .people-list{display:flex;flex-direction:column;gap:10px}
 .person-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.028);cursor:pointer;transition:.15s}
@@ -2679,6 +2715,52 @@ function PlanAccordion({id,title,sub,icon,count,open,onToggle,children}){
     {open?<div className="plan-accordion-body">{children}</div>:null}
   </section>;
 }
+function PlanPriorityList({kind,items,setItems,max,accent}){
+  const [draft,setDraft]=useState('');
+  const [editing,setEditing]=useState(null);
+  const [editText,setEditText]=useState('');
+  const active=(items||[]).filter(x=>!x.archived);
+  const done=active.filter(x=>x.done).length;
+  const patch=(id,fields)=>setItems((items||[]).map(x=>x.id===id?{...x,...fields}:x));
+  const remove=item=>{ if(confirm(`Remove "${item.text||item.title||'priority'}"?`)) setItems((items||[]).filter(x=>x.id!==item.id)); };
+  const startEdit=item=>{ setEditing(item.id); setEditText(item.text||item.title||''); };
+  const cancelEdit=()=>{ setEditing(null); setEditText(''); };
+  const saveEdit=item=>{ const text=editText.trim(); if(text) patch(item.id,{text,title:text}); cancelEdit(); };
+  const add=()=>{ const text=draft.trim(); if(!text||active.length>=max) return; setItems([...(items||[]),{id:Date.now()+Math.random(),text,title:text,goal:kind==='daily'?'Today':'Weekly Focus',done:false}]); setDraft(''); };
+  return <div className={`glass card plan-priority-card ${kind}`}>
+    <div className="plan-priority-card-head"><span>{kind==='daily'?'Daily Top 3':'Weekly Top 5'}</span><b style={{color:accent}}>{done}/{max}</b></div>
+    <div className="plan-priority-list">
+      {active.length?active.slice(0,max).map((item,i)=><div className={`plan-priority-row ${item.done?'done':''}`} key={item.id}>
+        <button type="button" className="plan-priority-num" onClick={()=>patch(item.id,{done:!item.done})} style={item.done?{background:accent,borderColor:accent,color:'#091005'}:{color:accent,borderColor:`${accent}44`,background:`${accent}16`}}>{item.done?'✓':i+1}</button>
+        <div className="plan-priority-main">
+          {editing===item.id?<input className="text-input" value={editText} onChange={e=>setEditText(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') saveEdit(item); if(e.key==='Escape') cancelEdit(); }} autoFocus />:<div className="plan-priority-text">{item.text||item.title}</div>}
+          <div className="plan-priority-tag">{item.goal||item.category||item.domain||'Priority'}</div>
+        </div>
+        <div className="plan-priority-actions">
+          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<><button type="button" onClick={()=>startEdit(item)}>Edit</button><button type="button" onClick={()=>remove(item)}>×</button></>}
+        </div>
+      </div>):<div className="empty">{kind==='daily'?'No Daily Top 3 set. Add the three things that win today.':'No Weekly Top 5 set. Add the five outcomes that define the week.'}</div>}
+    </div>
+    {active.length<max?<div className="plan-priority-add"><input className="text-input" value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={kind==='daily'?'Add Daily Top 3…':'Add Weekly Top 5…'} /><button type="button" className="primary-btn" style={{background:accent,color:'#091005'}} onClick={add}>Add</button></div>:null}
+  </div>;
+}
+function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOpenTasks}){
+  const [focusDraft,setFocusDraft]=useState(focus||'');
+  useEffect(()=>setFocusDraft(focus||''),[focus]);
+  const dailyOpen=(todos||[]).filter(x=>!x.done&&!x.archived).length;
+  const weeklyDone=(weekly||[]).filter(x=>x.done&&!x.archived).length;
+  return <section className="plan-section">
+    <div className="plan-section-head"><span className="plan-section-label">Priority Planner</span><button type="button" className="plan-link" onClick={onOpenTasks}>Pull from task queue ›</button></div>
+    <div className="glass card plan-priority-hero">
+      <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b><small>Edit the lists directly here. Everything else is support planning.</small></div><span className="plan-priority-progress">{dailyOpen}/3 today · {weeklyDone}/5 week</span></div>
+      <div className="plan-priority-grid">
+        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} />
+        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} />
+      </div>
+      <div className="plan-focus-inline"><input className="text-input" value={focusDraft} onChange={e=>setFocusDraft(e.target.value)} onBlur={()=>onFocus(focusDraft)} onKeyDown={e=>{ if(e.key==='Enter') e.currentTarget.blur(); }} placeholder="Weekly focus theme…" /><span>Weekly focus</span></div>
+    </div>
+  </section>;
+}
 function PlanScreen({navTarget,onNavigate,planExtras,setPlanExtras,todos,setTodos,weekly,setWeekly,tasks,setTasks,careerTasks,errands,setErrands,comms,setComms,habits,setHabits,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar,onConnectGoogleCalendar,onSyncGoogleCalendar,emailItems,emailStatus,emailMessage,emailAccount,emailLoading,onConnectGmail,onSyncGmail}){
   const [openPanels,setOpenPanels]=useState({horizons:false,calendar:false,tasks:false,routines:false,someday:false});
   const openPanel=id=>{ setOpenPanels(prev=>({...prev,[id]:true})); setTimeout(()=>document.querySelector(`[data-plan-panel="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}),30); };
@@ -2708,6 +2790,8 @@ function PlanScreen({navTarget,onNavigate,planExtras,setPlanExtras,todos,setTodo
     </header>
     <div className="plan-stack">
       <PlanConnectStrip calendarStatus={calendarStatus} calendarUrl={calendarUrl} calendarLoading={calendarLoading} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailStatus={emailStatus} emailItems={emailItems||[]} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} />
+      <PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} />
+      <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
       <div className="plan-system-stack">
         <div data-plan-panel="horizons"><PlanAccordion id="horizons" title="Planning Horizons" sub="Day, week, month, quarter, year" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Top 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly Top 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
         <div data-plan-panel="calendar"><PlanAccordion id="calendar" title="Calendar" sub={calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}><CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} /></PlanAccordion></div>
@@ -2715,8 +2799,6 @@ function PlanScreen({navTarget,onNavigate,planExtras,setPlanExtras,todos,setTodo
         <div data-plan-panel="routines"><PlanAccordion id="routines" title="Routines" sub="Daily and weekly checklists" icon="loop" count={routines.length} open={!!openPanels.routines} onToggle={()=>togglePanel('routines')}><PlanRoutines routines={routines} onChange={items=>patchEx({routines:items})} todos={todos} setTodos={setTodos} habits={habits||[]} setHabits={setHabits} /></PlanAccordion></div>
         <div data-plan-panel="someday"><PlanAccordion id="someday" title="Someday / Maybe" sub="Ideas parked for later" icon="star" count={someday.length} open={!!openPanels.someday} onToggle={()=>togglePanel('someday')}><PlanSimpleList items={someday} onChange={items=>patchEx({someday:items})} accent={C.warn} placeholder="Capture an idea for later…" empty="Nothing parked yet. Add ideas you want to revisit." /></PlanAccordion></div>
       </div>
-      <PlanThisWeek pct={weekPct} done={weekDone} total={weekTotal} focus={ex.focus} onFocus={v=>patchEx({focus:v})} openTaskCount={openTaskCount} weekEventCount={weekEventCount} />
-      <PlanWeeklyTop5 weekly={weekly} setWeekly={setWeekly} />
     </div>
   </div>;
 }
