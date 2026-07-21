@@ -55,6 +55,11 @@ _TYPE_MAP: dict[str, tuple[InstrumentType, Direction]] = {
     "short stock": (InstrumentType.STOCK, Direction.SHORT),
 }
 
+# Whitespace-folded lookup: "long call", "longcall", "Long  Call" all match.
+_TYPE_MAP_FOLDED: dict[str, tuple[InstrumentType, Direction]] = {
+    "".join(key.split()): value for key, value in _TYPE_MAP.items()
+}
+
 _STATUS_MAP: dict[str, TradeStatus] = {
     "open": TradeStatus.OPEN,
     "closed": TradeStatus.CLOSED,
@@ -212,12 +217,14 @@ def normalize_row(
             environment = TradeEnvironment.PAPER
             parse_sources["environment"] = ParseSource.TAGS
 
-    # Instrument classification from the `type` column.
+    # Instrument classification from the `type` column. Real Option Alpha
+    # exports use concatenated type tokens ("longcall"), so lookup folds
+    # whitespace: "long call" == "longcall" == "Long Call".
     type_text = values.clean_str(raw_row.get("type"))
     instrument_type, direction = InstrumentType.UNKNOWN, Direction.UNKNOWN
     asset_class = AssetClass.UNKNOWN
     if type_text is not None:
-        mapped = _TYPE_MAP.get(type_text.lower())
+        mapped = _TYPE_MAP_FOLDED.get("".join(type_text.lower().split()))
         if mapped is not None:
             instrument_type, direction = mapped
             asset_class = (

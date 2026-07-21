@@ -25,8 +25,10 @@ from decimal import Decimal
 
 from wolf_trading_os.domain import ParseSource, StrategyAttributes, TradeEnvironment
 
-# 0.50Δ / .5Δ / 0.50 delta / 50Δ / 50 delta
-_DELTA_DECIMAL = re.compile(r"(?<![\d.])(0?\.\d{1,3})\s*(?:Δ|∆|delta)\b", re.IGNORECASE)
+# 0.50Δ / .5Δ / 0.50 delta / 50Δ / 50 delta / .6 D (real-export notation).
+# The bare "D" suffix is accepted only for decimal-form values: integer
+# forms like "50 D" stay unparsed ("D" could mean days).
+_DELTA_DECIMAL = re.compile(r"(?<![\d.])(0?\.\d{1,3})\s*(?:Δ|∆|delta\b|D(?![\w]))", re.IGNORECASE)
 _DELTA_INT = re.compile(r"(?<![\d.])(\d{1,2})\s*(?:Δ|∆|delta)\b", re.IGNORECASE)
 _DTE = re.compile(r"(?<![\d.])(\d{1,3})\s*DTE\b", re.IGNORECASE)
 # 3x / x3 / 3 contracts
@@ -43,6 +45,7 @@ _ENV_MARKERS = re.compile(
     | \(\s*(?P<paren>live|paper)\s*\)       # (Live)
     | (?:^|\s)[-–—]\s*(?P<dash>live|paper)\b # - Live (hyphen/en/em dash)
     | (?:^|\s)(?P<colon>live|paper)\s*:      # Live:
+    | _(?P<uscore>live|paper)(?=$|[\s:(])    # Hulk_OG_Live: (trailing _Live token)
     """,
     re.IGNORECASE | re.VERBOSE,
 )
@@ -64,6 +67,10 @@ _TIMEFRAME = re.compile(
     r"(?<![\w])(" + "|".join(re.escape(t) for t in _TIMEFRAME_TOKENS) + r")(?![\w])",
     re.IGNORECASE,
 )
+# Real-export "N TF" tokens ("10 TF") are captured verbatim as "NTF".
+# Semantics (presumed minutes) are unconfirmed — the token is recorded,
+# never interpreted.
+_TIMEFRAME_TF = re.compile(r"(?<![\d.])(\d{1,3})\s*TF\b", re.IGNORECASE)
 
 # Leading run of alphabetic words = strategy family candidate, stopping at
 # config tokens. "live"/"paper" are NOT stopwords: brand words stay part
@@ -140,6 +147,7 @@ def parse_bot_name(bot_name: str | None) -> StrategyAttributes:
 
     # --- timeframe -----------------------------------------------------------
     timeframe_matches = [_TIMEFRAME_TOKENS[m.lower()] for m in _TIMEFRAME.findall(text)]
+    timeframe_matches += [f"{int(m)}TF" for m in _TIMEFRAME_TF.findall(text)]
     # "0DTE" is a strict specialization of "intraday", not a conflict
     # ("Scalper 0DTE ..."): keep the more specific token.
     if set(_distinct(timeframe_matches)) == {"intraday", "0DTE"}:

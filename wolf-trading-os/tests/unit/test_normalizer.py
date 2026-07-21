@@ -158,3 +158,34 @@ class TestTolerance:
         assert outcome.trade is not None
         assert outcome.trade.environment is TradeEnvironment.PAPER
         assert outcome.trade.parse_sources["environment"] is ParseSource.TAGS
+
+
+class TestRealExportTypeTokens:
+    """Concatenated `type` tokens from genuine exports ("longcall")."""
+
+    def test_longcall_maps_to_single_option(self) -> None:
+        row = {**VALID_ROW, "type": "longcall"}
+        outcome = normalize_row(row, 1)
+        assert outcome.accepted
+        assert outcome.trade is not None
+        assert outcome.trade.instrument_type is InstrumentType.SINGLE_OPTION
+        assert outcome.trade.direction is Direction.LONG
+        assert outcome.trade.asset_class is AssetClass.EQUITY_OPTION
+        assert not any("type" in w for w in outcome.warnings)
+
+    def test_ironcondor_and_spread_variants_fold(self) -> None:
+        for token, expected in [
+            ("ironcondor", InstrumentType.IRON_CONDOR),
+            ("IronButterfly", InstrumentType.IRON_BUTTERFLY),
+            ("putcreditspread", InstrumentType.VERTICAL_SPREAD),
+            ("Long  Call", InstrumentType.SINGLE_OPTION),
+        ]:
+            outcome = normalize_row({**VALID_ROW, "type": token}, 1)
+            assert outcome.trade is not None
+            assert outcome.trade.instrument_type is expected, token
+
+    def test_unknown_type_still_warns(self) -> None:
+        outcome = normalize_row({**VALID_ROW, "type": "quantumentanglement"}, 1)
+        assert outcome.trade is not None
+        assert outcome.trade.instrument_type is InstrumentType.OTHER
+        assert any("type" in w for w in outcome.warnings)

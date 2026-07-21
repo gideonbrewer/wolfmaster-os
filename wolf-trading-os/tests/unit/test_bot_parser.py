@@ -189,3 +189,45 @@ class TestFamilyAndVersion:
         assert attrs.strategy_family is None
         assert attrs.strategy_name is None
         assert attrs.parse_sources == {}
+
+
+class TestRealExportNotation:
+    """Format extensions confirmed against genuine Option Alpha exports."""
+
+    def test_decimal_d_delta_notation(self) -> None:
+        # "Hulk: 10 TF + 1 DTE + .5 D (1 contracts)" — real bot name.
+        attrs = parse_bot_name("Hulk: 10 TF + 1 DTE + .5 D (1 contracts)")
+        assert attrs.target_delta == Decimal("0.5")
+        assert attrs.dte_setting == 1
+        assert attrs.contract_count_setting == 1
+        assert attrs.timeframe == "10TF"
+
+    def test_decimal_d_variant_point_six(self) -> None:
+        attrs = parse_bot_name("Hulk_OG_Live: 10 TF + 1 DTE + .6 D (1 contracts)")
+        assert attrs.target_delta == Decimal("0.6")
+
+    def test_integer_d_not_interpreted_as_delta(self) -> None:
+        # "50 D" could mean 50 days — only decimal-form ".5 D" counts.
+        assert parse_bot_name("Theta 50 D strategy").target_delta is None
+
+    def test_trailing_underscore_live_marker(self) -> None:
+        attrs = parse_bot_name("Hulk_OG_Live: 10 TF + 1 DTE + .6 D (1 contracts)")
+        assert attrs.environment is TradeEnvironment.LIVE
+        assert attrs.strategy_family == "Hulk"
+
+    def test_trailing_underscore_paper_marker(self) -> None:
+        assert parse_bot_name("Hulk_OG_Paper: 1 DTE").environment is TradeEnvironment.PAPER
+
+    def test_leading_live_with_underscores_stays_unknown(self) -> None:
+        # "Live_Wire_Momentum": Live is not underscore-preceded/terminal.
+        attrs = parse_bot_name("Live_Wire_Momentum")
+        assert attrs.environment is TradeEnvironment.UNKNOWN
+
+    def test_tf_token_captured_verbatim(self) -> None:
+        attrs = parse_bot_name("Hulk: 10 TF + 1 DTE")
+        assert attrs.timeframe == "10TF"
+
+    def test_tf_conflicts_with_word_timeframe(self) -> None:
+        attrs = parse_bot_name("Swing bot 10 TF")
+        assert attrs.timeframe is None
+        assert any("timeframe" in w for w in attrs.warnings)
