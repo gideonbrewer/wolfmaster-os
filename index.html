@@ -2344,9 +2344,11 @@ function ExecutiveDashboard({executive,calendarEvents,onNavigate,compact=false})
 function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerTasks,errands,comms,build,reflect,onNavigate,drawer=false}){
   const [idx,setIdx]=useState(0);
   const [dismissed,setDismissed]=useState({});
+  const top3Key=title=>String(title||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const top3Keys=new Set((todos||[]).filter(t=>!t.done&&!t.archived).map(t=>top3Key(asTitle(t))));
   const cards=useMemo(()=>{
     const model=executiveDashboardModel(executive,calendarEvents);
-    const fromExec=model.active.slice(0,18).map(item=>({
+    const fromExec=model.active.filter(item=>!top3Keys.has(top3Key(item.title))).slice(0,18).map(item=>({
       id:item.id||item.identity||item.title,
       title:item.title,
       domain:item.domain||'WolfMaster',
@@ -2358,7 +2360,7 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
       score:item.rank?.score||scoreExecutiveItem(item).score
     }));
     if(fromExec.length) return fromExec;
-    const fallbackTasks=[...(todos||[]).filter(t=>!t.done).map((t,i)=>({id:`top3-${t.id}`,title:asTitle(t),domain:t.goal||'Daily Top 3',priority:i===0?'P1':'P2',nextAction:'Execute this before lower-priority inputs take over.',reason:'Ranked because it is in your Daily Top 3.',type:'task',source:'top3',score:90-i*5})),...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career'),...(errands||[]).filter(e=>!e.done).map(e=>({...e,domain:'Errands',kind:'Errand'}))].map((t,i)=>({
+    const fallbackTasks=[...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career'),...(errands||[]).filter(e=>!e.done).map(e=>({...e,domain:'Errands',kind:'Errand'}))].filter(t=>!top3Keys.has(top3Key(asTitle(t)))).map((t,i)=>({
       id:`task-${t.id||i}`,
       title:asTitle(t),
       domain:t.domain||t.goal||t.kind||'Task',
@@ -2380,7 +2382,7 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
       source:'signal',
       score:s.weight||50-i
     }));
-    return [...fallbackTasks,...signals].sort((a,b)=>b.score-a.score).slice(0,12);
+    return [...fallbackTasks,...signals].filter(c=>!top3Keys.has(top3Key(c.title))).sort((a,b)=>b.score-a.score).slice(0,12);
   },[JSON.stringify({executive,calendarEvents,todos,tasks,careerTasks,errands,comms,build,reflect})]);
   const visible=cards.filter(c=>!dismissed[c.id]);
   useEffect(()=>{ if(idx>=visible.length) setIdx(Math.max(0,visible.length-1)); },[idx,visible.length]);
@@ -2408,6 +2410,8 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
     return drawer?<NowDrawer eyebrow={<><Icon name="spark" size={13} /> Optional</>} eyebrowColor={C.accent} title="On Deck" summary="No candidates waiting." className="wm-optional-drawer">{empty}</NowDrawer>:<section className="glass card wm-priority-stack">{empty}</section>;
   }
   const priorityClass=String(card.priority||'P3').toLowerCase();
+  const cardInTop3=top3Keys.has(top3Key(card.title));
+  const top3Full=(todos||[]).filter(t=>!t.done&&!t.archived).length>=3&&!cardInTop3;
   const content=<>
     {!drawer?<div className="wm-stack-head"><div><div className="wm-stack-title"><Icon name="spark" size={13} /> On Deck</div><div className="meta">Candidates for what gets pulled in next.</div></div><div className="wm-stack-count">{idx+1} / {visible.length}</div></div>:null}
     <div className="wm-stack-stage">
@@ -2418,7 +2422,7 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
         <h3>{card.title}</h3>
         <div className="wm-stack-next"><span>Recommended next action</span><b>{card.nextAction}</b></div>
         <div className="wm-stack-reason"><Icon name="target" size={14} /><span>{card.reason}</span></div>
-        <div className="wm-stack-actions"><button type="button" className="primary-btn" onClick={addTop3}>Top 3</button><button type="button" className="ghost-btn" onClick={openArea}>Open</button><button type="button" className="ghost-btn" onClick={dismiss}>Skip</button></div>
+        <div className="wm-stack-actions"><button type="button" className={cardInTop3?'primary-btn':'ghost-btn'} disabled={cardInTop3||top3Full} onClick={addTop3} style={!cardInTop3?{borderColor:'rgba(147,242,10,.22)',color:top3Full?'var(--text-dim)':'var(--accent)',opacity:top3Full?.45:1}:null}>{cardInTop3?'In Top 3':top3Full?'Top 3 Full':'Add Top 3'}</button><button type="button" className="ghost-btn" onClick={openArea}>Open</button><button type="button" className="ghost-btn" onClick={dismiss}>Skip</button></div>
       </article>
     </div>
     <div className="wm-stack-nav"><button type="button" className="ghost-btn" onClick={()=>move(-1)}>← Prev</button><div className="wm-stack-dots">{visible.slice(0,8).map((c,i)=><i key={c.id} className={i===idx?'active':''}></i>)}</div><button type="button" className="ghost-btn" onClick={()=>move(1)}>Next →</button></div>
