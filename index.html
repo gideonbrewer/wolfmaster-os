@@ -2722,7 +2722,7 @@ function PlanAccordion({id,title,sub,icon,count,open,onToggle,children}){
     {open?<div className="plan-accordion-body">{children}</div>:null}
   </section>;
 }
-function PlanPriorityList({kind,items,setItems,max,accent}){
+function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,moveDisabledLabel}){
   const [draft,setDraft]=useState('');
   const [editing,setEditing]=useState(null);
   const [editText,setEditText]=useState('');
@@ -2748,7 +2748,7 @@ function PlanPriorityList({kind,items,setItems,max,accent}){
           <div className="plan-priority-tag">{item.goal||item.category||item.domain||'Priority'}</div>
         </div>
         <div className="plan-priority-actions">
-          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<><button type="button" onClick={()=>startEdit(item)}>Edit</button><button type="button" onClick={()=>remove(item)}>×</button></>}
+          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<>{onMoveItem&&!item.done?<button type="button" className="primary" onClick={()=>onMoveItem(item)}>{moveLabel}</button>:item.done&&moveDisabledLabel?<button type="button" disabled style={{opacity:.35}}>{moveDisabledLabel}</button>:null}<button type="button" onClick={()=>startEdit(item)}>Edit</button><button type="button" onClick={()=>remove(item)}>×</button></>}
         </div>
       </div>):<div className="empty">{kind==='daily'?'No Daily Top 3 set. Add the three things that win today.':'No Weekly Top 5 set. Add the five outcomes that define the week.'}</div>}
     </div>
@@ -2759,14 +2759,32 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
   const [focusDraft,setFocusDraft]=useState(focus||'');
   useEffect(()=>setFocusDraft(focus||''),[focus]);
   const dailyOpen=(todos||[]).filter(x=>!x.done&&!x.archived).length;
+  const weeklyOpen=(weekly||[]).filter(x=>!x.done&&!x.archived).length;
   const weeklyDone=(weekly||[]).filter(x=>x.done&&!x.archived).length;
+  const priorityKey=item=>String(item?.text||item?.title||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const moveToDaily=item=>{
+    const key=priorityKey(item);
+    const existing=(todos||[]).some(x=>!x.archived&&priorityKey(x)===key);
+    if(!existing&&dailyOpen>=3){ alert('Daily Top 3 is full. Complete or move one back first.'); return; }
+    setWeekly(prev=>(prev||[]).filter(x=>x.id!==item.id));
+    if(existing){ alert('Already in Daily Top 3. Removed the duplicate from Weekly Top 5.'); return; }
+    setTodos(prev=>[...(prev||[]),{...item,goal:item.goal||item.category||item.domain||'Today',done:false,archived:false,movedFrom:'weekly',movedAt:new Date().toISOString()}]);
+  };
+  const moveToWeekly=item=>{
+    const key=priorityKey(item);
+    const existing=(weekly||[]).some(x=>!x.archived&&priorityKey(x)===key);
+    if(!existing&&weeklyOpen>=5){ alert('Weekly Top 5 is full. Complete or remove one first.'); return; }
+    setTodos(prev=>(prev||[]).filter(x=>x.id!==item.id));
+    if(existing){ alert('Already in Weekly Top 5. Removed the duplicate from Daily Top 3.'); return; }
+    setWeekly(prev=>[...(prev||[]),{...item,goal:item.goal&&item.goal!=='Today'?item.goal:'Weekly Focus',done:false,archived:false,movedFrom:'daily',movedAt:new Date().toISOString()}]);
+  };
   return <section className="plan-section">
     <div className="plan-section-head"><span className="plan-section-label">Priority Planner</span><button type="button" className="plan-link" onClick={onOpenTasks}>Pull from task queue ›</button></div>
     <div className="glass card plan-priority-hero">
       <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b><small>Edit the lists directly here. Everything else is support planning.</small></div><span className="plan-priority-progress">{dailyOpen}/3 today · {weeklyDone}/5 week</span></div>
       <div className="plan-priority-grid">
-        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} />
-        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} />
+        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Back to Week" moveDisabledLabel="Done" />
+        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Move to Top 3" moveDisabledLabel="Done" />
       </div>
       <div className="plan-focus-inline"><input className="text-input" value={focusDraft} onChange={e=>setFocusDraft(e.target.value)} onBlur={()=>onFocus(focusDraft)} onKeyDown={e=>{ if(e.key==='Enter') e.currentTarget.blur(); }} placeholder="Weekly focus theme…" /><span>Weekly focus</span></div>
     </div>
