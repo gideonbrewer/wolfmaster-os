@@ -2259,7 +2259,7 @@ function momentumModel({habits,todos}){
     if(h.target) return `${parseFloat(h.current)||0}/${h.target}${h.unit?` ${h.unit}`:''}`;
     return h.done?'done':'not done';
   };
-  const habitRows=(habits||[]).filter(Boolean).map(h=>({label:habitLabel(h),icon:habitIcon(h),pct:habitPct(h),tracked:true,sub:habitSub(h),sourceId:h.id}));
+  const habitRows=(habits||[]).filter(Boolean).map(h=>({label:habitLabel(h),icon:habitIcon(h),pct:habitPct(h),tracked:true,sub:habitSub(h),sourceId:h.id,kind:h.type||'binary',done:!!h.done}));
   const top3=todos||[];
   const t3=top3.filter(t=>t.done).length, t3total=top3.length;
   const top3Row={label:'Daily Top 3',icon:'target',pct:t3total?(t3/t3total):null,tracked:t3total>0,sub:t3total?`${t3}/${t3total} today`:'not set'};
@@ -2573,14 +2573,14 @@ function NowMomentumStrip({habits,todos,setHabits}){
   const {rows,score,hasData,trackedCount}=momentumModel({habits,todos});
   const [open,setOpen]=useState(false);
   const topRows=[...rows].sort((a,b)=>(b.pct||0)-(a.pct||0)).slice(0,3);
-  const toggleHabit=id=>{ if(!setHabits||!id) return; setHabits((habits||[]).map(h=>{ if(h.id!==id) return h; const done=!h.done; const target=parseFloat(h.target)||1; return {...h,done,current:done?(h.type==='binary'?1:target):0,streak:done?(h.streak||0)+1:Math.max(0,(h.streak||0)-1),lastCompleted:done?todayStr():h.lastCompleted}; })); };
+  const toggleHabit=id=>{ if(!setHabits||!id) return; setHabits((habits||[]).map(h=>{ if(h.id!==id) return h; const done=!h.done; return {...h,done,current:done?1:0,streak:done?(h.streak||0)+1:Math.max(0,(h.streak||0)-1),lastCompleted:done?todayStr():h.lastCompleted}; })); };
   return <section className="glass card wm-panel wm-momentum wm-mo-strip">
     <div className="wm-mo-strip-head">
       <div className="wm-mo-strip-score"><span className="wm-panel-ico">📊</span><b>{score}</b><span className="wm-mo-strip-max">/100</span><span className="wm-mo-delta">{hasData?`${trackedCount} tracked`:'No data'}</span></div>
       <button type="button" className="ghost-btn wm-mo-toggle" aria-expanded={open} onClick={()=>setOpen(o=>!o)}>{open?'Hide habits ↑':'View habits ↓'}</button>
     </div>
     {!open?<div className="wm-mo-chips">{topRows.map((r,i)=><span className="wm-mo-chip" key={i}><b>{r.label}</b><small>{r.sub}</small></span>)}</div>:null}
-    {open?<div className="wm-mo-rows">{rows.map((r,i)=>{const pct=typeof r.pct==='number'?r.pct:0, clickable=!!(r.sourceId&&setHabits); const Tag=clickable?'button':'div'; return <Tag type={clickable?'button':undefined} className={`wm-mo-row ${r.tracked?'':'untracked'}`} key={i} onClick={clickable?()=>toggleHabit(r.sourceId):undefined} style={clickable?{width:'100%',border:'none',background:'transparent',padding:0,font:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}:null}><span className="wm-mo-label"><b>{r.label}</b></span><div className="wm-dots wm-mo-dots">{Array.from({length:8}).map((_,d)=><i key={d} className={d<Math.round(pct*8)?'on':''}></i>)}</div><small className="wm-mo-streak">{clickable?(pct>=1?'Tap to undo':'Tap to complete'):r.sub}</small></Tag>;})}</div>:null}
+    {open?<div className="wm-mo-rows">{rows.map((r,i)=>{const pct=typeof r.pct==='number'?r.pct:0, binary=r.kind==='binary', clickable=!!(r.sourceId&&setHabits&&binary); const Tag=clickable?'button':'div'; return <Tag type={clickable?'button':undefined} className={`wm-mo-row ${r.tracked?'':'untracked'}`} key={i} onClick={clickable?()=>toggleHabit(r.sourceId):undefined} style={clickable?{width:'100%',border:'none',background:'transparent',padding:0,font:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}:null}><span className="wm-mo-label"><b>{r.label}</b></span>{binary?<span style={{justifySelf:'start',display:'inline-flex',alignItems:'center',gap:7,padding:'6px 10px',borderRadius:999,border:`1px solid ${pct>=1?'rgba(147,242,10,.42)':'rgba(255,255,255,.12)'}`,background:pct>=1?'rgba(147,242,10,.14)':'rgba(255,255,255,.035)',color:pct>=1?'var(--accent)':'var(--text-mid)',fontSize:11,fontWeight:900}}><span>{pct>=1?'✓':'○'}</span>{pct>=1?'Done':'Open'}</span>:<div className="wm-dots wm-mo-dots">{Array.from({length:8}).map((_,d)=><i key={d} className={d<Math.round(pct*8)?'on':''}></i>)}</div>}<small className="wm-mo-streak">{clickable?(pct>=1?'Tap to undo':'Tap to complete'):r.sub}</small></Tag>;})}</div>:null}
   </section>;
 }
 function timelineSummary({calendarEvents,tasks,careerTasks}){
