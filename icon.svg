@@ -1,7 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0C0C0F"/>
-  <g transform="translate(106 116) scale(12.5)" fill="none" stroke="#93F20A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M4 18 9 6l3.2 6 2-4 5.8 10"/>
-    <path d="M4 18h16"/>
-  </g>
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="20%" r="78%">
+      <stop offset="0" stop-color="#93F20A"/>
+      <stop offset=".32" stop-color="#3E6E10"/>
+      <stop offset="1" stop-color="#070A08"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C8FF67"/>
+      <stop offset="1" stop-color="#5FB800"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#080B09"/>
+  <rect x="28" y="28" width="456" height="456" rx="92" fill="url(#glow)" opacity=".42"/>
+  <circle cx="256" cy="256" r="164" fill="none" stroke="#93F20A" stroke-width="10" opacity=".26"/>
+  <circle cx="256" cy="256" r="126" fill="#081008" opacity=".82"/>
+  <path d="M130 322 188 164 254 282 326 164 382 322" fill="none" stroke="url(#mark)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M154 322h204" stroke="#E8FFD3" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+  <circle cx="363" cy="137" r="20" fill="#93F20A"/>
 </svg>
