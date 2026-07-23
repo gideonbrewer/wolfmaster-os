@@ -1180,6 +1180,41 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;scroll-behavior:auto!important}
 }
 </style>
+<style id="wm-mobile-fixes-2026-07-23">
+@media (max-width:640px){
+  .main.v3{padding-bottom:calc(190px + var(--safe-bottom))!important}
+  .qc-fab{width:36px!important;height:36px!important;right:18px!important;bottom:calc(142px + var(--safe-bottom))!important;font-size:21px!important;opacity:.76!important;box-shadow:0 4px 15px rgba(147,242,10,.23)!important}
+  .qc-fab:active,.qc-fab:hover,.qc-fab:focus-visible{opacity:1!important;transform:scale(.96)!important}
+
+  .plan-priority-hero{padding:11px!important;border-radius:22px!important}
+  .plan-priority-top{align-items:flex-start!important;gap:8px!important}
+  .plan-priority-title b{font-size:15px!important;line-height:1.08!important}
+  .plan-priority-title small{font-size:10px!important;line-height:1.22!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .plan-priority-progress{font-size:9px!important;padding:6px 8px!important;white-space:nowrap!important}
+  .plan-priority-card{padding:9px!important;border-radius:18px!important}
+  .plan-priority-row{grid-template-columns:25px minmax(0,1fr) 104px!important;gap:7px!important;align-items:center!important;padding:7px!important;min-height:45px!important}
+  .plan-priority-text{font-size:11.5px!important;line-height:1.16!important;-webkit-line-clamp:2!important}
+  .plan-priority-tag{font-size:8.5px!important;letter-spacing:.02em!important}
+  .plan-priority-actions{display:grid!important;grid-template-columns:42px 31px 24px!important;gap:4px!important}
+  .plan-priority-actions button{width:100%!important;min-width:0!important;height:27px!important;padding:0 4px!important;border-radius:9px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .plan-priority-actions button.primary{font-size:9px!important}
+  .plan-priority-add{grid-template-columns:minmax(0,1fr) 60px!important}
+  .plan-focus-inline{grid-template-columns:1fr!important;gap:4px!important}
+
+  .domain-stack{display:grid!important;gap:10px!important}
+  .domain-card{padding:12px!important;border-radius:19px!important;background:linear-gradient(180deg,rgba(255,255,255,.033),rgba(255,255,255,.016))!important;border-color:rgba(255,255,255,.075)!important}
+  .domain-card>.row.between{align-items:center!important;gap:8px!important}
+  .domain-title{font-size:12px!important;letter-spacing:.02em!important;display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important}
+  .domain-dot{width:8px!important;height:8px!important;border-radius:999px!important;flex:0 0 auto!important}
+  .task-list{display:grid!important;gap:7px!important;margin-top:10px!important}
+  .task-row{display:grid!important;grid-template-columns:25px minmax(0,1fr)!important;gap:8px!important;align-items:flex-start!important;padding:10px!important;border:1px solid rgba(255,255,255,.065)!important;border-radius:15px!important;background:rgba(0,0,0,.12)!important}
+  .task-row .check{width:22px!important;height:22px!important;min-height:22px!important;margin-top:1px!important}
+  .task-title{font-size:12.5px!important;line-height:1.22!important;font-weight:750!important}
+  .task-meta{display:flex!important;gap:5px!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding-bottom:1px!important;scrollbar-width:none!important}
+  .task-meta::-webkit-scrollbar{display:none!important}
+  .task-meta .pill{flex:0 0 auto!important;font-size:9px!important;padding:5px 7px!important;min-height:25px!important;border-radius:999px!important;white-space:nowrap!important}
+}
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -1193,6 +1228,16 @@ const SUPABASE_URL = 'https://cgbyfooxstxinttfvwzq.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_dG_9EvJgTLiw95ByLGEkrA_XJSG1tbj';
 const DB_URL = `${SUPABASE_URL}/rest/v1`;
 const C = { bg:'#090A0E', bg2:'#0F1118', surface:'#121520', surface2:'#171B28', surface3:'#1C2231', border:'rgba(255,255,255,.08)', borderStrong:'rgba(255,255,255,.14)', text:'#F5F2EB', textMid:'#A8A3B8', textDim:'#6D6880', accent:'#93F20A', accentSoft:'rgba(147,242,10,.14)', good:'#4ADE80', warn:'#F59E0B', info:'#60A5FA', danger:'#FB7185', purple:'#A78BFA', teal:'#2DD4BF', pink:'#F472B6' };
+function domainFamilyColor(label){
+  const t=String(label||'').toLowerCase();
+  if(/family|marriage|erin|george|graham|frederick|boys|travel|birthday/.test(t)) return C.pink;
+  if(/finance|money|admin|administration|income|wealth|bank|tax|insurance|check|trading/.test(t)) return C.info;
+  if(/house|home|errand|driveway|fence|tv wall|court/.test(t)) return C.warn;
+  if(/wolflock|wolfmaster|build|auth|survey|product/.test(t)) return C.teal;
+  if(/purple|atlas|advisory|career|relationship|client|political|campaign|comms|stakeholder/.test(t)) return C.purple;
+  if(/health|fitness|workout|training|sleep|protein|habit|move/.test(t)) return C.good;
+  return C.accent;
+}
 const todayStr = () => new Date().toISOString().slice(0,10);
 const daysAgo = (n) => { const d=new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); };
 const weekStartStr = () => { const d = new Date(); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); const monday = new Date(d.setDate(diff)); return monday.toISOString().slice(0,10); };
@@ -2038,7 +2083,7 @@ function NowCommandPrompts({todos,setTodos,tasks,careerTasks,errands,comms,build
   return <section className="glass card wm-command-prompts"><div className="wm-command-head"><div className="wm-command-title"><Icon name="spark" size={13} /> Command Prompts</div><button type="button" className="wm-panel-link" onClick={()=>onNavigate&&onNavigate('plan')}>Plan</button></div><div className="wm-command-chips">{labels.map(([id,label])=><button type="button" key={id} className={`wm-command-chip ${prompt===id?'active':''}`} onClick={()=>setPrompt(id)}>{label}</button>)}</div><div className="wm-command-result">{rows.length?rows.map((r,i)=><div className="wm-command-row" key={`${prompt}-${i}-${asTitle(r)}`}><span className="wm-command-rank">{i+1}</span><div className="wm-command-copy"><b>{asTitle(r)}</b><span>{r.why||r.domain||'Recommended'}</span></div>{!r.locked&&r.source!=='top3'?<button type="button" className="wm-command-add" onClick={()=>promote(r)}>Top 3</button>:null}</div>):<div className="focus-time"><strong>No clear match</strong><div>Add or tag items in Plan, then this prompt will have better raw material.</div></div>}</div></section>;
 }
 const TOP3_TAG_COLORS=[C.purple,C.danger,C.accent,C.info,C.teal,C.warn,C.pink];
-function top3TagColor(label){ const s=String(label||''); let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return TOP3_TAG_COLORS[h%TOP3_TAG_COLORS.length]; }
+function top3TagColor(label){ return domainFamilyColor(label); }
 function top3Icon(label){ const t=String(label||'').toLowerCase(); if(/wolflock|auth|app|launch|build/.test(t)) return 'shield'; if(/atlas|purple|demo/.test(t)) return 'globe'; if(/belmont|hours|submit|report|doc/.test(t)) return 'doc'; if(/trade|market|portfolio|p&l/.test(t)) return 'trending'; if(/advisory|client|brewer/.test(t)) return 'handshake'; if(/family|erin|george|graham|frederick|blair/.test(t)) return 'heart'; return 'diamond'; }
 function NowTop3Cards({todos,setTodos,setCalendarEvents}){
   const patch=(id,fields)=>setTodos((todos||[]).map(t=>t.id===id?{...t,...fields}:t));
@@ -2270,7 +2315,7 @@ function momentumModel({habits,todos}){
     if(!h) return 'not tracked';
     if(h.streak) return `${h.streak} day streak`;
     if(h.target) return `${parseFloat(h.current)||0}/${h.target}${h.unit?` ${h.unit}`:''}`;
-    return h.done?'done':'not done';
+    return h.done?'done':'incomplete';
   };
   const habitRows=(habits||[]).filter(Boolean).map(h=>({label:habitLabel(h),icon:habitIcon(h),pct:habitPct(h),tracked:true,sub:habitSub(h),sourceId:h.id,kind:h.type||'binary',done:!!h.done}));
   const top3=todos||[];
@@ -2769,7 +2814,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
         <button type="button" className="plan-priority-num" onClick={()=>patch(item.id,{done:!item.done})} style={item.done?{background:accent,borderColor:accent,color:'#091005'}:{color:accent,borderColor:`${accent}44`,background:`${accent}16`}}>{item.done?'✓':i+1}</button>
         <div className="plan-priority-main">
           {editing===item.id?<input className="text-input" value={editText} onChange={e=>setEditText(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') saveEdit(item); if(e.key==='Escape') cancelEdit(); }} autoFocus />:<div className="plan-priority-text">{item.text||item.title}</div>}
-          <div className="plan-priority-tag">{item.goal||item.category||item.domain||'Priority'}</div>
+          <div className="plan-priority-tag" style={{color:domainFamilyColor(item.goal||item.category||item.domain||'Priority')}}>{item.goal||item.category||item.domain||'Priority'}</div>
         </div>
         <div className="plan-priority-actions">
           {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<>{onMoveItem&&!item.done?<button type="button" className="primary" onClick={()=>onMoveItem(item)}>{moveLabel}</button>:item.done&&moveDisabledLabel?<button type="button" disabled style={{opacity:.35}}>{moveDisabledLabel}</button>:null}<button type="button" onClick={()=>startEdit(item)}>Edit</button><button type="button" onClick={()=>remove(item)}>×</button></>}
@@ -2807,8 +2852,8 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
     <div className="glass card plan-priority-hero">
       <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b><small>Edit the lists directly here. Everything else is support planning.</small></div><span className="plan-priority-progress">{dailyOpen}/3 today · {weeklyDone}/5 week</span></div>
       <div className="plan-priority-grid">
-        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Back to Week" moveDisabledLabel="Done" />
-        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Move to Top 3" moveDisabledLabel="Done" />
+        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Week" moveDisabledLabel="Done" />
+        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Top 3" moveDisabledLabel="Done" />
       </div>
       <div className="plan-focus-inline"><input className="text-input" value={focusDraft} onChange={e=>setFocusDraft(e.target.value)} onBlur={()=>onFocus(focusDraft)} onKeyDown={e=>{ if(e.key==='Enter') e.currentTarget.blur(); }} placeholder="Weekly focus theme…" /><span>Weekly focus</span></div>
     </div>
@@ -3417,11 +3462,11 @@ function DomainTasksView({title,domains,setDomains,errands,setErrands,comms,setC
   const top3OpenCount=(top3Items||[]).filter(t=>!t.done&&!t.archived).length;
   const top5OpenCount=(top5Items||[]).filter(t=>!t.done&&!t.archived).length;
   return <section className="glass card"><div className="section-head"><div><div className="section-title">{title}</div><div className="meta">{showCompleted?'Showing completed items':'Completed items hidden'}{totalCompleted?` · ${totalCompleted} completed`:''}</div></div><button className={`pill ${showCompleted?'active':''}`} onClick={()=>setShowCompleted(v=>!v)}>{showCompleted?'Hide completed':'Show completed'}</button></div><div className="domain-stack">
-    {errands&&errands.length>0&&<div className="domain-card"><div className="row between"><div className="domain-title"><span className="domain-dot" style={{background:C.warn}}></span>Errands</div>{completedErrands>0&&<span className="badge">{visibleErrands.length}/{errands.length}</span>}</div><div className="task-list">{visibleErrands.length?visibleErrands.map(e=><div key={e.id} className={`task-row ${e.done?'done':''}`}><label className="check"><input type="checkbox" checked={e.done} onChange={()=>toggleErrand(e.id)}/><span></span></label><div className="task-main"><div className="task-title">{e.text}</div><div className="task-meta"><span className="pill">{e.category||'Errand'}</span><button className="pill" onClick={()=>editErrand(e)}>Edit</button><button className="pill" onClick={()=>deleteErrand(e)}>Delete</button>{promoteErrandTop3&&!e.done&&<button className="pill" style={{cursor:top3OpenCount>=3?'not-allowed':'pointer',opacity:top3OpenCount>=3 ? .3 : .9,fontWeight:top3OpenCount<3?700:400}} onClick={()=>{if(top3OpenCount<3)promoteErrandTop3({...e,title:e.text,domain:e.category||'Errand'})}} title={top3OpenCount>=3?"Top 3 full":"Move to Top 3"}>Top 3</button>}{promoteErrandTop5&&!e.done&&<button className="pill" style={{cursor:top5OpenCount>=5?'not-allowed':'pointer',opacity:top5OpenCount>=5 ? .3 : .9,fontWeight:top5OpenCount<5?700:400}} onClick={()=>{if(top5OpenCount<5)promoteErrandTop5({...e,title:e.text,domain:e.category||'Errand'})}} title={top5OpenCount>=5?"Weekly Top 5 full":"Move to Weekly Top 5"}>Week</button>}</div></div></div>):<div className="empty-inline">{completedErrands?'Only completed errands hidden.':'No errands yet.'}</div>}</div></div>}
+    {errands&&errands.length>0&&<div className="domain-card"><div className="row between"><div className="domain-title"><span className="domain-dot" style={{background:C.warn}}></span>Errands</div>{completedErrands>0&&<span className="badge">{visibleErrands.length}/{errands.length}</span>}</div><div className="task-list">{visibleErrands.length?visibleErrands.map(e=><div key={e.id} className={`task-row ${e.done?'done':''}`}><label className="check"><input type="checkbox" checked={e.done} onChange={()=>toggleErrand(e.id)}/><span></span></label><div className="task-main"><div className="task-title">{e.text}</div><div className="task-meta"><span className="pill" style={{color:domainFamilyColor(e.category||'Errand')}}>{e.category||'Errand'}</span><button className="pill" onClick={()=>editErrand(e)}>Edit</button><button className="pill" onClick={()=>deleteErrand(e)}>Delete</button>{promoteErrandTop3&&!e.done&&<button className="pill" style={{cursor:top3OpenCount>=3?'not-allowed':'pointer',opacity:top3OpenCount>=3 ? .3 : .9,fontWeight:top3OpenCount<3?700:400}} onClick={()=>{if(top3OpenCount<3)promoteErrandTop3({...e,title:e.text,domain:e.category||'Errand'})}} title={top3OpenCount>=3?"Top 3 full":"Promote to Top 3"}>Top 3</button>}{promoteErrandTop5&&!e.done&&<button className="pill" style={{cursor:top5OpenCount>=5?'not-allowed':'pointer',opacity:top5OpenCount>=5 ? .3 : .9,fontWeight:top5OpenCount<5?700:400}} onClick={()=>{if(top5OpenCount<5)promoteErrandTop5({...e,title:e.text,domain:e.category||'Errand'})}} title={top5OpenCount>=5?"Weekly Top 5 full":"Move to Weekly Top 5"}>Week</button>}</div></div></div>):<div className="empty-inline">{completedErrands?'Only completed errands hidden.':'No errands yet.'}</div>}</div></div>}
     {comms&&comms.length>0&&<div className="domain-card comms-workflow"><div className="row between"><div className="domain-title"><span className="domain-dot" style={{background:C.info}}></span>Comms</div><div className="meta">Phase board · methods separate</div></div><CommsBoard comms={comms} setComms={setComms} compact /></div>}
     {domains.map(domain=>{ const visibleTasks=(domain.tasks||[]).filter(task=>showCompleted||!task.done); return <div key={domain.id} className="domain-card" style={{borderLeft:`3px solid ${domain.color}`,paddingLeft:'14px'}}><div className="row between"><div style={{display:'flex',alignItems:'center',gap:'8px'}}><div className="domain-title" style={{color:domain.color,fontWeight:600}}><span className="domain-dot" style={{background:domain.color}}></span>{domain.label}</div>{domain.tasks.length>0&&<span style={{fontSize:'11px',fontWeight:700,color:domain.tasks.every(t=>t.done)?domain.color:'var(--text-dim)',background:domain.tasks.every(t=>t.done)?`${domain.color}18`:'rgba(255,255,255,.04)',border:`1px solid ${domain.tasks.every(t=>t.done)?`${domain.color}40`:'rgba(255,255,255,.08)'}`,borderRadius:'999px',padding:'2px 7px',transition:'all .3s'}}>{domain.tasks.filter(t=>t.done).length}/{domain.tasks.length}</span>}</div><button className="ghost-btn small" onClick={()=>addTask(domain.id)}>+ Task</button></div>
       {adding===domain.id&&<div className="row wrap" style={{marginBottom:'8px',gap:'6px'}}><input className="text-input" style={{flex:1}} autoFocus value={newTitle} onChange={e=>setNewTitle(e.target.value)} onKeyDown={e=>e.key==='Enter'&&confirmAdd(domain.id)} placeholder="Task name" /><input className="text-input" style={{width:'140px'}} type="date" value={newDue} onChange={e=>setNewDue(e.target.value)} /><button className="primary-btn" onClick={()=>confirmAdd(domain.id)}>Add</button><button className="ghost-btn" onClick={()=>setAdding(null)}>✕</button></div>}
-      <div className="task-list">{visibleTasks.map(task=><div key={task.id} className={`task-row ${task.done?'done':''}`}><label className="check"><input type="checkbox" checked={task.done} onChange={e=>patchTask(domain.id,task.id,{done:e.target.checked})}/><span></span></label><div className="task-main"><div className="task-title">{task.title}</div><div className="task-meta"><button className={`pill priority ${task.priority||'soon'}`} onClick={()=>patchTask(domain.id,task.id,{priority:cyclePriority(task.priority||'soon')})}>{(task.priority||'soon').toUpperCase()}</button><button className="pill due" onClick={()=>{ const d=prompt('Due date YYYY-MM-DD', task.dueDate||'')||''; patchTask(domain.id,task.id,{dueDate:d}); }}>{fmtDue(task.dueDate)}</button><button className="pill" onClick={()=>editTask(domain.id,task)}>Edit</button><button className="pill" onClick={()=>deleteTask(domain.id,task)}>Delete</button>{promoteTop3&&!task.done&&<button className="pill" style={{cursor:top3OpenCount>=3?'not-allowed':'pointer',opacity:top3OpenCount>=3 ? .3 : .9,fontWeight:top3OpenCount<3?700:400}} onClick={()=>{if(top3OpenCount<3)promoteTop3({...task,domainId:domain.id,domain:domain.label})}} title={top3OpenCount>=3?"Top 3 full":"Move to Top 3"}>Top 3</button>}{promoteTop5&&!task.done&&<button className="pill" style={{cursor:top5OpenCount>=5?'not-allowed':'pointer',opacity:top5OpenCount>=5 ? .3 : .9,fontWeight:top5OpenCount<5?700:400}} onClick={()=>{if(top5OpenCount<5)promoteTop5({...task,domainId:domain.id,domain:domain.label})}} title={top5OpenCount>=5?"Weekly Top 5 full":"Move to Weekly Top 5"}>Week</button>}</div></div></div>)}{visibleTasks.length===0&&adding!==domain.id&&<div className="empty-inline">{domain.tasks.some(t=>t.done)?'Completed tasks hidden.':'No tasks yet.'}</div>}</div></div>; })}
+      <div className="task-list">{visibleTasks.map(task=><div key={task.id} className={`task-row ${task.done?'done':''}`}><label className="check"><input type="checkbox" checked={task.done} onChange={e=>patchTask(domain.id,task.id,{done:e.target.checked})}/><span></span></label><div className="task-main"><div className="task-title">{task.title}</div><div className="task-meta"><button className={`pill priority ${task.priority||'soon'}`} onClick={()=>patchTask(domain.id,task.id,{priority:cyclePriority(task.priority||'soon')})}>{(task.priority||'soon').toUpperCase()}</button><button className="pill due" onClick={()=>{ const d=prompt('Due date YYYY-MM-DD', task.dueDate||'')||''; patchTask(domain.id,task.id,{dueDate:d}); }}>{fmtDue(task.dueDate)}</button><button className="pill" onClick={()=>editTask(domain.id,task)}>Edit</button><button className="pill" onClick={()=>deleteTask(domain.id,task)}>Delete</button>{promoteTop3&&!task.done&&<button className="pill" style={{cursor:top3OpenCount>=3?'not-allowed':'pointer',opacity:top3OpenCount>=3 ? .3 : .9,fontWeight:top3OpenCount<3?700:400}} onClick={()=>{if(top3OpenCount<3)promoteTop3({...task,domainId:domain.id,domain:domain.label})}} title={top3OpenCount>=3?"Top 3 full":"Promote to Top 3"}>Top 3</button>}{promoteTop5&&!task.done&&<button className="pill" style={{cursor:top5OpenCount>=5?'not-allowed':'pointer',opacity:top5OpenCount>=5 ? .3 : .9,fontWeight:top5OpenCount<5?700:400}} onClick={()=>{if(top5OpenCount<5)promoteTop5({...task,domainId:domain.id,domain:domain.label})}} title={top5OpenCount>=5?"Weekly Top 5 full":"Move to Weekly Top 5"}>Week</button>}</div></div></div>)}{visibleTasks.length===0&&adding!==domain.id&&<div className="empty-inline">{domain.tasks.some(t=>t.done)?'Completed tasks hidden.':'No tasks yet.'}</div>}</div></div>; })}
   </div></section>;
 }
 
