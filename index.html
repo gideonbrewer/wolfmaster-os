@@ -1367,6 +1367,12 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     .wm-date-pill input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
     .plan-focus-inline.compact{justify-content:flex-start}
     .plan-focus-inline.compact span{color:var(--text-mid);font-size:12px;letter-spacing:.04em;text-transform:none}
+    .plan-accordion-body,.plan-accordion-body .plan-section,.horizon-editor{min-width:0;max-width:100%;overflow:hidden}
+    .horizon-editor .row.between{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px}
+    .horizon-editor .cc-icon-btn{width:auto!important;min-width:72px!important;max-width:90px!important;min-height:36px;padding:8px 12px;white-space:nowrap}
+    .horizon-editor .text-input,.horizon-editor .text-area{min-width:0;max-width:100%}
+    .horizon-editor .empty{white-space:normal;overflow-wrap:anywhere;text-align:left}
+    @media (max-width:640px){.horizon-strip.compact{max-width:100%;overflow-x:auto}.horizon-strip.compact .horizon-card{flex-basis:132px}.horizon-editor{width:100%;padding:12px!important}.horizon-editor .label-line{font-size:10px;letter-spacing:.16em}.horizon-action-add{grid-template-columns:1fr!important}.horizon-action-add .primary-btn{width:100%!important;max-width:100%!important}}
 </style>
 </head>
 <body>
