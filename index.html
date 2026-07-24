@@ -2796,10 +2796,10 @@ function NowNextOptions({executive,calendarEvents,todos,setTodos,tasks,careerTas
 }
 function LifeClock(){
   const target=useMemo(()=>new Date(2069,6,26,0,0,0),[]);
-  const calc=()=>{ const ms=Math.max(0,target.getTime()-Date.now()); const totalMinutes=Math.floor(ms/60000); return {days:Math.floor(totalMinutes/1440),hours:Math.floor((totalMinutes%1440)/60),minutes:totalMinutes%60}; };
+  const calc=()=>{ const ms=Math.max(0,target.getTime()-Date.now()); const totalSeconds=Math.floor(ms/1000); return {days:Math.floor(totalSeconds/86400),hours:Math.floor((totalSeconds%86400)/3600),minutes:Math.floor((totalSeconds%3600)/60),seconds:totalSeconds%60}; };
   const [left,setLeft]=useState(calc);
-  useEffect(()=>{ const id=setInterval(()=>setLeft(calc()),30000); return ()=>clearInterval(id); },[]);
-  return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m</em></div></section>;
+  useEffect(()=>{ const id=setInterval(()=>setLeft(calc()),1000); return ()=>clearInterval(id); },[]);
+  return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m {String(left.seconds).padStart(2,'0')}s</em></div></section>;
 }
 function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,setHabits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact">
