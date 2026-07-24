@@ -1360,8 +1360,9 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     .wm-life-count strong{font-size:24px;line-height:1;color:var(--text);letter-spacing:-.04em}
     .wm-life-count span{font-size:11px;color:var(--text-mid);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
     .wm-life-count em{font-style:normal;font-size:12px;color:var(--accent);font-weight:900}
+    .wm-life-seconds{display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:3px 6px;border-radius:999px;background:rgba(147,242,10,.12);border:1px solid rgba(147,242,10,.28);color:var(--accent);font-size:12px;font-weight:950;font-variant-numeric:tabular-nums}
     html[data-theme="light"] .wm-life-clock{background:radial-gradient(120% 160% at 100% 0%,rgba(104,201,0,.12),transparent 48%),linear-gradient(180deg,#FFFFFF,#F8FAF5)!important;border-color:rgba(104,201,0,.28)!important;box-shadow:0 9px 22px rgba(37,51,30,.08)!important}
-    @media (max-width:640px){.wm-life-clock{padding:9px 11px;border-radius:16px}.wm-life-title{font-size:10px}.wm-life-kicker{font-size:8px}.wm-life-count strong{font-size:20px}.wm-life-count span{font-size:9px}.wm-life-count em{font-size:10px}}
+    @media (max-width:640px){.wm-life-clock{padding:9px 11px;border-radius:16px}.wm-life-title{font-size:10px}.wm-life-kicker{font-size:8px}.wm-life-count{gap:4px}.wm-life-count strong{font-size:20px}.wm-life-count span{font-size:9px}.wm-life-count em{font-size:10px}.wm-life-seconds{min-width:27px;padding:2px 5px;font-size:10px}}
     .wm-date-pill{position:relative;display:inline-flex;align-items:center;gap:6px;overflow:hidden}
     .wm-date-pill input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
     .plan-focus-inline.compact{justify-content:flex-start}
@@ -2799,7 +2800,7 @@ function LifeClock(){
   const calc=()=>{ const ms=Math.max(0,target.getTime()-Date.now()); const totalSeconds=Math.floor(ms/1000); return {days:Math.floor(totalSeconds/86400),hours:Math.floor((totalSeconds%86400)/3600),minutes:Math.floor((totalSeconds%3600)/60),seconds:totalSeconds%60}; };
   const [left,setLeft]=useState(calc);
   useEffect(()=>{ const id=setInterval(()=>setLeft(calc()),1000); return ()=>clearInterval(id); },[]);
-  return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m {String(left.seconds).padStart(2,'0')}s</em></div></section>;
+  return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m</em><b className="wm-life-seconds">{String(left.seconds).padStart(2,'0')}s</b></div></section>;
 }
 function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,setHabits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact">
