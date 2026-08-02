@@ -1827,6 +1827,136 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     border-color:rgba(28,43,22,.12)!important;
   }
 </style>
+<style id="wm-timeblock-suggestions-2026-08-02">
+  .wm-now-compact .wm-timeline-panel,
+  .wm-now-compact .wm-attention{
+    min-height:142px!important;
+  }
+  .wm-now-compact .wm-timeline-panel .wm-tl-row,
+  .wm-now-compact .wm-timeline-panel .wm-tl-row.open{
+    min-height:60px!important;
+    flex-basis:104px!important;
+    padding:7px!important;
+  }
+  .wm-now-compact .wm-timeline-panel .wm-tl-row.open{
+    flex-basis:122px!important;
+  }
+  .wm-now-compact .wm-timeline-panel .wm-tl-title{
+    -webkit-line-clamp:2!important;
+  }
+  .wm-now-compact .wm-open-focus-cta{
+    min-height:50px!important;
+    margin-top:7px!important;
+  }
+  .wm-now-compact .wm-attn-row2{
+    padding:5px 0!important;
+  }
+  .wm-now-compact .wm-signals-more{
+    min-height:32px!important;
+    margin-top:8px!important;
+    font-size:10px!important;
+  }
+  .wm-focus-suggest{
+    display:grid;
+    gap:7px;
+    padding:8px;
+    border-radius:13px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.026);
+  }
+  .wm-focus-suggest-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    color:var(--text-mid);
+  }
+  .wm-focus-suggest-head b{
+    color:var(--text);
+    font-size:11px;
+  }
+  .wm-focus-suggest-head span{
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-weight:900;
+  }
+  .wm-focus-suggest-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    padding:7px 0;
+    border-top:1px solid rgba(255,255,255,.055);
+  }
+  .wm-focus-suggest-row b{
+    display:block;
+    font-size:11px;
+    line-height:1.18;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .wm-focus-suggest-row small{
+    display:block;
+    margin-top:2px;
+    color:var(--text-mid);
+    font-size:9.5px;
+  }
+  .wm-focus-yn{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4px;
+  }
+  .wm-focus-yn button{
+    min-height:27px;
+    padding:5px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.035);
+    color:var(--text-mid);
+    font-size:9.5px;
+    font-weight:900;
+  }
+  .wm-focus-yn button.active{
+    border-color:rgba(147,242,10,.38);
+    background:rgba(147,242,10,.14);
+    color:var(--accent);
+  }
+  .wm-focus-yn button.no.active{
+    border-color:rgba(255,255,255,.14);
+    background:rgba(255,255,255,.07);
+    color:var(--text);
+  }
+  html[data-theme="light"] .wm-focus-suggest{
+    background:#fff!important;
+    border-color:rgba(28,43,22,.13)!important;
+  }
+  html[data-theme="light"] .wm-focus-suggest-row{
+    border-color:rgba(28,43,22,.10)!important;
+  }
+  html[data-theme="light"] .wm-focus-yn button{
+    background:#F8FAF5!important;
+    border-color:rgba(28,43,22,.13)!important;
+  }
+  html[data-theme="light"] .wm-focus-yn button.active{
+    background:#ECFFD8!important;
+    border-color:rgba(104,201,0,.35)!important;
+  }
+  @media (max-width:640px){
+    .wm-now-compact .wm-timeline-panel,
+    .wm-now-compact .wm-attention{
+      min-height:136px!important;
+    }
+    .wm-focus-suggest-row{
+      gap:6px;
+    }
+    .wm-focus-yn button{
+      min-height:26px;
+      padding:5px 7px;
+    }
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -2926,6 +3056,7 @@ function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,
   const dotColors=[C.info,C.accent,C.warn,C.purple,C.teal,C.pink];
   const [planner,setPlanner]=useState(null);
   const [draft,setDraft]=useState({start:'',duration:'30',title:'Focus Block'});
+  const [focusChoices,setFocusChoices]=useState({});
   const taskEvents=[...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career')].filter(taskDueToday).slice(0,3).map(t=>({time:t.time||'Today',title:asTitle(t),length:t.kind||''}));
   const todayEvents=(calendarEvents||[]).filter(e=>!e.date||String(e.date).slice(0,10)===todayStr()||e.day==='Today');
   const toMins=t=>{ const raw=String(t||'').trim(); const match=raw.match(/^(\d{1,2}):(\d{2})$/); if(match) return Number(match[1])*60+Number(match[2]); const casual=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i); if(!casual) return null; let h=Number(casual[1]); const m=Number(casual[2]||0); const ap=casual[3].toLowerCase(); if(ap==='pm'&&h<12) h+=12; if(ap==='am'&&h===12) h=0; return h*60+m; };
@@ -2941,10 +3072,8 @@ function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,
   const calEvents=todayEvents.map(e=>{ const start=toMins(e.rawTime||e.time); const duration=eventDuration(e); const priority=calendarEventPriority(e); return {id:e.id,time:e.time||'All day',title:e.title||e.text||'Calendar item',length:e.note||'',start:start??9999,past:start!==null&&start+duration<=nowM,priority,source:e.source,kind:e.kind,createdAt:e.createdAt}; });
   const firstTop3=(todos||[]).find(t=>!t.done);
   const focusTitleOptions=[firstTop3?asTitle(firstTop3):null,'Deep Work','Email Block','Money/Admin Block','Calls Block','House Sprint','Workout'].filter(Boolean);
-  const openPlanner=block=>{ const start=Math.max(block.start,nowM); const duration=[30,45,60,120].find(m=>m<=block.end-start)||Math.max(15,block.end-start); setPlanner(block); setDraft({start:String(start),duration:String(duration),title:focusTitleOptions[0]||'Focus Block'}); setTimeout(()=>document.querySelector('.wm-focus-planner')?.scrollIntoView({behavior:'smooth',block:'nearest'}),40); };
   const makeStartOptions=block=>{ if(!block) return []; const first=Math.max(block.start,nowM); const opts=[first]; for(let m=Math.ceil(first/30)*30;m<=block.end-15;m+=30){ if(!opts.includes(m)) opts.push(m); } return opts.slice(0,10); };
   const makeDurationOptions=(block,start)=>[30,45,60,120].filter(m=>block&&m<=block.end-start);
-  const createFocusBlock=()=>{ if(!planner||!setCalendarEvents) return; const start=Number(draft.start)||Math.max(planner.start,nowM); const durationOptions=makeDurationOptions(planner,start); const minutes=Number(draft.duration)||durationOptions[0]||30; const title=draft.title||'Focus Block'; setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:todayStr(),time:`${String(Math.floor(start/60)).padStart(2,'0')}:${String(start%60).padStart(2,'0')}`,title,note:`${minutes}m`,source:'manual',kind:'execution-block',createdAt:new Date().toISOString()}])); notify('Focus block added to calendar'); setPlanner(null); };
   // Seeded preview so the card resembles the mockup when no real schedule exists.
   const SEED_TL=[{time:'9:00 AM',title:'Belmont Meeting',length:'60m'},{time:'11:00 AM',title:'Deep Work Block',length:'90m'},{time:'12:30 PM',title:'Lunch',length:'60m'},{time:'3:00 PM',title:'Purple Atlas Demo',length:'45m'},{time:'7:00 PM',title:'George Training',length:'90m'}];
   const latestManualBlock=calEvents.filter(e=>e.kind==='execution-block').sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0];
@@ -2954,10 +3083,26 @@ function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,
   const seeded=!real.length;
   const totalOpen=openBlocks.reduce((sum,b)=>sum+(b.end-b.start),0);
   const primaryOpen=openBlocks[0];
-  const shownItems=items.slice(0,primaryOpen?4:5);
+  const shownItems=items.slice(0,primaryOpen?3:4);
   const startOptions=makeStartOptions(planner);
   const durationOptions=makeDurationOptions(planner,Number(draft.start)||0);
-  const inner=<><div className="wm-tl-wrap"><div className="wm-tl">{shownItems.map((e,i)=>{ const content=<><span className="wm-tl-dot" style={{background:e.open?'transparent':dotColors[i%dotColors.length],boxShadow:e.open?'none':`0 0 10px ${dotColors[i%dotColors.length]}55`}}></span><span className="wm-tl-time">{e.time}</span><b className="wm-tl-title">{e.title}</b>{e.priority?<small className={`wm-cal-priority ${e.priority.level}`}>{e.priority.label}</small>:e.length?<small className="wm-tl-len">{e.length}</small>:null}</>; return e.open?<button type="button" className="wm-tl-row open" key={i} onClick={()=>openPlanner(e)} title="Add focus block to calendar">{content}</button>:<div className={`wm-tl-row ${e.past?'past':''}`} key={i}>{content}</div>; })}</div>{shownItems.length>1?<div className="wm-swipe-cue">Swipe events →</div>:null}</div>{primaryOpen?<button type="button" className="wm-open-focus-cta compact" onClick={()=>openPlanner(primaryOpen)}><span><b>{planner?'Time block options':'Create time block'}</b><span>{primaryOpen.time} available</span></span><strong>{primaryOpen.length}</strong></button>:null}{planner?<div className="wm-focus-planner"><div className="wm-focus-grid"><div className="wm-focus-field"><label>Start</label><select value={draft.start} onChange={e=>setDraft({...draft,start:e.target.value,duration:String((makeDurationOptions(planner,Number(e.target.value))[0]||15))})}>{startOptions.map(m=><option key={m} value={m}>{m<=nowM+5?'Now':fmtMins(m)}</option>)}</select></div><div className="wm-focus-field"><label>Length</label><select value={draft.duration} onChange={e=>setDraft({...draft,duration:e.target.value})}>{durationOptions.map(m=><option key={m} value={m}>{durLabel(m)}</option>)}</select></div><div className="wm-focus-field"><label>Block</label><select value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}>{focusTitleOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></div><div className="wm-focus-actions"><button type="button" className="primary-btn" onClick={createFocusBlock}>Create Block</button><button type="button" className="ghost-btn" onClick={()=>setPlanner(null)}>Cancel</button></div></div>:null}<div className="wm-tl-foot"><span>{seeded?'Preview schedule':`${calEvents.length+taskEvents.length} scheduled`}</span><span className="wm-tl-open">{totalOpen?`${durLabel(totalOpen)} open`:'No open blocks'}</span></div></>;
+  const focusCandidates=useMemo(()=>{
+    const rows=[];
+    const push=(item,source,score)=>{
+      const title=asTitle(item).trim();
+      if(!title) return;
+      rows.push({id:`${source}-${item.id||title}`,title,source,score,minutes:Number(item.estimatedMinutes)||(/call|email|text|reply|send/i.test(title)?15:30),meta:item.goal||item.domain||item.kind||source});
+    };
+    (todos||[]).filter(t=>!t.done&&!t.archived).slice(0,3).forEach((t,i)=>push(t,'Top 3',100-i*10));
+    [...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career')].filter(t=>!t.done).forEach(t=>push(t,t.kind||'Task',(taskDueToday(t)?78:0)+(taskIsOverdue(t)?22:0)+(String(t.priority||'').toLowerCase()==='now'?18:0)));
+    (errands||[]).filter(e=>!e.done).forEach(e=>push(e,'Errand',(taskDueToday(e)?62:34)));
+    (comms||[]).filter(c=>['Sent','Follow-up','Follow Up'].includes(c.phase)).forEach(c=>push({id:c.id,title:c.title||`${c.contact||'Contact'} follow-up`,domain:'Replies'},'Reply',58));
+    const seen=new Set();
+    return rows.sort((a,b)=>b.score-a.score).filter(r=>{ const k=execNormText(r.title); if(seen.has(k)) return false; seen.add(k); return true; }).slice(0,4);
+  },[JSON.stringify({todos,tasks,careerTasks,errands,comms})]);
+  const openPlanner=block=>{ const start=Math.max(block.start,nowM); const duration=[30,45,60,120].find(m=>m<=block.end-start)||Math.max(15,block.end-start); const suggested={}; let used=0; focusCandidates.forEach((c,i)=>{ if(i<3&&used+c.minutes<=Math.max(duration,30)){ suggested[c.id]=true; used+=c.minutes; } }); setFocusChoices(suggested); setPlanner(block); setDraft({start:String(start),duration:String(duration),title:focusTitleOptions[0]||'Focus Block'}); setTimeout(()=>document.querySelector('.wm-focus-planner')?.scrollIntoView({behavior:'smooth',block:'nearest'}),40); };
+  const createFocusBlock=()=>{ if(!planner||!setCalendarEvents) return; const start=Number(draft.start)||Math.max(planner.start,nowM); const durationOptions=makeDurationOptions(planner,start); const minutes=Number(draft.duration)||durationOptions[0]||30; const selected=focusCandidates.filter(c=>focusChoices[c.id]); const title=draft.title||'Focus Block'; const note=[`${minutes}m`,selected.length?`Includes: ${selected.map(c=>c.title).join('; ')}`:null].filter(Boolean).join(' · '); setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:todayStr(),time:`${String(Math.floor(start/60)).padStart(2,'0')}:${String(start%60).padStart(2,'0')}`,title,note,source:'manual',kind:'execution-block',createdAt:new Date().toISOString(),items:selected.map(c=>({title:c.title,source:c.source,minutes:c.minutes}))}])); notify(selected.length?`Block added with ${selected.length} item${selected.length===1?'':'s'}`:'Focus block added to calendar'); setPlanner(null); setFocusChoices({}); };
+  const inner=<><div className="wm-tl-wrap"><div className="wm-tl">{shownItems.map((e,i)=>{ const content=<><span className="wm-tl-dot" style={{background:e.open?'transparent':dotColors[i%dotColors.length],boxShadow:e.open?'none':`0 0 10px ${dotColors[i%dotColors.length]}55`}}></span><span className="wm-tl-time">{e.time}</span><b className="wm-tl-title">{e.title}</b>{e.priority?<small className={`wm-cal-priority ${e.priority.level}`}>{e.priority.label}</small>:e.length?<small className="wm-tl-len">{e.length}</small>:null}</>; return e.open?<button type="button" className="wm-tl-row open" key={i} onClick={()=>openPlanner(e)} title="Add focus block to calendar">{content}</button>:<div className={`wm-tl-row ${e.past?'past':''}`} key={i}>{content}</div>; })}</div>{shownItems.length>1?<div className="wm-swipe-cue">Swipe events →</div>:null}</div>{primaryOpen?<button type="button" className="wm-open-focus-cta compact" onClick={()=>openPlanner(primaryOpen)}><span><b>{planner?'Time block options':'Create time block'}</b><span>{primaryOpen.time} available</span></span><strong>{primaryOpen.length}</strong></button>:null}{planner?<div className="wm-focus-planner"><div className="wm-focus-grid"><div className="wm-focus-field"><label>Start</label><select value={draft.start} onChange={e=>setDraft({...draft,start:e.target.value,duration:String((makeDurationOptions(planner,Number(e.target.value))[0]||15))})}>{startOptions.map(m=><option key={m} value={m}>{m<=nowM+5?'Now':fmtMins(m)}</option>)}</select></div><div className="wm-focus-field"><label>Length</label><select value={draft.duration} onChange={e=>setDraft({...draft,duration:e.target.value})}>{durationOptions.map(m=><option key={m} value={m}>{durLabel(m)}</option>)}</select></div><div className="wm-focus-field"><label>Block</label><select value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}>{focusTitleOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></div>{focusCandidates.length?<div className="wm-focus-suggest"><div className="wm-focus-suggest-head"><b>Suggested inside block</b><span>Tap Yes or No</span></div>{focusCandidates.map(c=><div className="wm-focus-suggest-row" key={c.id}><div><b>{c.title}</b><small>{c.meta} · {c.minutes}m</small></div><div className="wm-focus-yn"><button type="button" className={focusChoices[c.id]?'active':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:true}))}>Yes</button><button type="button" className={!focusChoices[c.id]?'active no':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:false}))}>No</button></div></div>)}</div>:null}<div className="wm-focus-actions"><button type="button" className="primary-btn" onClick={createFocusBlock}>Create Block</button><button type="button" className="ghost-btn" onClick={()=>{setPlanner(null);setFocusChoices({});}}>Cancel</button></div></div>:null}<div className="wm-tl-foot"><span>{seeded?'Preview schedule':`${calEvents.length+taskEvents.length} scheduled`}</span><span className="wm-tl-open">{totalOpen?`${durLabel(totalOpen)} open`:'No open blocks'}</span></div></>;
   if(bare) return inner;
   return <section className="glass card wm-panel wm-timeline-panel"><NowPanelHead icon={<Icon name="calendar" size={15} />} title="Today's Timeline" action={{label:'View calendar',onClick:()=>onNavigate&&onNavigate('plan')}} />{inner}</section>;
 }
