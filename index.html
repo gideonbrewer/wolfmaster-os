@@ -1083,7 +1083,7 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .life-toggle-row{display:flex;gap:8px;flex-wrap:wrap}
 .life-toggle{min-height:34px;padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:var(--text-mid);font-size:11px;font-weight:800}
 .life-toggle.active{border-color:rgba(147,242,10,.4);background:var(--accent-soft);color:var(--accent)}
-.exec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.exec-grid,.exec-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .exec-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .exec-card{padding:13px;border-radius:18px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.026);display:grid;gap:9px;min-width:0}
 .exec-card.warn{border-color:rgba(255,204,102,.2);background:rgba(255,204,102,.045)}
@@ -1108,7 +1108,7 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .exec-result b{display:block;margin-top:4px;font-size:18px}
 .exec-brief{white-space:pre-wrap;color:rgba(245,242,235,.9);font-size:12px;line-height:1.5}
 .exec-conflict{border-color:rgba(255,204,102,.22);background:rgba(255,204,102,.045)}
-@media (max-width:640px){.exec-grid,.exec-grid.three,.exec-result-grid{grid-template-columns:1fr}.exec-row{grid-template-columns:1fr}.exec-actions .ghost-btn,.exec-actions .primary-btn{width:100%;justify-content:center}.exec-import-box textarea{min-height:150px}}
+@media (max-width:640px){.exec-grid,.exec-grid.three,.exec-result-grid,.exec-report-grid{grid-template-columns:1fr}.exec-row{grid-template-columns:1fr}.exec-actions .ghost-btn,.exec-actions .primary-btn{width:100%;justify-content:center}.exec-import-box textarea{min-height:150px}}
 .review-memory-drawers{display:grid;gap:8px}
 .review-memory-drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .review-mini-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:10px}
@@ -1698,7 +1698,41 @@ const MONEYCONTROLINIT={
   nextMoneyAction:'',
   note:''
 };
-const EXEC_DOMAINS=['WolfLock','Purple Atlas','WolfMaster','Career and Relationships','Money and Administration','Marriage','Family Travel',"Boys' Development",'Family Systems','House','Personal Systems','Trading and Wealth'];
+const EXEC_DOMAINS=[
+  'Michigan House','WolfLock','Purple Atlas','Belmont Consulting','WolfMaster OS','Professional Positioning',
+  'Finance and Benefits','Northwestern Tuition Dispute','Marriage','Family Travel and Organization',
+  'Athlete Development','Home and Property','Personal Operating System','Relationships and Networking','Trading and Wealth',
+  'WolfMaster','Career and Relationships','Money and Administration','Family Travel',"Boys' Development",'Family Systems','House','Personal Systems'
+];
+const CANONICAL_PROJECTS=['Michigan House','WolfLock','Purple Atlas','Belmont Consulting','WolfMaster OS','Professional Positioning','Finance and Benefits','Northwestern Tuition Dispute','Marriage','Family Travel and Organization','Athlete Development','Home and Property','Personal Operating System','Relationships and Networking','Trading and Wealth'];
+const CANONICAL_MILESTONES={
+  'Michigan House':'Complete the first 30 days successfully',
+  'WolfLock':'Complete the V2 survey',
+  'Purple Atlas':'Complete the 2026 Independent Candidate Map MVP',
+  'WolfMaster OS':'Complete the initial canonical migration',
+  'Professional Positioning':'Publish the post-House LinkedIn profile',
+  'Finance and Benefits':'Finalize House benefits and household cash-flow plan',
+  'Northwestern Tuition Dispute':'Complete ombudsman escalation package',
+  'Marriage':'Establish recurring relationship cadence and book the next couples trip',
+  'Athlete Development':"Finalize and schedule the boys' training system",
+  'Personal Operating System':'Establish the workout-first morning routine'
+};
+const CANONICAL_P1_PRIORITIES=[
+  ['Michigan House','Michigan House onboarding and strong first 30 days'],
+  ['Relationships and Networking','Notify strategic contacts about the new House role'],
+  ['Finance and Benefits','Finalize medical, retirement, title, leave, and ethics questions'],
+  ['WolfLock','Complete the WolfLock V2 survey'],
+  ['Personal Operating System','Establish the morning exercise and Daily Top 3 system']
+];
+const CANONICAL_VERIFIED_DELTAS=[
+  'Gmail is connected to Gideon@GideonBrewer.com',
+  'Google Calendar is connected',
+  'The weekday 7:30 a.m. Chief of Staff briefing is active',
+  'The Michigan House role has begun',
+  'Notify contacts of my new job is active',
+  'Blockware ticket BWS-8468 is Waiting',
+  'The Blockware invoice was recorded in the Notion mining dashboard'
+];
 const EXEC_GUARDRAILS=[
   'No discretionary manual trading.',
   'Automated trading must remain isolated, rules-based and measurable.',
@@ -1711,7 +1745,10 @@ const EXEC_GUARDRAILS=[
   'House projects cannot displace WolfLock, marriage or the boys.',
   'Completed items leave the active dashboard but remain in history.',
   'Capture first; classify during review.',
-  'Do not repeatedly redesign plans instead of executing them.'
+  'Do not repeatedly redesign plans instead of executing them.',
+  'Notion remains durable institutional memory.',
+  'WolfMaster is the daily dashboard and attention layer.',
+  'Manual discretionary trading remains permanently discontinued.'
 ];
 const EXEC_TYPES=['task','project','milestone','waiting','scheduled','decision','guardrail','note'];
 const EXEC_STATUSES=['inbox','next','active','waiting','scheduled','blocked','completed','deferred','archived'];
@@ -1770,6 +1807,32 @@ function initialExecutiveSyncPacket(){ return {
     {title:'Automated trading must remain isolated and rules-based',domain:'Trading and Wealth',type:'guardrail',status:'active',priority:'P1',owner:'Gideon',canonicalSystem:'notion'}
   ]
 };}
+function canonicalReconciliationPacket(){ return {
+  packetVersion:'1.0',
+  packetType:'reconciliation',
+  packetId:'wolfmaster-initial-canonical-reconciliation-approved',
+  generatedAt:todayStr(),
+  sourceSystem:'chief-of-staff',
+  importMode:'approved-canonical-migration',
+  importRules:[
+    'Upsert records using supplied ID.',
+    'Do not recreate completed items as active.',
+    'Do not invent deadlines.',
+    'Waiting records should not appear in Today unless follow-up date is due.',
+    'Standing rules are constraints, not actionable tasks.',
+    'After this import, normal changes should arrive only as ADD, UPDATE, COMPLETE, CANCEL or WAITING deltas.'
+  ],
+  domains:CANONICAL_PROJECTS,
+  projects:CANONICAL_PROJECTS.map(project=>({id:`project:${execNormText(project)}`,title:project,domain:project,project,type:'project',status:'active',priority:['Michigan House','WolfLock','WolfMaster OS'].includes(project)?'P1':'P2',owner:'Gideon',currentMilestone:CANONICAL_MILESTONES[project]||'',canonicalSystem:'notion',sourceSystem:'chief-of-staff',sourceId:`project:${execNormText(project)}`})),
+  items:[
+    ...Object.entries(CANONICAL_MILESTONES).map(([project,title])=>({id:`milestone:${execNormText(project)}`,title,domain:project,project,type:'milestone',status:'active',priority:['Michigan House','WolfLock','Finance and Benefits','Personal Operating System'].includes(project)?'P1':'P2',owner:'Gideon',currentMilestone:title,canonicalSystem:'notion',sourceSystem:'chief-of-staff',sourceId:`milestone:${execNormText(project)}`})),
+    ...CANONICAL_P1_PRIORITIES.map(([domain,title])=>({id:`priority:${execNormText(title)}`,title,domain,project:domain,type:'task',status:'next',priority:'P1',owner:'Gideon',canonicalSystem:'wolfmaster',sourceSystem:'chief-of-staff',sourceId:`priority:${execNormText(title)}`})),
+    {id:'waiting:blockware-bws-8468',title:'Blockware ticket BWS-8468',domain:'Trading and Wealth',project:'Trading and Wealth',type:'waiting',status:'waiting',priority:'P2',owner:'Gideon',waitingOn:'Blockware',canonicalSystem:'notion',sourceSystem:'chief-of-staff',sourceId:'waiting:blockware-bws-8468'},
+    {id:'note:blockware-invoice-recorded',title:'Blockware invoice recorded in Notion mining dashboard',domain:'Trading and Wealth',project:'Trading and Wealth',type:'note',status:'active',priority:'P3',owner:'Gideon',canonicalSystem:'notion',sourceSystem:'chief-of-staff',sourceId:'note:blockware-invoice-recorded'},
+    ...CANONICAL_VERIFIED_DELTAS.filter(x=>!x.includes('Blockware')).map(title=>({id:`delta:${execNormText(title)}`,title,domain:title.includes('Calendar')?'WolfMaster OS':title.includes('Gmail')?'WolfMaster OS':title.includes('House')?'Michigan House':'Personal Operating System',type:'note',status:'active',priority:'P3',owner:'Gideon',canonicalSystem:'wolfmaster',sourceSystem:'chief-of-staff',sourceId:`delta:${execNormText(title)}`}))
+  ],
+  guardrails:EXEC_GUARDRAILS.map(title=>({id:`rule:${execNormText(title)}`,title,domain:title.toLowerCase().includes('trading')?'Trading and Wealth':'Personal Operating System',type:'guardrail',status:'active',priority:title.toLowerCase().includes('trading')?'P1':'P2',owner:'Gideon',canonicalSystem:'notion',sourceSystem:'chief-of-staff',sourceId:`rule:${execNormText(title)}`}))
+}; }
 const CALENDAR=[{day:'Sun',date:15,today:true,events:[{t:'9:30',text:'Market open',c:C.good},{t:'2pm',text:'WolfLock standup',c:C.teal},{t:'5pm',text:'Family dinner',c:C.pink}]},{day:'Mon',date:16,today:false,events:[{t:'8am',text:'Advisory call',c:C.info}]},{day:'Tue',date:17,today:false,events:[{t:'10am',text:'Soccer Graham',c:C.warn},{t:'3pm',text:'Options review',c:C.good}]},{day:'Wed',date:18,today:false,events:[]},{day:'Thu',date:19,today:false,events:[{t:'12pm',text:'Hulk V3 review',c:C.good},{t:'6pm',text:'Date night',c:C.pink}]},{day:'Fri',date:20,today:false,events:[{t:'Family game night',text:'',c:C.pink}]},{day:'Sat',date:21,today:false,events:[{t:'8am',text:'Soccer tournament',c:C.warn},{t:'1pm',text:'Team lunch',c:C.info}]}];
 function execNormText(v){ return String(v||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
 function execStableHash(v){ const s=typeof v==='string'?v:JSON.stringify(v||{}); let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); }
@@ -1781,10 +1844,11 @@ function execStatus(s,type){ const low=String(s||'').toLowerCase(); if(EXEC_STAT
 function execType(t){ const low=String(t||'task').toLowerCase(); return EXEC_TYPES.includes(low)?low:'task'; }
 function execCanonical(c){ const low=String(c||'wolfmaster').toLowerCase(); return EXEC_CANONICAL.includes(low)?low:'external'; }
 function execFingerprint(item){ return ['wmexec',execNormText(item.title),execNormText(item.domain),execNormText(item.type),execNormText(item.projectId||item.project||''),execNormText(item.owner||'')].filter(Boolean).join('|'); }
-function execIdentity(item){ return item.sourceSystem&&item.sourceId?`${item.sourceSystem}:${item.sourceId}`:execFingerprint(item); }
+function execIdentity(item){ if(item.sourceSystem&&item.sourceId) return `${item.sourceSystem}:${item.sourceId}`; if(item.id) return `${item.sourceSystem||'manual'}:id:${item.id}`; return execFingerprint(item); }
 function normalizeExecutiveItem(raw,packet={},section='items'){
   const type=execType(raw.type||section.replace(/s$/,''));
   const sourceSystem=String(raw.sourceSystem||packet.sourceSystem||'manual').toLowerCase();
+  const sourceId=raw.sourceId||raw.externalId||raw.id||'';
   const normalized={
     id:raw.id||null,
     title:String(raw.title||raw.text||'Untitled').trim(),
@@ -1800,13 +1864,16 @@ function normalizeExecutiveItem(raw,packet={},section='items'){
     scheduledStart:raw.scheduledStart||raw.start||'',
     scheduledEnd:raw.scheduledEnd||raw.end||'',
     sourceSystem,
-    sourceId:raw.sourceId||raw.externalId||'',
+    sourceId,
     sourceUrl:raw.sourceUrl||raw.url||'',
     canonicalSystem:execCanonical(raw.canonicalSystem),
     projectId:raw.projectId||raw.project||'',
+    project:raw.project||raw.projectId||'',
+    area:raw.area||raw.domain||'',
     personId:raw.personId||raw.person||'',
     blockedBy:raw.blockedBy||'',
     waitingOn:raw.waitingOn||'',
+    currentMilestone:raw.currentMilestone||'',
     actionMode:raw.actionMode||'',
     estimatedMinutes:raw.estimatedMinutes||'',
     location:raw.location||'',
@@ -1815,11 +1882,15 @@ function normalizeExecutiveItem(raw,packet={},section='items'){
     focusLevel:raw.focusLevel||'',
     preferredTimeOfDay:raw.preferredTimeOfDay||'',
     batchEligible:raw.batchEligible!==undefined?!!raw.batchEligible:true,
-    batchId:raw.batchId||'',
+    batchId:raw.batchId||raw.executionBlock||'',
+    executionBlock:raw.executionBlock||raw.batchId||'',
     preparationNeeded:raw.preparationNeeded||'',
-    lastUpdatedAt:raw.lastUpdatedAt||packet.generatedAt||new Date().toISOString(),
+    notes:raw.notes||raw.description||'',
+    createdDate:raw.createdDate||raw.createdAt||'',
+    lastUpdatedAt:raw.lastUpdatedAt||raw.updatedAt||packet.generatedAt||new Date().toISOString(),
     lastSyncedAt:new Date().toISOString(),
-    completedAt:raw.completedAt||'',
+    completedAt:raw.completedAt||raw.completedDate||'',
+    completedDate:raw.completedDate||raw.completedAt||'',
     archivedAt:raw.archivedAt||'',
     metadata:{...(raw.metadata||{}), packetVersion:packet.packetVersion||'', importedSection:section}
   };
@@ -1858,7 +1929,7 @@ function mergeExecutiveItems(prevItems=[],incomingItems=[]){
     const currentCanonical=execCanonical(current.canonicalSystem);
     const incomingCanonical=execCanonical(incoming.canonicalSystem);
     const protectedSystem=currentCanonical!=='wolfmaster'&&currentCanonical!==incomingCanonical;
-    const conflictFields=['title','description','domain','type','status','priority','owner','nextAction','dueDate','reviewDate','scheduledStart','scheduledEnd','canonicalSystem','projectId','personId','blockedBy','waitingOn','sourceUrl','actionMode','estimatedMinutes','location','energyLevel','focusLevel','preferredTimeOfDay','batchEligible','batchId','preparationNeeded'].filter(k=>String(current[k]||'')&&String(incoming[k]||'')&&String(current[k]||'')!==String(incoming[k]||''));
+    const conflictFields=['title','description','domain','type','status','priority','owner','nextAction','dueDate','reviewDate','scheduledStart','scheduledEnd','canonicalSystem','projectId','project','area','personId','blockedBy','waitingOn','currentMilestone','sourceUrl','actionMode','estimatedMinutes','location','energyLevel','focusLevel','preferredTimeOfDay','batchEligible','batchId','executionBlock','preparationNeeded','notes','createdDate','completedDate'].filter(k=>String(current[k]||'')&&String(incoming[k]||'')&&String(current[k]||'')!==String(incoming[k]||''));
     if(protectedSystem&&conflictFields.length){
       conflicts.push({id:`conf-${Date.now()}-${conflicts.length}`,at:now,itemId:current.id,title:current.title,fields:conflictFields,current,incoming,status:'open'});
       audit.push({id:`audit-${Date.now()}-${audit.length}`,at:now,action:'conflict',itemId:current.id,title:current.title,fields:conflictFields});
@@ -1883,7 +1954,19 @@ function importExecutivePacket(currentExec={},packet,options={}){
   const priorApplied=currentExec.appliedPackets||[];
   const appliedEntry={packetId,packetType,at,sourceSystem:packet.sourceSystem||'unknown',generatedAt:packet.generatedAt||'',reprocessed:!!options.reprocess};
   const importAudit={id:`audit-${Date.now()}-import`,at,action:options.reprocess?'packet_reprocessed':'packet_imported',title:`${packetType} · ${packetId}`,packetId,packetType};
-  return {domains,items:merged.items,conflicts:[...(currentExec.conflicts||[]),...merged.conflicts],auditLog:[importAudit,...(merged.audit||[]),...(currentExec.auditLog||[])].slice(0,160),appliedPackets:[appliedEntry,...priorApplied.filter(p=>p.packetId!==packetId)].slice(0,80),lastSuccessfulPacketId:packetId,lastSuccessfulImportAt:at,lastImportResult:{...merged.result,totalIncoming:incoming.length,at,sourceSystem:packet.sourceSystem||'unknown',packetId,packetType,reprocessed:!!options.reprocess},lastImportedAt:at,rollbackSnapshot:options.rollbackSnapshot||currentExec.rollbackSnapshot||null};
+  const active=merged.items.filter(x=>!x.completedAt&&!x.archivedAt&&!['completed','archived'].includes(x.status));
+  const byType=incoming.reduce((acc,item)=>({...acc,[item.type]:(acc[item.type]||0)+1}),{});
+  const report={
+    byType,
+    updated:merged.result.updated,
+    duplicatePrevented:merged.result.skipped,
+    rejected:0,
+    activeP1:active.filter(x=>x.priority==='P1'&&!['decision','guardrail','note'].includes(x.type)).map(x=>x.title).slice(0,12),
+    currentMilestones:active.filter(x=>x.type==='milestone'||x.currentMilestone).map(x=>({project:x.project||x.domain,title:x.currentMilestone||x.title})).slice(0,16),
+    waitingItems:active.filter(x=>x.type==='waiting'||x.status==='waiting'||x.waitingOn).map(x=>({title:x.title,waitingOn:x.waitingOn||'',reviewDate:x.reviewDate||''})).slice(0,16),
+    schemaConflicts:merged.conflicts.map(c=>({title:c.title,fields:c.fields})).slice(0,16)
+  };
+  return {domains,items:merged.items,conflicts:[...(currentExec.conflicts||[]),...merged.conflicts],auditLog:[importAudit,...(merged.audit||[]),...(currentExec.auditLog||[])].slice(0,160),appliedPackets:[appliedEntry,...priorApplied.filter(p=>p.packetId!==packetId)].slice(0,80),lastSuccessfulPacketId:packetId,lastSuccessfulImportAt:at,lastImportResult:{...merged.result,totalIncoming:incoming.length,at,sourceSystem:packet.sourceSystem||'unknown',packetId,packetType,reprocessed:!!options.reprocess,report},lastImportedAt:at,rollbackSnapshot:options.rollbackSnapshot||currentExec.rollbackSnapshot||null,canonicalMode:packet.importMode==='approved-canonical-migration'||currentExec.canonicalMode||false};
 }
 function previewExecutivePacket(currentExec={},packet){
   const packetId=execPacketId(packet), packetType=execPacketType(packet);
@@ -1908,7 +1991,9 @@ function scoreExecutiveItem(item){
 function activeExecutiveItems(exec){ return (exec?.items||[]).filter(x=>!x.completedAt&&!x.archivedAt&&!['completed','archived'].includes(x.status)); }
 function executiveDashboardModel(exec,calendarEvents=[]){
   const active=activeExecutiveItems(exec).map(x=>({...x,rank:scoreExecutiveItem(x)})).sort((a,b)=>b.rank.score-a.rank.score);
-  const today=active.filter(x=>x.metadata?.today||x.priority==='P1').slice(0,3);
+  const isWaiting=x=>x.type==='waiting'||x.status==='waiting'||x.waitingOn;
+  const waitingDue=x=>isWaiting(x)&&x.reviewDate&&execDaysUntil(x.reviewDate)<=0;
+  const today=active.filter(x=>!['decision','guardrail','note'].includes(x.type)&&(x.metadata?.today||x.priority==='P1')&&(!isWaiting(x)||waitingDue(x))).slice(0,3);
   const mustDo=active.filter(x=>x.type==='task'&&x.domain==='Money and Administration').slice(0,5);
   const waiting=active.filter(x=>x.type==='waiting'||x.status==='waiting'||x.waitingOn).slice(0,8);
   const scheduled=[...active.filter(x=>x.type==='scheduled'||x.status==='scheduled'),...(calendarEvents||[]).slice(0,4).map(e=>({id:`cal-${e.id||e.title}`,title:e.title||e.text||'Calendar item',domain:'Calendar',type:'scheduled',scheduledStart:e.date||e.time||'',priority:'P2',rank:{score:40,reason:'Calendar commitment.'}}))].slice(0,6);
@@ -3533,6 +3618,7 @@ function ExecutiveSyncPanel({executive,setExecutive,todos,setTodos,calendarEvent
   };
   const parsePreview=()=>{ try{ const packet=JSON.parse(input); const p=previewExecutivePacket(exec,packet); setPreview(p); setMessage(p.already?`Preview ready, but packet ${p.packetId} was already applied.`:`Preview ready for ${p.packetType} packet ${p.packetId}.`); }catch(e){ setPreview(null); setMessage(`Preview failed: ${e.message}`); } };
   const loadSeed=()=>{ const packet={...initialExecutiveSyncPacket(),packetType:'baseline',packetId:'wolfmaster-bootstrap-baseline-2026-07-17'}; setInput(JSON.stringify(packet,null,2)); setPreview(null); setMessage('Bootstrap baseline loaded. Preview before applying; do not use this as recurring sync.'); };
+  const loadCanonical=()=>{ const packet=canonicalReconciliationPacket(); setInput(JSON.stringify(packet,null,2)); setPreview(null); setMessage('Approved canonical reconciliation shell loaded. Paste/merge the structured payload here, then Preview before applying.'); };
   const rollback=()=>{ const snap=exec.rollbackSnapshot; if(!snap?.executive){ setMessage('No rollback snapshot available.'); return; } const restored={...snap.executive,auditLog:[{id:`audit-${Date.now()}-rollback`,at:new Date().toISOString(),action:'rollback',title:`Rolled back packet ${snap.packetId}`},...(snap.executive.auditLog||[])]}; setExecutive(restored); setPreview(null); setMessage(`Rolled back last packet: ${snap.packetId}.`); };
   const resolveConflict=(conflict,mode)=>{
     const nextItems=(exec.items||[]).map(item=>{ if(item.id!==conflict.itemId) return item; if(mode==='incoming') return {...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'accepted_incoming'},lastSyncedAt:new Date().toISOString()}; if(mode==='merge') return {...item,...conflict.incoming,id:item.id,metadata:{...(item.metadata||{}),...(conflict.incoming.metadata||{}),conflictResolution:'merged'},lastSyncedAt:new Date().toISOString()}; return {...item,metadata:{...(item.metadata||{}),conflictResolution:'kept_current'}}; });
@@ -3541,9 +3627,9 @@ function ExecutiveSyncPanel({executive,setExecutive,todos,setTodos,calendarEvent
   };
   const reconcile=(key,label)=>setExecutive({...exec,auditLog:[{id:`audit-${Date.now()}`,at:new Date().toISOString(),action:'evening_reconciliation',title:label,key},...(exec.auditLog||[])]});
   return <div className="plan-stack">
-    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Executive Sync Packet</span><span className="rv-badge">{exec.items?.length||0} items</span></div><div className="glass card exec-import-box"><textarea className="text-area" value={input} onChange={e=>{setInput(e.target.value);setPreview(null);}} placeholder="Paste versioned JSON sync packet here. Use packetType + packetId for normal sync." /><div className="exec-actions"><button type="button" className="primary-btn" onClick={parsePreview}>Preview Packet</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet)} disabled={!preview||preview.already}>Apply Preview</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet,{reprocess:true})} disabled={!preview}>Reprocess</button><button type="button" className="ghost-btn" onClick={loadSeed}>Load Bootstrap Seed</button><button type="button" className="ghost-btn" onClick={rollback} disabled={!exec.rollbackSnapshot}>Rollback Last</button></div>{message?<div className="status-note">{message}</div>:null}<div className="meta">Seeds are bootstrap-only. Normal sync uses versioned idempotent packets: baseline, delta, reconciliation, correction, completion, or emergency. Already-applied packets are rejected unless explicitly reprocessed.</div></div></section>
+    <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Executive Sync Packet</span><span className="rv-badge">{exec.items?.length||0} items</span></div><div className="glass card exec-import-box"><textarea className="text-area" value={input} onChange={e=>{setInput(e.target.value);setPreview(null);}} placeholder="Paste versioned JSON sync packet here. Use packetType + packetId for normal sync." /><div className="exec-actions"><button type="button" className="primary-btn" onClick={parsePreview}>Preview Packet</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet)} disabled={!preview||preview.already}>Apply Preview</button><button type="button" className="ghost-btn" onClick={()=>preview&&applyPacket(preview.packet,{reprocess:true})} disabled={!preview}>Reprocess</button><button type="button" className="ghost-btn" onClick={loadCanonical}>Load Canonical Shell</button><button type="button" className="ghost-btn" onClick={loadSeed}>Load Bootstrap Seed</button><button type="button" className="ghost-btn" onClick={rollback} disabled={!exec.rollbackSnapshot}>Rollback Last</button></div>{message?<div className="status-note">{message}</div>:null}<div className="meta">Initial canonical import uses the approved reconciliation shell. After that, normal task changes should be ADD, UPDATE, COMPLETE, CANCEL, or WAITING delta packets. Seeds are bootstrap-only.</div></div></section>
     {preview?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Import Preview</span><span className={`rv-badge ${preview.already?'warn':'good'}`}>{preview.packetType}</span></div><div className="exec-result-grid">{['created','updated','completed','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{preview.result[k]||0}</b></div>)}</div><div className="meta" style={{marginTop:8}}>Packet ID: {preview.packetId}{preview.already?' · already applied':''}</div></section>:null}
-    {exec.lastImportResult?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Last Successful Import</span><span className="rv-badge good">{exec.lastImportResult.packetType||'packet'}</span></div><div className="exec-result-grid">{['created','updated','completed','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k}</span><b>{exec.lastImportResult[k]||0}</b></div>)}</div><div className="meta" style={{marginTop:8}}>Last packet: {exec.lastSuccessfulPacketId||exec.lastImportResult.packetId} · {exec.lastSuccessfulImportAt||exec.lastImportResult.at}</div></section>:null}
+    {exec.lastImportResult?<section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Last Successful Import</span><span className="rv-badge good">{exec.lastImportResult.packetType||'packet'}</span></div><div className="exec-result-grid">{['created','updated','completed','skipped','conflicted'].map(k=><div className="exec-result" key={k}><span>{k==='skipped'?'duplicates prevented':k}</span><b>{exec.lastImportResult[k]||0}</b></div>)}</div><div className="meta" style={{marginTop:8}}>Last packet: {exec.lastSuccessfulPacketId||exec.lastImportResult.packetId} · {exec.lastSuccessfulImportAt||exec.lastImportResult.at}</div>{exec.lastImportResult.report?<div className="exec-report-grid" style={{marginTop:12}}><div className="exec-card"><b>By Type</b><small>{Object.entries(exec.lastImportResult.report.byType||{}).map(([k,v])=>`${k}: ${v}`).join(' · ')||'None'}</small></div><div className="exec-card"><b>Active P1</b><small>{(exec.lastImportResult.report.activeP1||[]).join('; ')||'None'}</small></div><div className="exec-card"><b>Current Milestones</b><small>{(exec.lastImportResult.report.currentMilestones||[]).map(x=>`${x.project}: ${x.title}`).join('; ')||'None'}</small></div><div className="exec-card"><b>Waiting Items</b><small>{(exec.lastImportResult.report.waitingItems||[]).map(x=>`${x.title}${x.waitingOn?` / ${x.waitingOn}`:''}${x.reviewDate?` / review ${x.reviewDate}`:''}`).join('; ')||'None'}</small></div><div className="exec-card"><b>Rejected / Missing</b><small>{exec.lastImportResult.report.rejected||0}</small></div><div className="exec-card"><b>Schema Conflicts</b><small>{(exec.lastImportResult.report.schemaConflicts||[]).map(x=>`${x.title}: ${x.fields.join(', ')}`).join('; ')||'None'}</small></div></div>:null}</section>:null}
     <ExecutiveDashboard executive={exec} calendarEvents={calendarEvents} />
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Daily Brief</span><span className="rv-badge good">Deterministic</span></div><div className="glass card"><div className="exec-brief">{brief}</div></div></section>
     <section className="plan-section"><div className="plan-section-head"><span className="plan-section-label">Evening Reconciliation</span></div><div className="exec-grid three">{[['completed','What was completed?'],['moved','What meaningfully moved?'],['blocked','What became blocked?'],['waiting','What is now waiting?'],['scheduled','What needs scheduling?'],['tomorrow','What should win tomorrow?']].map(([k,label])=><button type="button" className="exec-card" key={k} onClick={()=>reconcile(k,label)}><b>{label}</b><small>Tap to capture during review. Keep it short.</small></button>)}</div></section>
