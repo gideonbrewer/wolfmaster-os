@@ -1387,6 +1387,109 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .qc-fab:hover,.qc-fab:focus-visible,.qc-fab:active{opacity:1!important;}
 }
 </style>
+<style id="wm-radar-ondeck-money-final-2026-08-02">
+  .wm-signals-drawer,.wm-next-options{
+    border-color:rgba(147,242,10,.2)!important;
+    background:radial-gradient(90% 120% at 100% 0%,rgba(147,242,10,.06),transparent 46%),linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.014))!important;
+  }
+  .wm-signals-drawer .wm-drawer-head,.wm-next-options .wm-drawer-head{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:12px!important;
+  }
+  .wm-signals-drawer .wm-drawer-headline,.wm-next-options .wm-drawer-headline{
+    min-width:0!important;
+    text-align:left!important;
+  }
+  .wm-signals-drawer .wm-drawer-summary,.wm-next-options .wm-drawer-summary{
+    max-width:100%!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .wm-next-options-body{
+    gap:12px!important;
+  }
+  .wm-next-options-body>.wm-batches,.wm-next-options-body>.wm-priority-stack{
+    border:1px solid rgba(255,255,255,.09)!important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.018)!important;
+  }
+  .wm-next-options-body>.wm-batches{
+    border-color:rgba(96,165,250,.18)!important;
+  }
+  .wm-next-options-body>.wm-priority-stack{
+    border-color:rgba(147,242,10,.18)!important;
+  }
+  .wm-signals-drawer .wm-domains{
+    margin-top:0!important;
+  }
+  .money-command{
+    border-color:rgba(147,242,10,.22)!important;
+  }
+  .money-income-panel{
+    border-color:rgba(255,255,255,.1)!important;
+  }
+  .money-source-board{
+    grid-template-columns:1fr!important;
+  }
+  .money-source-row{
+    grid-template-columns:minmax(92px,1fr) minmax(92px,.8fr) minmax(92px,.8fr)!important;
+    border-color:rgba(255,255,255,.09)!important;
+  }
+  .money-source-row .text-input{
+    text-align:right!important;
+  }
+  .qc-fab{
+    width:40px!important;
+    height:40px!important;
+    right:18px!important;
+    bottom:calc(174px + var(--safe-bottom))!important;
+    opacity:.84!important;
+    z-index:180!important;
+  }
+  @media (max-width:640px){
+    .wm-next-options-body>.wm-batches,.wm-next-options-body>.wm-priority-stack{
+      padding:10px!important;
+      border-radius:17px!important;
+    }
+    .wm-next-options-body .wm-batch-title,.wm-next-options-body .wm-stack-title{
+      font-size:8.5px!important;
+      letter-spacing:.14em!important;
+    }
+    .wm-next-options-body .wm-stack-stage{
+      min-height:154px!important;
+    }
+    .wm-next-options-body .wm-stack-card{
+      min-height:138px!important;
+    }
+    .money-source-row{
+      grid-template-columns:1fr 1fr!important;
+      padding:10px!important;
+    }
+    .money-source-name{
+      grid-column:1 / -1!important;
+    }
+    .money-income-cell{
+      padding:13px 12px!important;
+    }
+    .money-income-cell b{
+      font-size:20px!important;
+    }
+  }
+  html[data-theme="light"] .wm-signals-drawer,html[data-theme="light"] .wm-next-options{
+    background:linear-gradient(180deg,#FFFFFF,#F8FAF5)!important;
+    border-color:rgba(104,201,0,.24)!important;
+  }
+  html[data-theme="light"] .wm-next-options-body>.wm-batches,html[data-theme="light"] .wm-next-options-body>.wm-priority-stack{
+    background:#FFFFFF!important;
+    border-color:rgba(28,43,22,.14)!important;
+  }
+  html[data-theme="light"] .money-source-row{
+    background:#FFFFFF!important;
+    border-color:rgba(28,43,22,.14)!important;
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -2645,7 +2748,7 @@ function NowDomainSignals({comms,tasks,careerTasks,errands,build,todos,reflect,o
      icon:'trending',signal:bld?bld.short:'All clear',mark:bld?bld.mark:'✓',assetDir:bld?bld.assetDir:'ventures',photo:bld?bld.photo:null,go:'more'}
   ];
   const active=cards.filter(c=>c.signal&&c.signal!=='All clear');
-  const summary=active.length?active.map(c=>`${c.name}: ${c.signal}`).join(' · '):'Family, people and build all clear.';
+  const summary=active.length?`${active[0].name}: ${active[0].signal}`:'All clear across family, people and build.';
   return <NowDrawer eyebrow={<><Icon name="spark" size={13} /> Radar</>} eyebrowColor={C.accent} title="Attention Signals" summary={summary} badge={active.length?String(active.length):'Clear'} className="wm-domain-section wm-signals-drawer"><div className="wm-domains">{cards.map(c=>(
     <button type="button" key={c.key} className={`glass card wm-domain wm-domain-${c.key}`} aria-label={c.label} title={c.label} onClick={()=>onNavigate&&onNavigate(c.go)}>
       <div className="wm-domain-head">
@@ -2731,7 +2834,7 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
   };
   if(!visible.length){
     const empty=<div className="wm-stack-head"><div><div className="wm-stack-title"><Icon name="spark" size={13} /> On Deck</div><div className="meta">No candidates waiting.</div></div><button type="button" className="ghost-btn" onClick={()=>onNavigate&&onNavigate('track','sync')}>Sync</button></div>;
-    return drawer?<NowDrawer eyebrow={<><Icon name="spark" size={13} /> Optional</>} eyebrowColor={C.accent} title="On Deck" summary="No candidates waiting." className="wm-optional-drawer">{empty}</NowDrawer>:<section className="glass card wm-priority-stack">{empty}</section>;
+    return drawer?<NowDrawer eyebrow={<><Icon name="spark" size={13} /> On Deck</>} eyebrowColor={C.accent} title="Priority Stack" summary="No candidates waiting." className="wm-optional-drawer">{empty}</NowDrawer>:<section className="glass card wm-priority-stack">{empty}</section>;
   }
   const priorityClass=String(card.priority||'P3').toLowerCase();
   const cardInTop3=top3Keys.has(top3Key(card.title));
@@ -2751,7 +2854,7 @@ function NowPriorityStack({executive,calendarEvents,todos,setTodos,tasks,careerT
     </div>
     <div className="wm-stack-nav"><button type="button" className="ghost-btn" onClick={()=>move(-1)}>← Prev</button><div className="wm-stack-dots">{visible.slice(0,8).map((c,i)=><i key={c.id} className={i===idx?'active':''}></i>)}</div><button type="button" className="ghost-btn" onClick={()=>move(1)}>Next →</button></div>
   </>;
-  if(drawer) return <NowDrawer eyebrow={<><Icon name="spark" size={13} /> Optional</>} eyebrowColor={C.accent} title="On Deck" summary={`${card.title} · candidate ${idx+1} of ${visible.length}`} badge={`${idx+1}/${visible.length}`} className="wm-optional-drawer wm-ondeck-drawer">{content}</NowDrawer>;
+  if(drawer) return <NowDrawer eyebrow={<><Icon name="spark" size={13} /> On Deck</>} eyebrowColor={C.accent} title="Priority Stack" summary={`${card.title} · candidate ${idx+1} of ${visible.length}`} badge={`${idx+1}/${visible.length}`} className="wm-optional-drawer wm-ondeck-drawer">{content}</NowDrawer>;
   return <section className="glass card wm-priority-stack">{content}</section>;
 }
 const BATCH_TEMPLATES={
@@ -2866,7 +2969,7 @@ function RecommendedExecutionBlocks({executive,todos,tasks,careerTasks,errands,c
     {scheduledNote?<div className="status-note" style={{marginTop:8,color:'var(--accent)'}}>{scheduledNote}</div>:null}
     {open?<div className="wm-batch-detail"><div className="wm-batch-detail-head"><div><h3>{open.title}</h3><div className="meta">{open.why}</div></div><div className="wm-batch-progress">{Object.keys(done).filter(k=>k.startsWith(open.id)).length}/{open.items.length} done</div></div><div className="wm-batch-checklist">{open.prep.map((p,i)=><div key={i}><span>{i+1}</span><b>{p}</b><small></small></div>)}</div><div className="wm-batch-tasklist">{open.items.map((item,i)=><button type="button" className="wm-batch-task" key={item.id} onClick={()=>setDone(d=>({...d,[`${open.id}-${item.id}`]:!d[`${open.id}-${item.id}`]}))}><span>{done[`${open.id}-${item.id}`]?'✓':i+1}</span><b>{item.title}</b><small>{item.estimatedMinutes}m · {item.domain}</small></button>)}</div><div className="wm-batch-schedule"><label>Start time<select value={scheduleStart||String(openStartOptions[0]||'')} onChange={e=>setScheduleStart(e.target.value)}>{openStartOptions.map(m=><option key={m} value={m}>{m<=nowM+5?'Now':fmtMins(m)}</option>)}</select></label><span>{open.duration}m block</span></div><div className="wm-batch-actions"><button type="button" className="ghost-btn" onClick={()=>setHidden(h=>({...h,[open.id]:true}))}>Reject</button><button type="button" className="primary-btn" onClick={()=>schedule(open)}>Add Block</button></div></div>:null}
   </>;
-  if(drawer) return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> Optional</>} eyebrowColor={C.info} title="Execution Blocks" summary={batches.length?`${batches[0].title.replace(' Block','')} · ${batches[0].duration}m suggested`:'No compatible blocks'} badge={batches.length?String(batches.length):''} className="wm-optional-drawer">{batches.length?content:<div className="empty">No compatible blocks right now.</div>}</NowDrawer>;
+  if(drawer) return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> On Deck</>} eyebrowColor={C.info} title="Execution Blocks" summary={batches.length?`${batches[0].title.replace(' Block','')} · ${batches[0].duration}m suggested`:'No compatible blocks'} badge={batches.length?String(batches.length):''} className="wm-optional-drawer">{batches.length?content:<div className="empty">No compatible blocks right now.</div>}</NowDrawer>;
   if(!batches.length) return <section className="glass card wm-batches"><div className="wm-batch-head"><div className="wm-batch-title"><Icon name="grid" size={13} /> Execution Blocks</div><span className="wm-batch-quiet">No compatible blocks</span></div></section>;
   return <section className="glass card wm-batches">{content}</section>;
 }
@@ -2877,8 +2980,8 @@ function NowNextOptions({executive,calendarEvents,todos,setTodos,tasks,careerTas
     const fallback=[...(todos||[]).filter(t=>!t.done),...flattenOpenTasks(tasks,'Task'),...flattenOpenTasks(careerTasks,'Career'),...(errands||[]).filter(e=>!e.done)];
     return execItems||fallback.length;
   },[JSON.stringify({executive,todos,tasks,careerTasks,errands})]);
-  const summary=[batches[0]?`${batches[0].title.replace(' Block','')} · ${batches[0].duration}m`:null,deckCount?`${deckCount} on deck`:null].filter(Boolean).join(' · ')||'No optional candidates right now.';
-  return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> Optional</>} eyebrowColor={C.info} title="On Deck Options" summary={summary} badge={`${batches.length}/${deckCount||0}`} className="wm-optional-drawer wm-next-options">
+  const summary=[batches[0]?`${batches[0].title.replace(' Block','')} · ${batches[0].duration}m`:null,deckCount?`${deckCount} candidates`:null].filter(Boolean).join(' · ')||'No candidates right now.';
+  return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> On Deck</>} eyebrowColor={C.info} title="On Deck Options" summary={summary} badge={`${batches.length}/${deckCount||0}`} className="wm-optional-drawer wm-next-options">
     <div className="wm-next-options-body">
       <RecommendedExecutionBlocks executive={executive} todos={todos||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
       <NowPriorityStack executive={executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} onNavigate={onNavigate} />
