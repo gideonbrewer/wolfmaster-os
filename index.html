@@ -3091,7 +3091,6 @@ function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLea
       <NowAttentionPanel tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} onNavigate={onNavigate} />
     </div>
     <NowMomentumStrip habits={habits||[]} setHabits={setHabits} todos={todos||[]} />
-    <NowDomainSignals comms={comms||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} build={build||[]} todos={todos||[]} reflect={reflect||[]} onNavigate={onNavigate} />
     <NowNextOptions executive={reviewData?.executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
   </div>;
 }
