@@ -2488,8 +2488,13 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .plan-action-headline b{display:block;font-size:18px;line-height:1.1}
   .plan-action-headline small{display:block;color:var(--text-mid);font-size:12px;line-height:1.35;margin-top:3px}
   .plan-action-headline span{font-weight:900;color:var(--accent);font-size:18px}
+  .plan-action-subhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px;padding:0 2px 2px}
+  .plan-action-subhead b{font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+  .plan-action-subhead span{min-width:28px;height:28px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:var(--text-mid);font-weight:900;font-size:12px}
   .plan-action-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
   .plan-action-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.07);border-left:3px solid var(--accent);background:rgba(255,255,255,.025)}
+  .plan-errands-card{margin-top:12px!important;border-color:rgba(255,177,32,.2)!important;background:linear-gradient(180deg,rgba(255,177,32,.035),rgba(255,255,255,.015))!important}
+  .plan-action-row.errand{background:linear-gradient(90deg,rgba(255,177,32,.035),rgba(255,255,255,.018))}
   .plan-action-row.done{opacity:.48}
   .plan-action-title{font-weight:800;font-size:14px;line-height:1.18;color:var(--text)}
   .plan-action-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
@@ -4404,17 +4409,18 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
 }
 function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpenTasks,onPromoteTop3,onPromoteWeekly}){
   const [stage,setStage]=useState('Sent');
-  const taskRows=useMemo(()=>{
+  const commRows=useMemo(()=>{
     const rows=[];
-    const taskStage=x=>x.done?'Complete':String(x.status||x.phase||'').toLowerCase().includes('waiting')||x.waitingOn?'Waiting':'Follow-Up';
-    (todos||[]).filter(t=>!t.archived).forEach((t,i)=>rows.push({id:`top3-${t.id}`,title:asTitle(t),domain:t.goal||'Today',stage:taskStage(t),source:'Daily 3',priority:i===0?'P1':'P2',done:!!t.done,original:t}));
-    (weekly||[]).filter(t=>!t.archived).forEach((t,i)=>rows.push({id:`week-${t.id}`,title:asTitle(t),domain:t.goal||'Weekly Focus',stage:taskStage(t),source:'Weekly 5',priority:i<2?'P1':'P2',done:!!t.done,original:t}));
-    (tasks||[]).forEach(domain=>(domain.tasks||[]).forEach(t=>rows.push({id:`task-${domain.id}-${t.id}`,title:t.title,domain:domain.label,stage:taskStage(t),source:'Source Queue',priority:t.priority==='now'?'P1':t.priority==='later'?'P3':'P2',dueDate:t.dueDate,done:!!t.done,subtasks:t.subtasks||[],original:{...t,domain:domain.label,domainId:domain.id}})));
-    (errands||[]).forEach(e=>rows.push({id:`errand-${e.id}`,title:e.text,domain:e.category||'Errands',stage:taskStage(e),source:'Errands',priority:e.priority||'P2',done:!!e.done,original:{...e,title:e.text,domain:e.category||'Errands'}}));
+    const commStage=c=>{
+      const phase=String(c.phase||c.status||'Draft').toLowerCase();
+      if(phase.includes('closed')||phase.includes('complete')) return 'Complete';
+      if(phase.includes('waiting')) return 'Waiting';
+      if(phase.includes('sent')) return 'Sent';
+      return 'Follow-Up';
+    };
     (comms||[]).forEach(c=>{
-      const phase=String(c.phase||'Draft');
-      const stageMap={Draft:'Follow-Up',Sent:'Sent','Follow-up':'Follow-Up',Closed:'Complete'};
-      rows.push({id:`comm-${c.id}`,title:c.title||'Communication',domain:c.contact||c.category||'Relationships',stage:stageMap[phase]||'Follow-Up',source:COMMTYPES[c.type]||'Comms',priority:phase==='Follow-up'?'P1':'P2',dueDate:c.followUpDate,done:phase==='Closed',original:c});
+      const stage=commStage(c);
+      rows.push({id:`comm-${c.id}`,title:c.title||'Communication',domain:c.contact||c.category||'Relationships',stage,source:COMMTYPES[c.type]||'Comms',priority:stage==='Follow-Up'?'P1':'P2',dueDate:c.followUpDate,done:stage==='Complete',original:c});
     });
     const byKey=new Map();
     rows.map(r=>({...inferExecutionMeta(r),tag:r.source,subtasks:Array.isArray(r.subtasks)?r.subtasks:[]})).forEach(r=>{
@@ -4422,14 +4428,20 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpen
       if(!byKey.has(key)) byKey.set(key,r);
     });
     return [...byKey.values()];
-  },[JSON.stringify({todos,weekly,tasks,errands,comms})]);
+  },[JSON.stringify(comms||[])]);
+  const errandRows=useMemo(()=>{
+    const rows=(errands||[]).filter(e=>!e.done).map(e=>({...inferExecutionMeta({title:e.text||e.title||'Errand',domain:e.category||'Errands',actionMode:'errand'}),id:`errand-${e.id}`,title:e.text||e.title||'Errand',domain:e.category||'Errands',source:'Errands',priority:e.priority||'P2',dueDate:e.dueDate,done:!!e.done,original:{...e,title:e.text||e.title,domain:e.category||'Errands'}}));
+    const byKey=new Map();
+    rows.forEach(r=>{ const key=execNormText(`${r.title} ${r.domain} errand`); if(!byKey.has(key)) byKey.set(key,r); });
+    return [...byKey.values()];
+  },[JSON.stringify(errands||[])]);
   const stages=[
     {key:'Sent',label:'Sent',icon:'mail',color:C.info},
     {key:'Waiting',label:'Waiting',icon:'users',color:C.purple},
     {key:'Follow-Up',label:'Follow-Up',icon:'clock',color:C.pink},
     {key:'Complete',label:'Complete',icon:'check',color:C.good}
   ];
-  const rows=taskRows.filter(r=>r.stage===stage || (stage==='Waiting'&&String(r.status||'').toLowerCase()==='waiting'));
+  const rows=commRows.filter(r=>r.stage===stage);
   const stageMeta=stages.find(s=>s.key===stage)||stages[0];
   const dueLabel=d=>d?fmtDue(d):'No date';
   const modeLabel=m=>String(m||'task').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
@@ -4438,10 +4450,11 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpen
     target==='top3'?onPromoteTop3?.(item):onPromoteWeekly?.(item);
   };
   return <section className="plan-section plan-action-board">
-    <div className="plan-section-head"><span className="plan-section-label">Action Queue</span><div className="plan-action-shortcuts"><button type="button" className="plan-link" onClick={onOpenCalendar}>Calendar</button><button type="button" className="plan-link" onClick={onOpenTasks}>Tasks</button></div></div>
+    <div className="plan-section-head"><span className="plan-section-label">Execution Queue</span><div className="plan-action-shortcuts"><button type="button" className="plan-link" onClick={onOpenCalendar}>Calendar</button><button type="button" className="plan-link" onClick={onOpenTasks}>Tasks</button></div></div>
     <div className="glass card plan-action-card">
-      <div className="plan-stage-pills">{stages.map(s=>{ const count=taskRows.filter(r=>r.stage===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${stage===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setStage(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
-      <div className="plan-action-headline"><div><b style={{color:stageMeta.color}}>{stageMeta.label}</b><small>Status lane. Context and mode are just labels.</small></div><span>{rows.length}</span></div>
+      <div className="plan-action-headline"><div><b style={{color:C.info}}>Comms</b><small>Sent, waiting, follow-up, complete.</small></div><span>{commRows.length}</span></div>
+      <div className="plan-stage-pills">{stages.map(s=>{ const count=commRows.filter(r=>r.stage===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${stage===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setStage(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
+      <div className="plan-action-subhead"><b style={{color:stageMeta.color}}>{stageMeta.label}</b><span>{rows.length}</span></div>
       <div className="plan-action-list">
         {rows.length?rows.slice(0,8).map(r=>{
           const color=domainFamilyColor(r.domain||r.actionMode||'Task');
@@ -4449,7 +4462,19 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpen
             <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>Context · {r.domain}</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span><span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
             <div className="plan-action-buttons"><button type="button" onClick={()=>promote(r,'top3')}>Daily 3</button><button type="button" onClick={()=>promote(r,'weekly')}>Weekly 5</button></div>
           </article>;
-        }):<div className="empty">Nothing in {stageMeta.label}. That is a feature, not a bug.</div>}
+        }):<div className="empty">No comms in {stageMeta.label}.</div>}
+      </div>
+    </div>
+    <div className="glass card plan-action-card plan-errands-card">
+      <div className="plan-action-headline"><div><b style={{color:C.warn}}>Errands</b><small>Physical stops, pickups, drop-offs, and outside-the-house execution.</small></div><span>{errandRows.length}</span></div>
+      <div className="plan-action-list">
+        {errandRows.length?errandRows.slice(0,6).map(r=>{
+          const color=domainFamilyColor(r.domain||'Errands');
+          return <article key={r.id} className="plan-action-row errand" style={{borderLeftColor:color}}>
+            <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>Bucket · Errands</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span><span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div></div>
+            <div className="plan-action-buttons"><button type="button" onClick={()=>promote(r,'top3')}>Daily 3</button><button type="button" onClick={()=>promote(r,'weekly')}>Weekly 5</button></div>
+          </article>;
+        }):<div className="empty">No open errands.</div>}
       </div>
     </div>
   </section>;
