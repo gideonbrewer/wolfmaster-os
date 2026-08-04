@@ -2476,8 +2476,10 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
 </style>
 <style id="wm-execution-cleanup-2026-08-04">
   .plan-action-board .plan-action-card{padding:14px!important;border-color:rgba(147,242,10,.18);background:linear-gradient(180deg,rgba(147,242,10,.04),rgba(255,255,255,.018))}
+  .plan-action-board .plan-action-card + .plan-action-card{margin-top:12px!important}
   .plan-action-shortcuts{display:flex;align-items:center;gap:10px}
   .plan-stage-pills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:2px 0 10px;scrollbar-width:none}
+  .plan-task-pills{grid-template-columns:repeat(3,minmax(0,1fr))}
   .plan-stage-pills::-webkit-scrollbar{display:none}
   .plan-stage-pill{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:var(--text-mid);border-radius:16px;padding:9px 6px;min-height:64px;text-align:center}
   .plan-stage-pill svg{width:16px;height:16px}
@@ -4408,7 +4410,32 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
   </section>;
 }
 function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpenTasks,onPromoteTop3,onPromoteWeekly}){
+  const [taskBucket,setTaskBucket]=useState('Now');
   const [stage,setStage]=useState('Sent');
+  const taskRows=useMemo(()=>{
+    const rows=[];
+    const today=new Date(); today.setHours(0,0,0,0);
+    const bucketFor=(x,source)=>{
+      if(x.done) return 'Later';
+      const raw=String(x.priority||x.status||x.phase||x.bucket||'').toLowerCase();
+      if(source==='Daily 3'||raw==='now'||raw==='p1'||raw.includes('urgent')) return 'Now';
+      if(raw==='later'||raw==='p3'||raw.includes('deferred')||raw.includes('park')) return 'Later';
+      if(x.dueDate){
+        const due=new Date(`${x.dueDate}T00:00:00`);
+        if(Number.isFinite(due.getTime())&&due<=today) return 'Now';
+      }
+      return source==='Weekly 5'?'Soon':'Soon';
+    };
+    (todos||[]).filter(t=>!t.archived&&!t.done).forEach((t,i)=>rows.push({id:`top3-${t.id}`,title:asTitle(t),domain:t.goal||'Today',bucket:bucketFor(t,'Daily 3'),source:'Daily 3',priority:i===0?'P1':'P2',done:!!t.done,original:t}));
+    (weekly||[]).filter(t=>!t.archived&&!t.done).forEach((t,i)=>rows.push({id:`week-${t.id}`,title:asTitle(t),domain:t.goal||'Weekly Focus',bucket:bucketFor(t,'Weekly 5'),source:'Weekly 5',priority:i<2?'P1':'P2',done:!!t.done,original:t}));
+    (tasks||[]).forEach(domain=>(domain.tasks||[]).filter(t=>!t.done).forEach(t=>rows.push({id:`task-${domain.id}-${t.id}`,title:t.title,domain:domain.label,bucket:bucketFor(t,'Source Queue'),source:'Source Queue',priority:t.priority==='now'?'P1':t.priority==='later'?'P3':'P2',dueDate:t.dueDate,done:!!t.done,subtasks:t.subtasks||[],original:{...t,domain:domain.label,domainId:domain.id}})));
+    const byKey=new Map();
+    rows.map(r=>({...inferExecutionMeta(r),tag:r.source,subtasks:Array.isArray(r.subtasks)?r.subtasks:[]})).forEach(r=>{
+      const key=execNormText(`${r.title} ${r.domain} ${r.source}`);
+      if(!byKey.has(key)) byKey.set(key,r);
+    });
+    return [...byKey.values()];
+  },[JSON.stringify({todos,weekly,tasks})]);
   const commRows=useMemo(()=>{
     const rows=[];
     const commStage=c=>{
@@ -4442,6 +4469,13 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpen
     {key:'Complete',label:'Complete',icon:'check',color:C.good}
   ];
   const rows=commRows.filter(r=>r.stage===stage);
+  const taskBuckets=[
+    {key:'Now',label:'Now',icon:'target',color:C.accent},
+    {key:'Soon',label:'Soon',icon:'clock',color:C.warn},
+    {key:'Later',label:'Later',icon:'star',color:C.textDim}
+  ];
+  const taskBucketMeta=taskBuckets.find(s=>s.key===taskBucket)||taskBuckets[0];
+  const visibleTasks=taskRows.filter(r=>r.bucket===taskBucket);
   const stageMeta=stages.find(s=>s.key===stage)||stages[0];
   const dueLabel=d=>d?fmtDue(d):'No date';
   const modeLabel=m=>String(m||'task').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
@@ -4450,7 +4484,21 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,onOpenCalendar,onOpen
     target==='top3'?onPromoteTop3?.(item):onPromoteWeekly?.(item);
   };
   return <section className="plan-section plan-action-board">
-    <div className="plan-section-head"><span className="plan-section-label">Execution Queue</span><div className="plan-action-shortcuts"><button type="button" className="plan-link" onClick={onOpenCalendar}>Calendar</button><button type="button" className="plan-link" onClick={onOpenTasks}>Tasks</button></div></div>
+    <div className="plan-section-head"><span className="plan-section-label">Work Queues</span><div className="plan-action-shortcuts"><button type="button" className="plan-link" onClick={onOpenCalendar}>Calendar</button><button type="button" className="plan-link" onClick={onOpenTasks}>Tasks</button></div></div>
+    <div className="glass card plan-action-card plan-tasks-card">
+      <div className="plan-action-headline"><div><b style={{color:C.accent}}>Tasks</b><small>Actionable work prioritized by Now, Soon, Later.</small></div><span>{taskRows.length}</span></div>
+      <div className="plan-stage-pills plan-task-pills">{taskBuckets.map(s=>{ const count=taskRows.filter(r=>r.bucket===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${taskBucket===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setTaskBucket(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
+      <div className="plan-action-subhead"><b style={{color:taskBucketMeta.color}}>{taskBucketMeta.label}</b><span>{visibleTasks.length}</span></div>
+      <div className="plan-action-list">
+        {visibleTasks.length?visibleTasks.slice(0,8).map(r=>{
+          const color=domainFamilyColor(r.domain||r.actionMode||'Task');
+          return <article key={r.id} className={`plan-action-row ${r.done?'done':''}`} style={{borderLeftColor:color}}>
+            <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>Domain · {r.domain}</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span><span>{r.source}</span><span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
+            <div className="plan-action-buttons"><button type="button" onClick={()=>promote(r,'top3')}>Daily 3</button><button type="button" onClick={()=>promote(r,'weekly')}>Weekly 5</button></div>
+          </article>;
+        }):<div className="empty">No tasks in {taskBucketMeta.label}.</div>}
+      </div>
+    </div>
     <div className="glass card plan-action-card">
       <div className="plan-action-headline"><div><b style={{color:C.info}}>Comms</b><small>Initiated, waiting, follow-up, complete.</small></div><span>{commRows.length}</span></div>
       <div className="plan-stage-pills">{stages.map(s=>{ const count=commRows.filter(r=>r.stage===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${stage===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setStage(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
