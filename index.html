@@ -2576,9 +2576,9 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .bg-glow-b{background:rgba(93,183,255,.10)!important;opacity:.11!important}
   .glass{border-color:rgba(235,241,255,.08)!important;box-shadow:0 1px 2px rgba(0,0,0,.22),0 14px 34px rgba(0,0,0,.30)!important;background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.016))!important}
   .brand-mark,.primary-btn,.qc-fab{background:linear-gradient(180deg,var(--accent),#56D94F)!important;box-shadow:0 8px 22px rgba(124,255,107,.13)!important}
-  .qc-fab{width:auto!important;min-width:88px!important;height:40px!important;gap:6px!important;padding:0 12px!important;font-size:0!important;border-radius:999px!important;bottom:calc(126px + var(--safe-bottom))!important}
+  .qc-fab{width:42px!important;min-width:42px!important;height:42px!important;gap:0!important;padding:0!important;font-size:0!important;border-radius:999px!important;bottom:calc(128px + var(--safe-bottom))!important}
   .qc-fab span{font-size:19px!important;line-height:1;font-weight:900}
-  .qc-fab b{font-size:10px!important;letter-spacing:.055em;text-transform:uppercase}
+  .qc-fab b{display:none!important}
   .fixed-tabs{background:rgba(8,9,13,.88)!important;border-color:rgba(235,241,255,.08)!important}
   .wm-brief,.wm-top3,.plan-priority-hero,.plan-action-board .plan-action-card{border-color:rgba(124,255,107,.14)!important;background:radial-gradient(92% 80% at 100% 0%,rgba(93,183,255,.04),transparent 48%),linear-gradient(180deg,rgba(255,255,255,.034),rgba(255,255,255,.014))!important}
   .wm-next,.wm-open-focus-cta,.plan-focus-inline{background:rgba(124,255,107,.055)!important;border-color:rgba(124,255,107,.13)!important}
@@ -2591,12 +2591,13 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .wm-task-detail-note{color:var(--text-mid);font-size:13px;line-height:1.35}
   .wm-task-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .wm-task-detail-close{width:36px;height:36px;border-radius:999px;padding:0}
-  .wm-mo-strip{min-height:0!important;padding:14px!important}
-  .wm-mo-strip-head{gap:10px!important}
+  .wm-mo-strip{min-height:0!important;padding:13px!important}
+  .wm-mo-strip-head{gap:10px!important;flex-wrap:nowrap!important}
   .wm-mo-chips{margin-top:11px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-  .wm-mo-chip{padding:10px!important;min-height:54px!important;border-radius:14px!important;background:rgba(124,255,107,.055)!important;border:1px solid rgba(124,255,107,.13)!important}
+  .wm-mo-chip{padding:8px 9px!important;min-height:44px!important;border-radius:13px!important;background:rgba(124,255,107,.045)!important;border:1px solid rgba(124,255,107,.12)!important}
   .wm-mo-chip b{font-size:12px!important}
   .wm-mo-chip small{font-size:10px!important}
+  .wm-mo-strip .wm-panel-ico{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:10px;background:rgba(124,255,107,.10);border:1px solid rgba(124,255,107,.20);color:var(--accent);font-size:0}
   @media(max-width:640px){
     .wm-now-cockpit .wm-top3{padding:10px!important;border-radius:18px!important}
     .wm-now-cockpit .wm-top3-grid{gap:6px!important;margin-top:7px!important}
@@ -2607,7 +2608,7 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     .wm-now-cockpit .cc-empty{min-height:72px!important;padding:12px!important;text-align:left!important;border-radius:15px!important}
     .wm-now-cockpit .cc-empty strong{font-size:14px!important;line-height:1.1!important}
     .wm-now-cockpit .cc-empty .meta{font-size:11px!important;letter-spacing:0!important;text-transform:none!important;line-height:1.25!important}
-    .wm-now-cockpit .wm-mo-strip{padding:12px!important;border-radius:18px!important}
+    .wm-now-cockpit .wm-mo-strip{padding:11px 12px!important;border-radius:18px!important}
     .wm-now-cockpit .wm-mo-strip-score b{font-size:27px!important}
     .wm-now-cockpit .wm-mo-chips{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin-top:9px!important}
     .wm-now-cockpit .wm-mo-toggle{padding:7px 9px!important;font-size:10px!important}
@@ -3605,7 +3606,9 @@ function commandBriefBullets(text,fallbackItems=[]){
   return parts.slice(0,2);
 }
 function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,careerTasks,comms,emailItems,calendarEvents,habits,errands,build,reflect}){
-  const pDone=(todos||[]).filter(t=>t.done).length, pTotal=(todos||[]).length||3;
+  const dailyItems=(todos||[]).filter(t=>!t.archived).slice(0,3);
+  const dailyOpen=dailyItems.filter(t=>!t.done);
+  const pDone=dailyItems.filter(t=>t.done).length, pTotal=dailyItems.length;
   const manualReplies=(comms||[]).filter(c=>['Sent','Follow-up','Follow Up'].includes(c.phase)).length;
   const gmailReplyLoops=(emailItems||[]).filter(m=>m.needsReply||m.waitingOn).length;
   const awaiting=manualReplies+gmailReplyLoops;
@@ -3614,8 +3617,8 @@ function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,care
   const momentumData=momentumModel({habits,todos});
   const momentum=momentumData.score;
   const momentumWord=!momentumData.hasData?'No data':momentum>=80?'Great':momentum>=60?'Good':momentum>=40?'Building':'Low';
-  const next=(todos||[]).find(t=>!t.done) || openTasks.find(t=>String(t.priority||t.ccPriority||'').toLowerCase()==='now') || (careerLeads||[]).find(t=>!t.done) || openTasks[0];
-  const recommendation=next?asTitle(next):'Everything critical is clear — get ahead.';
+  const next=dailyOpen[0]||null;
+  const recommendation=next?asTitle(next):(pTotal?'Daily 3 complete — pick an On Deck option.':"Set today's Daily 3 before chasing new work.");
   const briefSignals=buildPrioritizedSignals({comms,tasks,careerTasks,errands,build,todos,reflect},3);
   const familySignal=briefSignals.find(s=>s.tag==='family');
   const alsoLine=briefSignals.map(s=>s.short).join('; ');
@@ -3630,16 +3633,16 @@ function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,care
   const latestReflection=(reflect||[])[0];
   const digest=useMemo(()=>({today:todayStr(),top3:(todos||[]).filter(t=>!t.done&&!t.archived).slice(0,3).map(t=>({text:asTitle(t),done:!!t.done,goal:t.goal||''})),weekly:(weekly||[]).filter(t=>!t.archived).slice(0,5).map(t=>({text:asTitle(t),done:!!t.done})),recommendation,signals:deepSignals.map(s=>({text:s.short||s.label,tag:s.tag})),attention,people,events,momentum,reflection:latestReflection?(latestReflection.win||latestReflection.tomorrow||latestReflection.gratitude||''):'none'}),[JSON.stringify({todos,weekly,recommendation,deepSignals,attention,people,events,momentum,latestReflection})]);
   const digestKey=useMemo(()=>JSON.stringify(digest),[digest]);
-  const heuristicBrief=`${recommendation} ${alsoLine?`Also: ${alsoLine}. `:''}${pDone}/${pTotal} Daily 3 complete, ${meetings} meeting${meetings===1?'':'s'} today${momentumData.hasData?`, and momentum is ${momentum}/100`:''}.`;
+  const heuristicBrief=`${recommendation} ${alsoLine?`Also: ${alsoLine}. `:''}${pDone}/${pTotal||0} Daily 3 complete, ${meetings} meeting${meetings===1?'':'s'} today${momentumData.hasData?`, and momentum is ${momentum}/100`:''}.`;
   const runBrief=async(force=false)=>{ if(!session?.access_token){ setBriefError('No active Supabase session token. Sign out and sign back in.'); setBriefState('fallback'); return; } try{ setBriefError(''); setBriefState(force?'refreshing':'loading'); const data=await fetchAIBrief(digest,session.access_token,force); setAiBrief(data.brief||null); setBriefState(data.cached?'cached':'ready'); }catch(e){ setBriefError(e.message||'AI brief request failed'); setBriefState('fallback'); } };
   useEffect(()=>{ setAiBrief(null); setBriefError(''); runBrief(false); },[session?.access_token,todayStr(),digestKey]);
   const briefText=aiBrief||heuristicBrief;
   const briefBullets=commandBriefBullets(briefText,[recommendation,...briefSignals.map(s=>s.short)]);
   const briefBadge=aiBrief?(briefState==='cached'?'Cached AI':'AI brief'):briefState==='loading'||briefState==='refreshing'?'Loading AI':briefError?'AI error':'Fallback';
-  const detailWhy=pDone<pTotal?'It is the first unfinished Daily 3 item, so it protects the day before lower-priority inputs take over.':openTasks.length?'Daily 3 is clear, so the next open urgent task becomes the highest-leverage move.':'No urgent execution item is open right now.';
+  const detailWhy=pTotal===0?'Daily 3 is empty. Choose the three outcomes before reacting to lower-priority work.':pDone<pTotal?'It is the first unfinished Daily 3 item, so it protects the day before lower-priority inputs take over.':'Daily 3 is complete. Use On Deck only if you want more work.';
   const detailRisk=deepSignals.length?deepSignals.slice(0,2).map(s=>s.short||s.label).join('; '):awaiting?`${awaiting} reply${awaiting===1?'':'ies'} still awaiting follow-up.`:'No major slipping signal detected.';
   const detailOrder=[recommendation,...deepSignals.map(s=>s.short||s.label)].filter(Boolean).slice(0,3).join(' → ');
-  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing…':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Daily 3" value={`${pDone}/${pTotal}`} color={C.accent} onClick={()=>onNavigate&&onNavigate('plan','priorities')}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Replies" value={awaiting} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','replies')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familySignal?'Needs':'OK'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Next</div><strong>{recommendation}</strong></div><span className="wm-next-hint">Daily 3</span></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
+  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing…':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Daily 3" value={`${pDone}/${pTotal||0}`} color={C.accent} onClick={()=>onNavigate&&onNavigate('plan','priorities')}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Replies" value={awaiting} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','replies')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familySignal?'Needs':'OK'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Next</div><strong>{recommendation}</strong></div><span className="wm-next-hint">{next?'Daily 3':pTotal?'Done':'Plan'}</span></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
 }
 function NowCommandPrompts({todos,setTodos,tasks,careerTasks,errands,comms,build,reflect,onNavigate}){
   const [prompt,setPrompt]=useState('next');
@@ -3670,7 +3673,7 @@ function NowTop3Cards({todos,setTodos,setCalendarEvents}){
   const del=item=>{ if(confirm(`Delete "${asTitle(item)}"?`)) setTodos((todos||[]).filter(t=>t.id!==item.id)); };
   const edit=item=>{ const next=prompt('Edit Daily 3',asTitle(item)); if(next===null) return; const trimmed=next.trim(); if(trimmed) patch(item.id,{text:trimmed,title:trimmed}); };
   const schedule=item=>{ if(!setCalendarEvents) return; const date=prompt('Schedule date YYYY-MM-DD',todayStr()); if(date===null) return; const time=prompt('Start time HH:MM','09:00'); if(time===null) return; setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:date||todayStr(),time:time||'09:00',title:asTitle(item),note:'60m · Daily 3',source:'manual'}])); notify('Added to calendar'); };
-  const items=[...(todos||[])].filter(t=>!t.done&&!t.archived).slice(0,3);
+  const items=[...(todos||[])].filter(t=>!t.archived).slice(0,3);
   const activeId=items.find(t=>!t.done)?.id;
   const [input,setInput]=useState('');
   const [detail,setDetail]=useState(null);
@@ -4254,7 +4257,7 @@ function NowMomentumStrip({habits,todos,setHabits}){
   const toggleHabit=id=>{ if(!setHabits||!id) return; setHabits((habits||[]).map(h=>{ if(h.id!==id) return h; const done=!h.done; return {...h,done,current:done?1:0,streak:done?(h.streak||0)+1:Math.max(0,(h.streak||0)-1),lastCompleted:done?todayStr():h.lastCompleted}; })); };
   return <section className="glass card wm-panel wm-momentum wm-mo-strip">
     <div className="wm-mo-strip-head">
-      <div className="wm-mo-strip-score"><span className="wm-panel-ico">📊</span><b>{score}</b><span className="wm-mo-strip-max">/100</span><span className="wm-mo-delta">{hasData?`${trackedCount} tracked`:'No data'}</span></div>
+      <div className="wm-mo-strip-score"><span className="wm-panel-ico"><Icon name="bars" size={15} /></span><b>{score}</b><span className="wm-mo-strip-max">/100</span><span className="wm-mo-delta">{hasData?`${trackedCount} tracked`:'No data'}</span></div>
       <button type="button" className="ghost-btn wm-mo-toggle" aria-expanded={open} onClick={()=>setOpen(o=>!o)}>{open?'Hide habits ↑':'View habits ↓'}</button>
     </div>
     {!open?<div className="wm-mo-chips">{topRows.map((r,i)=><span className="wm-mo-chip" key={i}><b>{r.label}</b><small>{r.sub}</small></span>)}</div>:null}
