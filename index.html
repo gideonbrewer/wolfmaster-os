@@ -4434,7 +4434,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
         <div className="plan-priority-actions">
           {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<ActionMenu items={[(onMoveItem&&!item.done)?{label:moveLabel,primary:true,onSelect:()=>{onMoveItem(item);notify('Moved to '+moveLabel);}}:null,{label:'Edit',onSelect:()=>startEdit(item)},{label:'Remove',danger:true,onSelect:()=>remove(item)}]} />}
         </div>
-      </div>):<div className="empty">{kind==='daily'?'No Daily 3 set. Add the three things that win today.':'No Weekly 5 set. Add the five outcomes that define the week.'}</div>}
+      </div>):<div className="empty">{kind==='daily'?'No Daily 3 set.':'No Weekly 5 set.'}</div>}
     </div>
     {open.length<max?<div className="plan-priority-add"><input className="text-input" value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={kind==='daily'?'Restock Daily 3…':'Restock Weekly 5…'} /><button type="button" className="primary-btn" style={{background:accent,color:'#091005'}} onClick={add}>Add</button></div>:null}
   </div>;
@@ -4465,12 +4465,11 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
   return <section className="plan-section">
     <div className="plan-section-head"><span className="plan-section-label">Priority Planner</span><button type="button" className="plan-link" onClick={onOpenTasks}>Pull from task queue ›</button></div>
     <div className="glass card plan-priority-hero">
-      <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b><small>Edit Daily 3 and Weekly 5 directly here. Everything else is support planning.</small></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 · Weekly 5 {weeklyDone}/5</span></div>
+      <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 · Weekly 5 {weeklyDone}/5</span></div>
       <div className="plan-priority-grid">
         <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" moveDisabledLabel="Done" />
         <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" moveDisabledLabel="Done" />
       </div>
-      <div className="plan-focus-inline compact"><span>Weekly focus comes from Weekly 5.</span></div>
     </div>
   </section>;
 }
