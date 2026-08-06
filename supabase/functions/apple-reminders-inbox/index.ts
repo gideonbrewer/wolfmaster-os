@@ -80,10 +80,19 @@ Deno.serve(async (req) => {
   try {
     if (action === "capture") {
       const expected = Deno.env.get("WM_APPLE_REMINDERS_TOKEN") || "";
-      const userId = Deno.env.get("WM_APPLE_REMINDERS_USER_ID") || "";
+      let userId = Deno.env.get("WM_APPLE_REMINDERS_USER_ID") || "";
+      const userEmail = clean(Deno.env.get("WM_APPLE_REMINDERS_USER_EMAIL")).toLowerCase();
       const token = req.headers.get("x-wm-capture-token") || clean(body.token);
-      if (!expected || !userId) return json({ error: "missing_apple_reminders_config" }, 500);
+      if (!expected || (!userId && !userEmail)) return json({ error: "missing_apple_reminders_config" }, 500);
       if (token !== expected) return json({ error: "unauthorized" }, 401);
+
+      if (!userId && userEmail) {
+        const userLookup = await admin.auth.admin.listUsers();
+        if (userLookup.error) return json({ error: "user_lookup_failed", detail: userLookup.error.message }, 500);
+        const matched = userLookup.data.users.find((user) => user.email?.toLowerCase() === userEmail);
+        if (!matched) return json({ error: "apple_reminders_user_not_found" }, 500);
+        userId = matched.id;
+      }
 
       const skipReason = shouldSkip(body);
       if (skipReason) return json({ ok: true, skipped: true, reason: skipReason });
