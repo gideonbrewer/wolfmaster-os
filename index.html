@@ -906,6 +906,19 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .plan-connect-copy b{font-size:11.5px;font-weight:900;line-height:1.1}
 .plan-connect-copy small{font-size:9.5px;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .plan-connect-copy,.plan-connect-action{display:none}
+.apple-review-backdrop{position:fixed;inset:0;z-index:520;display:flex;align-items:flex-end;justify-content:center;padding:18px;background:rgba(2,4,8,.72);backdrop-filter:blur(12px)}
+.apple-review-sheet{width:min(560px,100%);max-height:min(78vh,680px);overflow:auto;border-radius:26px;padding:16px;box-shadow:0 28px 70px rgba(0,0,0,.55)}
+.apple-review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.apple-review-head b{display:block;font-size:18px;line-height:1.1}
+.apple-review-head small{display:block;color:var(--text-mid);font-size:12px;line-height:1.35;margin-top:3px}
+.apple-review-list{display:grid;gap:9px}
+.apple-review-item{display:grid;gap:8px;padding:11px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.028);border-radius:17px}
+.apple-review-title{font-weight:850;font-size:13px;line-height:1.25;color:var(--text)}
+.apple-review-note{font-size:11px;color:var(--text-mid);line-height:1.3}
+.apple-review-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+.apple-review-controls .text-input{min-height:36px;padding:8px 10px;font-size:12px;border-radius:12px}
+.apple-review-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+@media (max-width:640px){.apple-review-backdrop{padding:10px 10px calc(118px + var(--safe-bottom))}.apple-review-sheet{max-height:72vh;border-radius:22px}.apple-review-controls{grid-template-columns:1fr}.apple-review-actions .primary-btn,.apple-review-actions .ghost-btn{width:100%}}
 .wm-top-search{width:42px;height:42px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-mid);cursor:pointer;transition:background .15s,border-color .15s}
 .wm-top-search:hover{background:rgba(255,255,255,.07);border-color:var(--border-strong)}
 .wm-search-backdrop{position:fixed;inset:0;z-index:320;display:flex;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 14px 120px;background:rgba(2,3,6,.70);backdrop-filter:blur(10px)}
@@ -4024,6 +4037,7 @@ const ICON_PATHS={
   alert:'M12 4 2.5 20h19zM12 10v4M12 17.5v.5',
   doc:'M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7zM14 3v4h4M9 13h6M9 17h4',
   mail:'M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1M3.5 7l8.5 6 8.5-6',
+  reminder:'M8 6h13M8 12h13M8 18h13M3.5 6.2l1 1 2-2M3.5 12.2l1 1 2-2M3.5 18.2l1 1 2-2',
   spark:'M12 3v5M12 16v5M3 12h5M16 12h5M6.5 6.5 9 9M15 15l2.5 2.5M17.5 6.5 15 9M9 15l-2.5 2.5',
   flag:'M5 21V4M5 4h11l-2 4 2 4H5',
   trophy:'M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M9 17h6M10 13.5V17M14 13.5V17M8 20h8',
@@ -4888,16 +4902,17 @@ function normalizedHorizons(items){
   (items||[]).forEach(h=>{ if(h?.key) byKey[h.key]={...(byKey[h.key]||{}),...h}; });
   return order.map(k=>byKey[k]).filter(Boolean).map(h=>({...h,actions:Array.isArray(h.actions)?h.actions:[]}));
 }
-function PlanConnectStrip({calendarStatus,calendarUrl,calendarLoading,onConnectGoogleCalendar,onSyncGoogleCalendar,emailStatus,emailItems,emailLoading,onConnectGmail,onSyncGmail}){
+function PlanConnectStrip({calendarStatus,calendarUrl,calendarLoading,onConnectGoogleCalendar,onSyncGoogleCalendar,emailStatus,emailItems,emailLoading,onConnectGmail,onSyncGmail,appleLoading,appleMessage,onPullAppleReminders}){
   const calendarConnected=String(calendarStatus||'').toLowerCase().includes('google')||!!calendarUrl;
   const emailConnected=String(emailStatus||'').toLowerCase().includes('gmail');
   const needs=(emailItems||[]).filter(x=>x.needsReply).length;
   const mailCount=(emailItems||[]).length;
   const items=[
     {key:'cal',label:'Calendar',status:calendarConnected?'Synced':'Not connected',meta:calendarConnected?'Google':'Connect',icon:'calendar',busy:calendarLoading,action:calendarConnected?onSyncGoogleCalendar:onConnectGoogleCalendar,actionLabel:calendarLoading?'Syncing':'Sync'},
-    {key:'mail',label:'Email',status:emailConnected?'Synced':'Not connected',meta:emailConnected?`${needs} reply · ${mailCount} read`:'Gmail',icon:'mail',busy:emailLoading,action:emailConnected?onSyncGmail:onConnectGmail,actionLabel:emailLoading?'Syncing':'Sync'}
+    {key:'mail',label:'Email',status:emailConnected?'Synced':'Not connected',meta:emailConnected?`${needs} reply · ${mailCount} read`:'Gmail',icon:'mail',busy:emailLoading,action:emailConnected?onSyncGmail:onConnectGmail,actionLabel:emailLoading?'Syncing':'Sync'},
+    {key:'reminders',label:'Apple Reminders',status:appleMessage||'Ready',meta:'Capture inbox',icon:'reminder',busy:appleLoading,action:onPullAppleReminders,actionLabel:appleLoading?'Pulling':'Pull'}
   ];
-  return <div className="plan-connect-strip">{items.map(item=><button type="button" key={item.key} className={`plan-connect-btn ${item.status==='Synced'?'connected':''}`} onClick={item.action} disabled={item.busy} title={`${item.label}: ${item.status} · ${item.meta}`} aria-label={`${item.status==='Synced'?'Sync':'Connect'} ${item.label}`}>
+  return <div className="plan-connect-strip">{items.map(item=><button type="button" key={item.key} className={`plan-connect-btn ${item.status==='Synced'||item.key==='reminders'?'connected':''}`} onClick={item.action} disabled={item.busy} title={`${item.label}: ${item.status} · ${item.meta}`} aria-label={`${item.status==='Synced'||item.key==='reminders'?'Sync':'Connect'} ${item.label}`}>
     <span className="plan-connect-ico"><Icon name={item.icon} size={15} /></span>
     <span className="plan-connect-copy"><b>{item.label}</b><small>{item.status} · {item.meta}</small></span>
     <span className="plan-connect-action">{item.status==='Synced'?item.actionLabel:'Connect'}</span>
@@ -5107,6 +5122,8 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
   const [openPanels,setOpenPanels]=useState({horizons:false,calendar:false,tasks:false,routines:false});
   const [appleLoading,setAppleLoading]=useState(false);
   const [appleMessage,setAppleMessage]=useState('');
+  const [appleReview,setAppleReview]=useState([]);
+  const [appleChoices,setAppleChoices]=useState({});
   const openPanel=id=>{ setOpenPanels(prev=>({...prev,[id]:true})); setTimeout(()=>document.querySelector(`[data-plan-panel="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}),30); };
   const togglePanel=id=>setOpenPanels(prev=>({...prev,[id]:!prev[id]}));
   useEffect(()=>{ if(navTarget?.tab==='plan'&&navTarget.sub) openPanel(navTarget.sub); },[navTarget?.stamp]);
@@ -5124,6 +5141,7 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
   const moveTaskToWeekly=task=>{ addToPriorityList(task,setWeekly,weekly,5,'Weekly 5'); };
   const moveErrandToTop3=errand=>{ addToPriorityList(errand,setTodos,todos,3,'Daily 3'); };
   const moveErrandToWeekly=errand=>{ addToPriorityList(errand,setWeekly,weekly,5,'Weekly 5'); };
+  const appleDestinationFor=cap=>{ const t=String(cap?.title||'').toLowerCase(); if(/\b(call|text|email|reply|follow up|follow-up)\b/.test(t)) return 'comms'; if(/\b(pick up|drop off|buy|costco|store|errand|deposit)\b/.test(t)) return 'errand'; return 'task'; };
   const pullAppleReminders=async()=>{
     if(!session?.access_token){ notify('Sign in first'); return; }
     setAppleLoading(true);
@@ -5131,12 +5149,10 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       setAppleMessage('Checking Apple Reminders inbox...');
       const captures=await dbGet('apple_reminder_captures','select=id,source_system,source_id,title,notes,due_date,source_url,payload,captured_at&source_system=eq.apple_reminders&status=eq.pending&order=captured_at.asc&limit=100',session.access_token);
       if(!captures.length){ setAppleMessage('No Apple reminders waiting'); notify('No Apple reminders waiting'); return; }
-      const result=importAppleReminderCapturesIntoTasks(captures,tasks);
-      setTasks(result.tasks);
-      if(result.ackIds.length) await dbPatch('apple_reminder_captures',`id=in.(${result.ackIds.join(',')})`,{status:'imported',imported_at:new Date().toISOString(),updated_at:new Date().toISOString()},session.access_token);
-      setAppleMessage(`${result.created.length} imported · ${result.skipped.length} skipped`);
-      notify(result.created.length?`Imported ${result.created.length} Apple reminder${result.created.length===1?'':'s'}`:'No new Apple reminders');
-      if(result.created.length) openPanel('tasks');
+      setAppleReview(captures);
+      setAppleChoices(Object.fromEntries(captures.map(cap=>[cap.id,{destination:appleDestinationFor(cap),domain:'Inbox'}])));
+      setAppleMessage(`${captures.length} to categorize`);
+      notify(`Categorize ${captures.length} Apple reminder${captures.length===1?'':'s'}`);
     }catch(e){
       const message=e.message||'Apple Reminders pull failed';
       setAppleMessage(message);
@@ -5145,18 +5161,66 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       setAppleLoading(false);
     }
   };
+  const updateAppleChoice=(id,fields)=>setAppleChoices(prev=>({...prev,[id]:{destination:'task',domain:'Inbox',...(prev[id]||{}),...fields}}));
+  const applyAppleReview=async()=>{
+    if(!session?.access_token||!appleReview.length) return;
+    setAppleLoading(true);
+    try{
+      const baseTasks=deepClone(tasks&&tasks.length?tasks:TASKSINIT);
+      const findDomain=label=>baseTasks.findIndex(d=>d.id===label||d.label===label);
+      const ensureDomain=label=>{ let idx=findDomain(label); if(idx>=0) return idx; const color=domainFamilyColor(label); baseTasks.unshift({id:label,label,color,tasks:[]}); return 0; };
+      const seen=new Set();
+      const addSeen=text=>seen.add(normKey(text));
+      (todos||[]).forEach(x=>addSeen(asTitle(x)));
+      (weekly||[]).forEach(x=>addSeen(asTitle(x)));
+      (errands||[]).forEach(x=>addSeen(x.text||x.title));
+      (comms||[]).forEach(x=>addSeen(x.title));
+      baseTasks.forEach(d=>(d.tasks||[]).forEach(t=>addSeen(t.title||t.text)));
+      const nextTodos=[...(todos||[])], nextWeekly=[...(weekly||[])], nextErrands=[...(errands||[])], nextComms=[...(comms||[])];
+      let created=0, skipped=0;
+      const ackIds=[];
+      appleReview.forEach((cap,idx)=>{
+        const title=String(cap.title||'').trim();
+        if(cap.id) ackIds.push(cap.id);
+        if(!title){ skipped++; return; }
+        const choice=appleChoices[cap.id]||{destination:'task',domain:'Inbox'};
+        const key=normKey(title);
+        if(choice.destination==='skip'||seen.has(key)){ skipped++; return; }
+        const base={id:`apple-${cap.source_id||cap.id||Date.now()+idx}`,title,text:title,dueDate:cap.due_date||'',notes:cap.notes||'',sourceSystem:'apple_reminders',sourceId:cap.source_id||cap.id,canonicalSystem:'wolfmaster',tags:['apple-reminders'],metadata:{source:'Apple Reminders',captureId:cap.id||'',raw:cap.payload||{}}};
+        if(choice.destination==='daily'&&nextTodos.filter(x=>!x.done&&!x.archived).length<3) nextTodos.push({...base,goal:choice.domain||'Inbox',done:false});
+        else if(choice.destination==='weekly'&&nextWeekly.filter(x=>!x.done&&!x.archived).length<5) nextWeekly.push({...base,goal:choice.domain||'Inbox',done:false});
+        else if(choice.destination==='errand') nextErrands.push({id:base.id,text:title,done:false,category:choice.domain||'Errands',dueDate:base.dueDate,notes:base.notes,sourceSystem:base.sourceSystem,sourceId:base.sourceId,tags:base.tags});
+        else if(choice.destination==='comms') nextComms.push({id:base.id,title,phase:'Draft',type:'text',contact:'',followUpDate:base.dueDate,notes:base.notes||'Apple Reminders capture',sourceSystem:base.sourceSystem,sourceId:base.sourceId,tags:base.tags});
+        else {
+          const idxDomain=ensureDomain(choice.domain||'Inbox');
+          baseTasks[idxDomain]={...baseTasks[idxDomain],tasks:[...(baseTasks[idxDomain].tasks||[]),{...base,priority:'now',status:'inbox',bucket:baseTasks[idxDomain].label||choice.domain||'Inbox',done:false}]};
+        }
+        addSeen(title);
+        created++;
+      });
+      setTodos(nextTodos); setWeekly(nextWeekly); setErrands(nextErrands); setComms(nextComms); setTasks(baseTasks);
+      if(ackIds.length) await dbPatch('apple_reminder_captures',`id=in.(${[...new Set(ackIds)].join(',')})`,{status:'imported',imported_at:new Date().toISOString(),updated_at:new Date().toISOString()},session.access_token);
+      setAppleReview([]); setAppleChoices({});
+      setAppleMessage(`${created} imported · ${skipped} skipped`);
+      notify(`${created} Apple reminder${created===1?'':'s'} imported`);
+      if(created) openPanel('tasks');
+    }catch(e){
+      const message=e.message||'Apple Reminders import failed';
+      setAppleMessage(message);
+      notify(message);
+    }finally{
+      setAppleLoading(false);
+    }
+  };
+  const appleDomainOptions=useMemo(()=>['Inbox',...(tasks||[]).map(d=>d.label||d.id).filter(Boolean)].filter((x,i,a)=>a.indexOf(x)===i),[JSON.stringify(tasks||[])]);
   return <div className="plan-screen plan-single">
     <header className="plan-head">
       <div className="plan-head-titles"><h1 className="plan-title">PLAN</h1><p className="plan-sub">Create the week. Keep the system behind doors.</p></div>
       <div className="plan-head-actions">
-        <PlanConnectStrip calendarStatus={calendarStatus} calendarUrl={calendarUrl} calendarLoading={calendarLoading} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailStatus={emailStatus} emailItems={emailItems||[]} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} />
+        <PlanConnectStrip calendarStatus={calendarStatus} calendarUrl={calendarUrl} calendarLoading={calendarLoading} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailStatus={emailStatus} emailItems={emailItems||[]} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} appleLoading={appleLoading} appleMessage={appleMessage} onPullAppleReminders={pullAppleReminders} />
       </div>
     </header>
     <div className="plan-stack">
-      <button type="button" className="plan-apple-pull" onClick={pullAppleReminders} disabled={appleLoading}>
-        <span><Icon name="check" size={15} /> Apple Inbox</span>
-        <b>{appleLoading?'Pulling reminders…':appleMessage||'Pull Reminders'}</b>
-      </button>
       <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} /></div>
       <PlanActionBoard todos={todos} weekly={weekly} tasks={tasks} errands={errands} comms={comms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
@@ -5167,6 +5231,7 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
         <div data-plan-panel="horizons"><PlanAccordion id="horizons" title="Goals" sub="Supported by tasks and priorities" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Daily 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
       </div>
     </div>
+    {appleReview.length?<div className="apple-review-backdrop" onClick={()=>setAppleReview([])}><section className="glass card apple-review-sheet" onClick={e=>e.stopPropagation()}><div className="apple-review-head"><div><b>Apple Reminders</b><small>Categorize each capture before it enters WolfMaster.</small></div><button type="button" className="ghost-btn" onClick={()=>setAppleReview([])}>Close</button></div><div className="apple-review-list">{appleReview.map(cap=>{ const choice=appleChoices[cap.id]||{destination:'task',domain:'Inbox'}; return <article className="apple-review-item" key={cap.id}><div><div className="apple-review-title">{cap.title||'Untitled reminder'}</div>{cap.notes||cap.due_date?<div className="apple-review-note">{cap.notes||''}{cap.due_date?` · Due ${cap.due_date}`:''}</div>:null}</div><div className="apple-review-controls"><select className="text-input select-like" value={choice.destination} onChange={e=>updateAppleChoice(cap.id,{destination:e.target.value})}><option value="task">Task Queue</option><option value="errand">Errand</option><option value="comms">Comms</option><option value="daily">Daily 3</option><option value="weekly">Weekly 5</option><option value="skip">Skip</option></select><select className="text-input select-like" value={choice.domain||'Inbox'} onChange={e=>updateAppleChoice(cap.id,{domain:e.target.value})} disabled={choice.destination==='skip'}>{appleDomainOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></article>; })}</div><div className="apple-review-actions"><button type="button" className="ghost-btn" onClick={()=>setAppleReview([])}>Cancel</button><button type="button" className="primary-btn" onClick={applyAppleReview} disabled={appleLoading}>{appleLoading?'Importing…':'Import Categorized'}</button></div></section></div>:null}
   </div>;
 }
 
