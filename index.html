@@ -5070,7 +5070,7 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
     </div>
   </section>;
 }
-function PlanActionBoard({todos,weekly,tasks,errands,comms,calendarEvents,calendarStatus,calendarLoading,onOpenCalendar,onOpenTasks,onOpenPeople,onSyncCalendar,onPromoteTop3,onPromoteWeekly}){
+function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands,setErrands,comms,setComms,calendarEvents,calendarStatus,calendarLoading,onOpenCalendar,onOpenTasks,onOpenPeople,onSyncCalendar,onPromoteTop3,onPromoteWeekly}){
   const [panel,setPanel]=useState('calendar');
   const [taskBucket,setTaskBucket]=useState('Now');
   const [stage,setStage]=useState('Sent');
@@ -5148,12 +5148,35 @@ function PlanActionBoard({todos,weekly,tasks,errands,comms,calendarEvents,calend
     const item={...(r.original||{}),title:r.title,text:r.title,domain:r.domain,category:r.domain};
     target==='top3'?onPromoteTop3?.(item):onPromoteWeekly?.(item);
   };
+  const updateRowTitle=(r,title)=>{
+    const next=String(title||'').trim();
+    if(!next) return;
+    const source=r.source;
+    const original=r.original||{};
+    if(source==='Daily 3') setTodos?.(prev=>(prev||[]).map(x=>x.id===original.id?{...x,text:next,title:next}:x));
+    else if(source==='Weekly 5') setWeekly?.(prev=>(prev||[]).map(x=>x.id===original.id?{...x,text:next,title:next}:x));
+    else if(source==='Task Queue') setTasks?.(prev=>(prev||[]).map(domain=>domain.id!==original.domainId?domain:{...domain,tasks:(domain.tasks||[]).map(t=>t.id===original.id?{...t,title:next,text:next}:t)}));
+    else if(source==='Errands') setErrands?.(prev=>(prev||[]).map(x=>x.id===original.id?{...x,text:next,title:next}:x));
+    else if(source==='Comms') setComms?.(prev=>(prev||[]).map(x=>x.id===original.id?{...x,title:next}:x));
+  };
+  const editRow=r=>{ const title=prompt('Edit item',r.title||''); if(title!==null) updateRowTitle(r,title); };
+  const deleteRow=r=>{
+    if(!confirm(`Delete "${r.title||'item'}"?`)) return;
+    const source=r.source;
+    const original=r.original||{};
+    if(source==='Daily 3') setTodos?.(prev=>(prev||[]).filter(x=>x.id!==original.id));
+    else if(source==='Weekly 5') setWeekly?.(prev=>(prev||[]).filter(x=>x.id!==original.id));
+    else if(source==='Task Queue') setTasks?.(prev=>(prev||[]).map(domain=>domain.id!==original.domainId?domain:{...domain,tasks:(domain.tasks||[]).filter(t=>t.id!==original.id)}));
+    else if(source==='Errands') setErrands?.(prev=>(prev||[]).filter(x=>x.id!==original.id));
+    else if(source==='Comms') setComms?.(prev=>(prev||[]).filter(x=>x.id!==original.id));
+    notify('Deleted');
+  };
   const renderRows=(items,empty,kind)=> <div className="plan-action-list">
     {items.length?items.slice(0,8).map(r=>{
       const color=domainFamilyColor(r.domain||r.actionMode||kind||'Task');
       return <article key={r.id} className={`plan-action-row ${r.done?'done':''} ${kind==='errand'?'errand':''}`} style={{borderLeftColor:color}}>
         <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>{kind==='comm'?'Person / org':kind==='errand'?'Bucket':'Domain'} · {r.domain}</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span>{r.source?<span>{r.source}</span>:null}<span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
-        <div className="plan-action-buttons"><button type="button" onClick={()=>promote(r,'top3')}>Daily 3</button><button type="button" onClick={()=>promote(r,'weekly')}>Weekly 5</button></div>
+        <div className="plan-action-buttons"><button type="button" onClick={()=>editRow(r)}>Edit</button><button type="button" onClick={()=>deleteRow(r)}>Delete</button><button type="button" onClick={()=>promote(r,'top3')}>Daily 3</button><button type="button" onClick={()=>promote(r,'weekly')}>Weekly 5</button></div>
       </article>;
     }):<div className="empty">{empty}</div>}
   </div>;
@@ -5296,7 +5319,7 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
     </header>
     <div className="plan-stack">
       <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} /></div>
-      <PlanActionBoard todos={todos} weekly={weekly} tasks={tasks} errands={errands} comms={comms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
+      <PlanActionBoard todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
       <div className="plan-system-stack">
         <div data-plan-panel="calendar"><PlanAccordion id="calendar" title="Calendar" sub={calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}><CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} /></PlanAccordion></div>
