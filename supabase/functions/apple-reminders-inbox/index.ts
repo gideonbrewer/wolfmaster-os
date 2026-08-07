@@ -144,18 +144,6 @@ Deno.serve(async (req) => {
     const user = await requireUser(req);
 
     if (action === "pending") {
-      const expected = Deno.env.get("WM_APPLE_REMINDERS_TOKEN") || "";
-      const userEmail = clean(Deno.env.get("WM_APPLE_REMINDERS_USER_EMAIL")).toLowerCase();
-      if (expected && userEmail && user.email?.toLowerCase() === userEmail) {
-        const claim = await admin
-          .from("apple_reminder_captures")
-          .update({ user_id: user.id, updated_at: new Date().toISOString() })
-          .eq("source_system", "apple_reminders")
-          .eq("status", "pending")
-          .filter("payload->>token", "eq", expected);
-        if (claim.error) return json({ error: "pending_claim_failed", detail: claim.error.message }, 500);
-      }
-
       const { data, error } = await admin
         .from("apple_reminder_captures")
         .select("id,source_system,source_id,title,notes,due_date,source_url,payload,captured_at")
