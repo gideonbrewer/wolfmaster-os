@@ -892,16 +892,18 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .plan-hub-count{font-size:13px;font-weight:900}
 .plan-single .plan-head{margin-bottom:0}
 .plan-single .plan-system-stack{display:grid;gap:9px;margin-top:2px}
-.plan-connect-strip{display:flex;justify-content:flex-end;align-items:center;gap:7px;margin-top:0}
-.plan-connect-btn{position:relative;width:38px;height:38px;min-width:38px;display:grid;place-items:center;padding:0;border-radius:13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.032);color:var(--text);text-align:left;cursor:pointer}
-.plan-connect-btn.connected{border-color:rgba(147,242,10,.22);background:rgba(147,242,10,.045)}
-.plan-connect-btn.connected::after{content:'';position:absolute;right:6px;top:6px;width:7px;height:7px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 2px rgba(10,12,16,.9)}
+.plan-connect-strip{display:inline-flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:0;padding:5px;border-radius:999px;border:1px solid rgba(190,211,238,.12);background:rgba(9,15,25,.78);box-shadow:0 14px 34px rgba(0,0,0,.28);backdrop-filter:blur(16px)}
+.plan-connect-btn{position:relative;width:38px;height:38px;min-width:38px;display:grid;place-items:center;padding:0;border-radius:999px;border:0;background:transparent;color:var(--text-mid);text-align:left;cursor:pointer;transition:background .15s,color .15s,transform .15s}
+.plan-connect-btn:hover,.plan-connect-btn:focus-visible{background:rgba(255,255,255,.055);color:var(--text)}
+.plan-connect-btn:active{transform:scale(.95)}
+.plan-connect-btn.connected{background:rgba(124,255,107,.08);color:var(--accent)}
+.plan-connect-btn.connected::after{content:'';position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 2px rgba(9,15,25,.95)}
 .plan-connect-btn:disabled{opacity:.65;cursor:wait}
 .plan-apple-pull{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:11px 13px;border-radius:16px;border:1px solid rgba(98,169,255,.26);background:linear-gradient(135deg,rgba(98,169,255,.10),rgba(98,169,255,.035));color:var(--text);text-align:left;box-shadow:0 14px 28px rgba(0,0,0,.16)}
 .plan-apple-pull span{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:11px;color:var(--info)}
 .plan-apple-pull b{font-size:12px;color:var(--text-mid);font-weight:800;text-align:right;max-width:54%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-apple-pull:disabled{opacity:.7;cursor:wait}
-.plan-connect-ico{width:24px;height:24px;border-radius:9px;display:grid;place-items:center;color:var(--accent);background:rgba(147,242,10,.09);border:1px solid rgba(147,242,10,.18);flex:0 0 auto}
+.plan-connect-ico{width:100%;height:100%;border-radius:999px;display:grid;place-items:center;color:inherit;background:transparent;border:0;flex:0 0 auto}
 .plan-connect-copy{min-width:0;display:grid;gap:1px}
 .plan-connect-copy b{font-size:11.5px;font-weight:900;line-height:1.1}
 .plan-connect-copy small{font-size:9.5px;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4908,8 +4910,8 @@ function PlanConnectStrip({calendarStatus,calendarUrl,calendarLoading,onConnectG
   const needs=(emailItems||[]).filter(x=>x.needsReply).length;
   const mailCount=(emailItems||[]).length;
   const items=[
-    {key:'cal',label:'Calendar',status:calendarConnected?'Synced':'Not connected',meta:calendarConnected?'Google':'Connect',icon:'calendar',busy:calendarLoading,action:calendarConnected?onSyncGoogleCalendar:onConnectGoogleCalendar,actionLabel:calendarLoading?'Syncing':'Sync'},
     {key:'mail',label:'Email',status:emailConnected?'Synced':'Not connected',meta:emailConnected?`${needs} reply · ${mailCount} read`:'Gmail',icon:'mail',busy:emailLoading,action:emailConnected?onSyncGmail:onConnectGmail,actionLabel:emailLoading?'Syncing':'Sync'},
+    {key:'cal',label:'Calendar',status:calendarConnected?'Synced':'Not connected',meta:calendarConnected?'Google':'Connect',icon:'calendar',busy:calendarLoading,action:calendarConnected?onSyncGoogleCalendar:onConnectGoogleCalendar,actionLabel:calendarLoading?'Syncing':'Sync'},
     {key:'reminders',label:'Apple Reminders',status:appleMessage||'Ready',meta:'Capture inbox',icon:'reminder',busy:appleLoading,action:onPullAppleReminders,actionLabel:appleLoading?'Pulling':'Pull'}
   ];
   return <div className="plan-connect-strip">{items.map(item=><button type="button" key={item.key} className={`plan-connect-btn ${item.status==='Synced'||item.key==='reminders'?'connected':''}`} onClick={item.action} disabled={item.busy} title={`${item.label}: ${item.status} · ${item.meta}`} aria-label={`${item.status==='Synced'||item.key==='reminders'?'Sync':'Connect'} ${item.label}`}>
