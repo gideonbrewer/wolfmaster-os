@@ -3113,11 +3113,15 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
 </style>
 <style id="wm-now-plan-approved-mockup-2026-08-12">
   .fixed-tabs{grid-template-columns:repeat(5,1fr)!important}
-  .wm-life-clock{padding:8px 12px!important;border-radius:15px!important}
+  .wm-life-clock{display:grid!important;gap:7px;padding:8px 12px!important;border-radius:15px!important}
+  .wm-life-main{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
   .wm-life-title{font-size:10px!important}
   .wm-life-count strong{font-size:20px!important}
   .wm-life-count span,.wm-life-count em{font-size:10px!important}
   .wm-life-seconds{display:none!important}
+  .wm-life-progress{position:relative;height:3px;border-radius:999px;background:rgba(255,255,255,.09);overflow:visible}
+  .wm-life-progress span{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--accent);box-shadow:0 0 12px rgba(147,242,10,.2)}
+  .wm-life-progress i{position:absolute;top:50%;width:7px;height:7px;border-radius:999px;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 16px rgba(147,242,10,.35)}
   .wm-now-cockpit{gap:12px}
   .wm-next .wm-eyebrow-ic::after{content:'Focus Now'!important}
   .wm-next-context{margin-top:3px;color:var(--text-mid);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3126,7 +3130,31 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .wm-metric-ring:after{content:'';position:absolute;inset:5px;border-radius:inherit;background:rgba(10,12,18,.96)}
   .wm-metric-ring b{position:relative;z-index:1;color:var(--text);font-size:13px;line-height:1;font-weight:950}
   .wm-metric-sub{font-size:8px!important;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid);font-weight:900;text-align:center}
-  .wm-top3 .wm-top3-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .wm-top3 .section-head{align-items:center!important}
+  .wm-top3-head-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .wm-top3-head-actions>span{display:inline-flex;align-items:center;min-height:30px;padding:6px 9px;border-radius:999px;background:rgba(147,242,10,.1);border:1px solid rgba(147,242,10,.18);color:var(--accent);font-size:10px;font-weight:950;letter-spacing:.11em}
+  .wm-top3 .wm-top3-grid{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;margin-top:9px!important}
+  .wm-top3-card{display:grid!important;grid-template-columns:31px minmax(0,1fr) 26px 30px!important;align-items:center!important;min-height:50px!important;padding:7px 7px!important;border-radius:15px!important;gap:8px!important}
+  .wm-top3-card .wm-top3-head{display:contents!important}
+  .wm-top3-card .wm-rank{position:static!important;transform:none!important;width:29px!important;height:29px!important;font-size:12px!important}
+  .wm-top3-card .wm-card-check{position:static!important;width:24px!important;height:24px!important;min-height:24px!important;grid-column:3!important;grid-row:1!important}
+  .wm-top3-card .wm-card-title{grid-column:2!important;grid-row:1!important;font-size:13px!important;line-height:1.15!important}
+  .wm-top3-card .wm-top3-domain{grid-column:2!important;grid-row:2!important;width:max-content;max-width:100%!important;margin-right:0!important;font-size:9px!important;padding:3px 7px 3px 5px!important}
+  .wm-top3-card .wm-card-menu-wrap{grid-column:4!important;grid-row:1 / span 2!important;justify-self:end!important}
+  .wm-top3-card .wm-card-menu{position:static!important}
+  .wm-top3-card .wm-action-trigger{width:28px!important;height:28px!important;min-height:28px!important}
+  .wm-top3-add{padding-right:0!important}
+  .wm-mo-strip{min-height:auto!important;padding:11px!important}
+  .wm-mo-strip-head{margin-bottom:7px}
+  .wm-mo-strip-score{display:flex;align-items:center;gap:7px;min-width:0}
+  .wm-mo-label-inline{font-size:12px;font-weight:900;color:var(--text);white-space:nowrap}
+  .wm-mo-strip-score b{font-size:22px;line-height:1;color:var(--text);letter-spacing:-.03em}
+  .wm-mo-strip-max{font-size:11px;color:var(--text-mid);font-weight:800}
+  .wm-mo-delta{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-weight:950;white-space:nowrap}
+  .wm-mo-chips{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-top:0!important;overflow:visible!important}
+  .wm-mo-chip{min-width:0;padding:7px;border-radius:12px;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.024);color:var(--text);text-align:left}
+  .wm-mo-chip b{display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wm-mo-chip small{display:block;margin-top:2px;font-size:9px;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .wm-panel-head{margin-bottom:10px}
   .plan-screen.plan-single .plan-head{margin-bottom:2px}
   .plan-screen.plan-single .plan-stack{gap:10px}
@@ -3136,6 +3164,17 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .plan-priority-title b{font-size:15px!important}
   .plan-priority-title small{display:block;margin-top:3px;color:var(--text-mid);font-size:10px;line-height:1.25}
   .plan-priority-progress{font-size:9px!important;padding:5px 8px!important}
+  .plan-capacity-row{display:flex;align-items:center;gap:7px;margin:-1px 0 9px;padding:8px;border-radius:13px;background:rgba(255,255,255,.026);border:1px solid rgba(255,255,255,.065);min-width:0;flex-wrap:wrap}
+  .plan-capacity-label{display:inline-flex;align-items:center;gap:5px;color:var(--text-mid);font-size:10px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+  .plan-capacity-row b{font-size:13px;color:var(--text);letter-spacing:-.02em}
+  .plan-capacity-row small{font-size:10px;color:var(--text-mid);white-space:nowrap}
+  .plan-capacity-load{font-size:10px;color:var(--text-mid);white-space:nowrap}
+  .plan-capacity-load strong{color:var(--accent)}
+  .plan-capacity-load.tight strong{color:var(--warn)}
+  .plan-capacity-load.heavy strong{color:var(--danger)}
+  .plan-capacity-bars{display:flex;align-items:end;justify-content:flex-end;gap:3px;min-width:42px}
+  .plan-capacity-bars i{display:block;width:5px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.05)}
+  .plan-capacity-bars i.on{background:var(--accent);box-shadow:0 0 10px rgba(147,242,10,.18)}
   .plan-priority-grid{grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr)!important;gap:8px!important}
   .plan-priority-card{padding:9px!important;border-radius:15px!important}
   .plan-priority-card-head{margin-bottom:6px!important}
@@ -3205,10 +3244,15 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   @media (max-width:640px){
     .wm-life-clock{padding:7px 10px!important}
     .wm-brief-title{font-size:20px!important}
-    .wm-top3 .wm-top3-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+    .wm-top3 .wm-top3-grid{grid-template-columns:1fr!important}
+    .wm-top3-card{grid-template-columns:28px minmax(0,1fr) 24px 28px!important;min-height:48px!important;padding:7px!important}
+    .wm-mo-chips{grid-template-columns:repeat(2,minmax(0,1fr))!important}
     .plan-head{gap:8px!important}
     .plan-head-actions{max-width:48%}
     .plan-connect-strip{transform:scale(.9);transform-origin:right top}
+    .plan-capacity-row{gap:5px}
+    .plan-capacity-label{flex:1 0 100%}
+    .plan-capacity-bars{flex:1 0 100%;justify-content:flex-start;margin-top:2px}
     .plan-priority-row.weekly-row{grid-template-columns:22px minmax(0,1fr) 34px auto!important}
     .mini-progress-ring{width:31px;height:31px}
     .mini-progress-ring b{font-size:8px}
@@ -4380,7 +4424,7 @@ function NowCommandBrief({session,onNavigate,todos,weekly,careerLeads,tasks,care
   const detailWhy=pTotal===0?'Daily 3 is empty. Choose the three outcomes before reacting to lower-priority work.':pDone<pTotal?'It is the first unfinished Daily 3 item, so it protects the day before lower-priority inputs take over.':'Daily 3 is complete. Use On Deck only if you want more work.';
   const detailRisk=deepSignals.length?deepSignals.slice(0,2).map(s=>s.short||s.label).join('; '):awaiting?`${awaiting} reply${awaiting===1?'':'ies'} still awaiting follow-up.`:'No major slipping signal detected.';
   const detailOrder=[recommendation,...deepSignals.map(s=>s.short||s.label)].filter(Boolean).slice(0,3).join(' → ');
-  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing...':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Daily 3" value={dailyMetric} sub={dailyMetricSub} color={C.accent} onClick={()=>onNavigate&&onNavigate('plan','priorities')}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Replies" value={awaiting} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','replies')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} sub={momentumWord} ringPct={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familySignal?'Needs':'OK'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Focus Now</div><strong>{recommendation}</strong>{next?<div className="wm-next-context">{next.goal||next.domain||'Daily 3'} · Daily 3 #{dailyItems.findIndex(x=>x.id===next.id)+1}</div>:null}</div><span className="wm-next-hint">{next?'Start':pTotal?'Done':'Plan'}</span></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
+  return <section className="glass card wm-brief"><div className="wm-brief-top"><div><div className="eyebrow wm-brief-eyebrow" style={{color:'var(--accent)'}}><span className="wm-brief-spark"><Icon name="spark" size={13} /></span> AI Command Brief</div><h2 className="wm-brief-title">Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, Gideon.</h2>{briefError?<div className="wm-ai-brief-error">{briefError}</div>:null}</div><div className="row" style={{gap:6,flexShrink:0}}><button className="ghost-btn wm-fullbrief-btn" onClick={()=>runBrief(true)} disabled={briefState==='loading'||briefState==='refreshing'}>{briefState==='refreshing'?'Refreshing...':'↻'}</button><button className="ghost-btn wm-fullbrief-btn" onClick={()=>setFullBrief(o=>!o)}>{fullBrief?'Less ↑':'Brief Details →'}</button></div></div><div className="wm-metrics"><NowMetric icon={<Icon name="target" size={18} />} label="Daily 3" value={dailyMetric} sub={dailyMetricSub} color={C.accent} onClick={()=>onNavigate&&onNavigate('plan','priorities')}/><NowMetric icon={<Icon name="calendar" size={18} />} label="Meetings" value={meetings} sub="TODAY" color={C.info} onClick={()=>onNavigate&&onNavigate('plan','calendar')}/><NowMetric icon={<Icon name="mail" size={18} />} label="Replies" value={awaiting} sub={awaiting?'NEEDS':'UNREAD'} color={C.warn} onClick={()=>onNavigate&&onNavigate('career','replies')}/><NowMetric icon={<Icon name="activity" size={18} />} label="Momentum" value={momentum} sub={momentumWord} ringPct={momentum} color={C.purple} onClick={()=>onNavigate&&onNavigate('track','habits')}/><NowMetric icon={<Icon name="heart" size={18} />} label="Family" value={familySignal?'Needs':'OK'} sub={familySignal?'CHECK':'ALL GOOD'} color={C.pink} onClick={()=>onNavigate&&onNavigate('career','Family')}/></div><div className="wm-next"><div className="wm-next-body"><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="target" size={13} /> Focus Now</div><strong>{recommendation}</strong>{next?<div className="wm-next-context">{next.goal||next.domain||'Daily 3'} · Daily 3 #{dailyItems.findIndex(x=>x.id===next.id)+1}</div>:null}</div><span className="wm-next-hint">{next?'Highest Impact ⚡':pTotal?'Done':'Plan'}</span></div>{fullBrief?<div className="wm-fullbrief"><div className="eyebrow" style={{color:'var(--accent)'}}>Brief Details</div>{briefBullets.length>1?<ul className="wm-ai-bullets wm-ai-bullets-detail">{briefBullets.map((b,i)=><li key={i}>{b}</li>)}</ul>:<p className="wm-ai-brief-text">{briefBullets[0]||briefText}</p>}<div className="wm-ai-brief-source">{briefBadge}</div><div className="wm-brief-detail-grid"><div className="wm-brief-detail-row"><span>Why this action</span><b>{detailWhy}</b></div><div className="wm-brief-detail-row"><span>Risks if ignored</span><b>{detailRisk}</b></div><div className="wm-brief-detail-row"><span>Execution order</span><b>{detailOrder}</b></div></div><div className="wm-fullbrief-signals">{deepSignals.map(s=><div className="wm-fullbrief-row" key={s.id}><span className={`attn-tag ${s.tag}`}>{s.tag}</span><b>{s.label}</b></div>)}</div></div>:null}</section>;
 }
 function NowCommandPrompts({todos,setTodos,tasks,careerTasks,errands,comms,build,reflect,onNavigate}){
   const [prompt,setPrompt]=useState('next');
@@ -4418,7 +4462,7 @@ function NowTop3Cards({todos,setTodos,setCalendarEvents}){
   const add=()=>{ const text=input.trim(); if(!text||items.length>=3) return; setTodos([...(todos||[]),{id:Date.now()+Math.random(),text,title:text,goal:'Today',done:false}]); setInput(''); };
   const [why,setWhy]=useState(false);
   const subtasks=detail?.subtasks||detail?.steps||detail?.checklist||[];
-  return <section className="glass card wm-top3"><div className="section-head"><div><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="flag" size={13} /> Daily 3</div></div><button className="ghost-btn wm-why" onClick={()=>setWhy(w=>!w)}>Why these 3? ⓘ</button></div>{why?<p className="wm-why-note">These are your highest-leverage items today. Keep the list to three so the day stays winnable.</p>:null}<div className="wm-top3-grid">{items.length?items.map((item,i)=>{ const tag=item.goal||'Today'; const col=top3TagColor(tag); return <div key={item.id} role="button" tabIndex="0" onClick={()=>setDetail(item)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setDetail(item);}}} className={`wm-top3-card ${item.done?'done':''} ${item.id===activeId?'active':''}`}><div className="wm-top3-head"><div className="wm-rank">{i+1}</div><button className="wm-card-check" onClick={e=>{e.stopPropagation();patch(item.id,{done:!item.done});}}>{item.done?'✓':''}</button></div><div className="wm-card-title">{asTitle(item)}</div><span className="wm-top3-domain" style={{color:col,borderColor:`${col}3a`,background:`${col}1c`}}><Icon name={top3Icon(tag)} size={13} /><span>{tag}</span></span><span onClick={e=>e.stopPropagation()}><ActionMenu className="wm-card-menu" items={[{label:'Edit',onSelect:()=>edit(item)},{label:'Schedule',primary:true,onSelect:()=>schedule(item)},{label:'Delete',danger:true,onSelect:()=>del(item)}]} /></span></div>; }):<div className="cc-empty"><strong>No Daily 3 yet</strong><div className="meta">Add one below or promote from PLAN.</div></div>}</div>{items.length<3?<div className="wm-top3-add"><input className="text-input" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={`Add #${items.length+1} to Daily 3`} /><button type="button" className="primary-btn" onClick={add} disabled={!input.trim()}>Add</button></div>:null}{detail?<div className="wm-task-detail-backdrop" onClick={()=>setDetail(null)}><div className="glass wm-task-detail" onClick={e=>e.stopPropagation()}><div className="wm-task-detail-head"><div><div className="eyebrow" style={{color:'var(--accent)'}}>Daily 3 Task</div><div className="wm-task-detail-title">{asTitle(detail)}</div></div><button type="button" className="ghost-btn wm-task-detail-close" onClick={()=>setDetail(null)}>×</button></div><div className="wm-task-detail-meta"><span className="pill">{detail.goal||'Today'}</span>{detail.priority?<span className="pill">{detail.priority}</span>:null}{detail.dueDate||detail.date?<span className="pill">{detail.dueDate||detail.date}</span>:null}</div>{detail.nextAction||detail.note||detail.description?<div className="wm-task-detail-note">{detail.nextAction||detail.note||detail.description}</div>:<div className="wm-task-detail-note">No extra notes yet. Use Edit to rename it, or Schedule to place it on the calendar.</div>}{subtasks.length?<div className="wm-task-detail-note"><b>Subtasks</b><ul>{subtasks.map((s,i)=><li key={i}>{typeof s==='string'?s:(s.text||s.title||`Step ${i+1}`)}</li>)}</ul></div>:null}<div className="wm-task-detail-actions"><button type="button" className="primary-btn" onClick={()=>{patch(detail.id,{done:true,completedAt:new Date().toISOString()});setDetail(null);notify('Daily 3 completed');}}>Complete</button><button type="button" className="ghost-btn" onClick={()=>{schedule(detail);setDetail(null);}}>Schedule</button></div></div></div>:null}</section>;
+  return <section className="glass card wm-top3"><div className="section-head"><div><div className="eyebrow wm-eyebrow-ic" style={{color:'var(--accent)'}}><Icon name="flag" size={13} /> Daily 3</div></div><div className="wm-top3-head-actions"><span>{items.filter(x=>x.done).length}/3 DONE</span><button className="ghost-btn wm-why" onClick={()=>setWhy(w=>!w)}>Why these 3? ⓘ</button></div></div>{why?<p className="wm-why-note">These are your highest-leverage items today. Keep the list to three so the day stays winnable.</p>:null}<div className="wm-top3-grid">{items.length?items.map((item,i)=>{ const tag=item.goal||'Today'; const col=top3TagColor(tag); return <div key={item.id} role="button" tabIndex="0" onClick={()=>setDetail(item)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setDetail(item);}}} className={`wm-top3-card ${item.done?'done':''} ${item.id===activeId?'active':''}`}><div className="wm-top3-head"><div className="wm-rank">{i+1}</div><button className="wm-card-check" onClick={e=>{e.stopPropagation();patch(item.id,{done:!item.done});}}>{item.done?'✓':''}</button></div><div className="wm-card-title">{asTitle(item)}</div><span className="wm-top3-domain" style={{color:col,borderColor:`${col}3a`,background:`${col}1c`}}><Icon name={top3Icon(tag)} size={13} /><span>{tag}</span></span><span className="wm-card-menu-wrap" onClick={e=>e.stopPropagation()}><ActionMenu className="wm-card-menu" items={[{label:'Edit',onSelect:()=>edit(item)},{label:'Schedule',primary:true,onSelect:()=>schedule(item)},{label:'Delete',danger:true,onSelect:()=>del(item)}]} /></span></div>; }):<div className="cc-empty"><strong>No Daily 3 yet</strong><div className="meta">Add one below or promote from PLAN.</div></div>}</div>{items.length<3?<div className="wm-top3-add"><input className="text-input" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={`Add #${items.length+1} to Daily 3`} /><button type="button" className="primary-btn" onClick={add} disabled={!input.trim()}>Add</button></div>:null}{detail?<div className="wm-task-detail-backdrop" onClick={()=>setDetail(null)}><div className="glass wm-task-detail" onClick={e=>e.stopPropagation()}><div className="wm-task-detail-head"><div><div className="eyebrow" style={{color:'var(--accent)'}}>Daily 3 Task</div><div className="wm-task-detail-title">{asTitle(detail)}</div></div><button type="button" className="ghost-btn wm-task-detail-close" onClick={()=>setDetail(null)}>×</button></div><div className="wm-task-detail-meta"><span className="pill">{detail.goal||'Today'}</span>{detail.priority?<span className="pill">{detail.priority}</span>:null}{detail.dueDate||detail.date?<span className="pill">{detail.dueDate||detail.date}</span>:null}</div>{detail.nextAction||detail.note||detail.description?<div className="wm-task-detail-note">{detail.nextAction||detail.note||detail.description}</div>:<div className="wm-task-detail-note">No extra notes yet. Use Edit to rename it, or Schedule to place it on the calendar.</div>}{subtasks.length?<div className="wm-task-detail-note"><b>Subtasks</b><ul>{subtasks.map((s,i)=><li key={i}>{typeof s==='string'?s:(s.text||s.title||`Step ${i+1}`)}</li>)}</ul></div>:null}<div className="wm-task-detail-actions"><button type="button" className="primary-btn" onClick={()=>{patch(detail.id,{done:true,completedAt:new Date().toISOString()});setDetail(null);notify('Daily 3 completed');}}>Complete</button><button type="button" className="ghost-btn" onClick={()=>{schedule(detail);setDetail(null);}}>Schedule</button></div></div></div>:null}</section>;
 }
 // NowDrawer: reusable collapsible command-center panel. Header shows eyebrow,
 // title, a one-line summary (visible when collapsed), an optional status badge,
@@ -4958,7 +5002,7 @@ function NowNextOptions({executive,calendarEvents,todos,setTodos,tasks,careerTas
     return execItems||fallback.length;
   },[JSON.stringify({executive,todos,tasks,careerTasks,errands})]);
   const summary=[batches[0]?`${batches[0].title.replace(' Block','')} · ${batches[0].duration}m`:null,deckCount?`${deckCount} candidates`:null].filter(Boolean).join(' · ')||'No candidates right now.';
-  return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> On Deck</>} eyebrowColor={C.info} title="On Deck Options" summary={summary} badge={`${batches.length}/${deckCount||0}`} className="wm-optional-drawer wm-next-options">
+  return <NowDrawer eyebrow={<><Icon name="grid" size={13} /> On Deck</>} eyebrowColor={C.info} title="On Deck" summary={summary} badge={`${batches.length}/${deckCount||0}`} defaultOpen={true} className="wm-optional-drawer wm-next-options">
     <div className="wm-next-options-body">
       <RecommendedExecutionBlocks executive={executive} todos={todos||[]} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
       <NowPriorityStack executive={executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} onNavigate={onNavigate} />
@@ -4970,7 +5014,8 @@ function LifeClock(){
   const calc=()=>{ const ms=Math.max(0,target.getTime()-Date.now()); const totalSeconds=Math.floor(ms/1000); return {days:Math.floor(totalSeconds/86400),hours:Math.floor((totalSeconds%86400)/3600),minutes:Math.floor((totalSeconds%3600)/60),seconds:totalSeconds%60}; };
   const [left,setLeft]=useState(calc);
   useEffect(()=>{ const id=setInterval(()=>setLeft(calc()),1000); return ()=>clearInterval(id); },[]);
-  return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m</em><b className="wm-life-seconds">{String(left.seconds).padStart(2,'0')}s</b></div></section>;
+  const progress=Math.max(8,Math.min(92,100-left.days/22000*100));
+  return <section className="wm-life-clock" aria-label="Life clock"><div className="wm-life-main"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m</em><b className="wm-life-seconds">{String(left.seconds).padStart(2,'0')}s</b></div></div><div className="wm-life-progress"><span style={{width:`${progress}%`}}></span><i style={{left:`${progress}%`}}></i></div></section>;
 }
 function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,setHabits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
   return <div className="wm-now wm-now-compact wm-now-cockpit">
@@ -4991,12 +5036,14 @@ function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLea
 function NowMomentumStrip({habits,todos,setHabits}){
   const {rows,score,hasData,trackedCount}=momentumModel({habits,todos});
   const [open,setOpen]=useState(false);
+  const chips=rows.slice(0,4);
   const toggleHabit=id=>{ if(!setHabits||!id) return; setHabits((habits||[]).map(h=>{ if(h.id!==id) return h; const done=!h.done; return {...h,done,current:done?1:0,streak:done?(h.streak||0)+1:Math.max(0,(h.streak||0)-1),lastCompleted:done?todayStr():h.lastCompleted}; })); };
   return <section className={`glass card wm-panel wm-momentum wm-mo-strip ${open?'open':'collapsed'}`}>
     <div className="wm-mo-strip-head">
-      <div className="wm-mo-strip-score"><span className="wm-panel-ico"><Icon name="bars" size={15} /></span><b>{score}</b><span className="wm-mo-strip-max">/100</span><span className="wm-mo-delta">{hasData?`${trackedCount} tracked`:'No data'}</span></div>
-      <button type="button" className="ghost-btn wm-mo-toggle" aria-expanded={open} onClick={()=>setOpen(o=>!o)}>{open?'Hide habits ↑':'View habits ↓'}</button>
+      <div className="wm-mo-strip-score"><span className="wm-panel-ico"><Icon name="activity" size={15} /></span><span className="wm-mo-label-inline">Momentum</span><b>{score}</b><span className="wm-mo-strip-max">/100</span><span className="wm-mo-delta">{hasData?'↑ today':'No data'}</span></div>
+      <button type="button" className="ghost-btn wm-mo-toggle" aria-expanded={open} onClick={()=>setOpen(o=>!o)}>{open?'Hide ↑':'›'}</button>
     </div>
+    <div className="wm-mo-chips">{chips.map((r,i)=><button type="button" key={`${r.label}-${i}`} className="wm-mo-chip" onClick={r.sourceId?()=>toggleHabit(r.sourceId):undefined}><b>{r.label}</b><small>{r.kind==='binary'?((r.pct||0)>=1?'1 / 1':'0 / 1'):r.sub}</small></button>)}</div>
     {open?<div className="wm-mo-rows">{rows.map((r,i)=>{const pct=typeof r.pct==='number'?r.pct:0, binary=r.kind==='binary', clickable=!!(r.sourceId&&setHabits&&binary); const Tag=clickable?'button':'div'; return <Tag type={clickable?'button':undefined} className={`wm-mo-row ${r.tracked?'':'untracked'}`} key={i} onClick={clickable?()=>toggleHabit(r.sourceId):undefined} style={clickable?{width:'100%',border:'none',background:'transparent',padding:0,font:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}:null}><span className="wm-mo-label"><b>{r.label}</b></span>{binary?<span style={{justifySelf:'start',display:'inline-flex',alignItems:'center',gap:7,padding:'6px 10px',borderRadius:999,border:`1px solid ${pct>=1?'rgba(147,242,10,.42)':'rgba(255,255,255,.12)'}`,background:pct>=1?'rgba(147,242,10,.14)':'rgba(255,255,255,.035)',color:pct>=1?'var(--accent)':'var(--text-mid)',fontSize:11,fontWeight:900}}><span>{pct>=1?'✓':'○'}</span>{pct>=1?'Done':'Incomplete'}</span>:<div className="wm-dots wm-mo-dots">{Array.from({length:8}).map((_,d)=><i key={d} className={d<Math.round(pct*8)?'on':''}></i>)}</div>}<small className="wm-mo-streak">{clickable?(pct>=1?'Tap to undo':'Tap to complete'):r.sub}</small></Tag>;})}</div>:null}
   </section>;
 }
@@ -5206,7 +5253,7 @@ function PlanQueuePull({tasks,onTop3,onWeekly}){
   },[JSON.stringify(tasks||[])]);
   return <div className="plan-queue-pull"><div className="plan-queue-pull-head"><span>Pull from task queue</span><b>{candidates.length?`${candidates.length} recommended`:'No candidates'}</b></div>{candidates.length?<div className="plan-queue-pull-list">{candidates.map(task=><article key={`${task.domainId}-${task.id}`}><div><b>{task.title||task.text}</b><small>{task.domain} · {task.priority||'soon'}{task.dueDate?` · ${fmtDue(task.dueDate)}`:''}</small></div><div><button type="button" className="ghost-btn small" onClick={()=>onTop3(task)}>Daily 3</button><button type="button" className="ghost-btn small" onClick={()=>onWeekly(task)}>Weekly 5</button></div></article>)}</div>:<div className="meta">Open tasks will appear here when the queue has work to recommend.</div>}</div>;
 }
-function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,tasks,calendarEvents,setCalendarEvents,focus,onFocus,onOpenTasks,onPromoteTop3,onPromoteWeekly,weekCapacity}){
+function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,tasks,calendarEvents,setCalendarEvents,focus,onFocus,onOpenTasks,onPromoteTop3,onPromoteWeekly,capacityStats}){
   const [focusDraft,setFocusDraft]=useState(focus||'');
   useEffect(()=>setFocusDraft(focus||''),[focus]);
   const dailyOpen=(todos||[]).filter(x=>!x.done&&!x.archived).length;
@@ -5232,7 +5279,14 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,tasks,calendarEven
   return <section className="plan-section">
     <div className="plan-section-head"><span className="plan-section-label">Priority Planner</span><button type="button" className="plan-link" onClick={onOpenTasks}>Open queue ›</button></div>
     <div className="glass card plan-priority-hero">
-      <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b><small>Week Capacity · {weekCapacity}</small></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 · Weekly 5 {weeklyDone}/5</span></div>
+      <div className="plan-priority-top"><div className="plan-priority-title"><b>Priority Planner</b><small>Daily 3 and Weekly 5 stay visible together.</small></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 · Weekly 5 {weeklyDone}/5</span></div>
+      <div className="plan-capacity-row">
+        <span className="plan-capacity-label"><Icon name="calendar" size={12} /> Week Capacity</span>
+        <b>{capacityStats.committedHours}h</b><small>committed</small>
+        <b>{capacityStats.openFocusHours}h</b><small>open focus</small>
+        <span className={`plan-capacity-load ${String(capacityStats.load||'').toLowerCase()}`}>Load: <strong>{capacityStats.load}</strong></span>
+        <span className="plan-capacity-bars" aria-hidden="true">{Array.from({length:6}).map((_,i)=><i key={i} className={i<capacityStats.loadBars?'on':''} style={{height:`${8+i*3}px`}}></i>)}</span>
+      </div>
       <div className="plan-priority-grid">
         <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
         <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
@@ -5418,11 +5472,31 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
   const patchEx=(fields)=>setPlanExtras(prev=>({...PLANEXTRASINIT,...(prev||{}),...fields}));
   const weekDone=weekly.filter(w=>w.done).length, weekTotal=weekly.length, weekPct=weekTotal?Math.round(weekDone/weekTotal*100):0;
   const openTaskCount=(tasks||[]).reduce((n,d)=>n+(d.tasks||[]).filter(t=>!t.done).length,0);
-  const weekEventCount=(()=>{ const now=new Date(); const start=new Date(now); start.setHours(0,0,0,0); start.setDate(now.getDate()-((now.getDay()+6)%7)); const end=new Date(start); end.setDate(start.getDate()+7); return (calendarEvents||[]).filter(e=>{ if(!e.date) return false; const d=new Date(e.date+'T00:00:00'); return d>=start&&d<end; }).length; })();
+  const weekEvents=(()=>{ const now=new Date(); const start=new Date(now); start.setHours(0,0,0,0); start.setDate(now.getDate()-((now.getDay()+6)%7)); const end=new Date(start); end.setDate(start.getDate()+7); return (calendarEvents||[]).filter(e=>{ if(!e.date) return false; const d=new Date(e.date+'T00:00:00'); return d>=start&&d<end; }); })();
+  const weekEventCount=weekEvents.length;
+  const eventMinutes=e=>{
+    if(Number.isFinite(Number(e.durationMinutes))) return Number(e.durationMinutes);
+    if(Number.isFinite(Number(e.duration))) return Number(e.duration);
+    const explicit=String(e.note||e.notes||e.description||'').match(/(\d+)\s*(?:m|min|minutes)\b/i);
+    if(explicit) return Number(explicit[1]);
+    const start=e.startTime||e.start||e.start_at||e.startAt, end=e.endTime||e.end||e.end_at||e.endAt;
+    const startMs=start?new Date(start).getTime():NaN, endMs=end?new Date(end).getTime():NaN;
+    if(Number.isFinite(startMs)&&Number.isFinite(endMs)&&endMs>startMs) return Math.round((endMs-startMs)/60000);
+    const timeRange=String(e.time||'').match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+    if(timeRange){
+      const toMin=(h,m,ap)=>{ let hr=Number(h); if(ap){ const p=ap.toLowerCase(); if(p==='pm'&&hr<12) hr+=12; if(p==='am'&&hr===12) hr=0; } return hr*60+Number(m||0); };
+      const a=toMin(timeRange[1],timeRange[2],timeRange[3]||timeRange[6]), b=toMin(timeRange[4],timeRange[5],timeRange[6]||timeRange[3]);
+      if(b>a) return b-a;
+    }
+    return 60;
+  };
+  const committedHours=Math.round(weekEvents.reduce((sum,e)=>sum+eventMinutes(e),0)/60);
+  const openFocusHours=Math.max(0,Math.round(25-committedHours));
+  const capacityLoad=committedHours>25?'Heavy':committedHours>18?'Tight':'Good';
+  const capacityStats={committedHours,openFocusHours,load:capacityLoad,loadBars:capacityLoad==='Heavy'?6:capacityLoad==='Tight'?4:3};
   const priorityItems=[...(todos||[]).filter(x=>!x.done&&!x.archived),...(weekly||[]).filter(x=>!x.done&&!x.archived)];
   const scheduledPriorityCount=priorityItems.filter(item=>priorityScheduleMatch(item,calendarEvents)).length;
   const unscheduledPriorityCount=Math.max(0,priorityItems.length-scheduledPriorityCount);
-  const weekCapacity=`${weekEventCount} calendar block${weekEventCount===1?'':'s'} · ${scheduledPriorityCount} priority block${scheduledPriorityCount===1?'':'s'} · ${unscheduledPriorityCount} find-time`;
   const addToPriorityList=(item,setter,current,max,label)=>{ const text=(item.title||item.text||'').trim(); if(!text) return false; const exists=(current||[]).some(x=>!x.archived&&(x.text||x.title||'')===text); const openCount=(current||[]).filter(x=>!x.done&&!x.archived).length; if(!exists&&openCount>=max){ alert(`${label} is full. Complete or delete one first.`); return false; } setter(prev=>prev.some(x=>!x.archived&&(x.text||x.title||'')===text)?prev:[...prev,{id:Date.now()+Math.random(),text,goal:item.domain||item.category||'Queue',done:false}]); return true; };
   const addToTaskQueue=item=>{ const title=(item.title||item.text||'').trim(); if(!title) return false; setTasks(prev=>{ const list=prev&&prev.length?prev:deepClone(TASKSINIT); const idx=list.findIndex(d=>d.id==='Personal'||d.label==='Personal'); const useIdx=idx>=0?idx:0; return list.map((domain,i)=>i!==useIdx?domain:{...domain,tasks:[...(domain.tasks||[]),{id:Date.now()+Math.random(),title,priority:'soon',done:false,horizon:item.horizon||''}]}); }); return true; };
   const removeTaskFromQueue=task=>setTasks(prev=>prev.map(domain=>domain.id!==task.domainId?domain:{...domain,tasks:(domain.tasks||[]).filter(t=>t.id!==task.id&&t.id!==task.taskId)}));
@@ -5504,13 +5578,13 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
   const appleDomainOptions=useMemo(()=>['Inbox',...(tasks||[]).map(d=>d.label||d.id).filter(Boolean)].filter((x,i,a)=>a.indexOf(x)===i),[JSON.stringify(tasks||[])]);
   return <div className="plan-screen plan-single">
     <header className="plan-head">
-      <div className="plan-head-titles"><h1 className="plan-title">PLAN</h1><p className="plan-sub">Commitments, capacity, and execution inventory on one screen.</p></div>
+      <div className="plan-head-titles"><h1 className="plan-title">PLAN</h1><p className="plan-sub">Shape the week. Keep the system visible.</p></div>
       <div className="plan-head-actions">
         <PlanConnectStrip calendarStatus={calendarStatus} calendarUrl={calendarUrl} calendarLoading={calendarLoading} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} emailStatus={emailStatus} emailItems={emailItems||[]} emailLoading={emailLoading} onConnectGmail={onConnectGmail} onSyncGmail={onSyncGmail} appleLoading={appleLoading} appleMessage={appleMessage} onPullAppleReminders={pullAppleReminders} />
       </div>
     </header>
     <div className="plan-stack">
-      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} weekCapacity={weekCapacity} /></div>
+      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} capacityStats={capacityStats} /></div>
       <PlanActionBoard todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
       <PlanSchedulePreview calendarEvents={calendarEvents||[]} todos={todos||[]} weekly={weekly||[]} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} />
       <PlanSupportTiles openPanels={openPanels} openPanel={openPanel} togglePanel={togglePanel} calendarUrl={calendarUrl} weekEventCount={weekEventCount} openTaskCount={openTaskCount} routines={routines} horizons={horizons} />
