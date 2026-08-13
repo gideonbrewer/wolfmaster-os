@@ -3390,6 +3390,17 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .plan-screen-canonical .plan-priority-coverage{
     font-size:8.5px!important;
   }
+  .plan-screen-canonical .plan-find-time{
+    appearance:none!important;
+    border:0!important;
+    background:transparent!important;
+    color:var(--wm-blue)!important;
+    padding:0!important;
+    font:inherit!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+    text-align:left!important;
+  }
   .plan-screen-canonical .plan-priority-actions{
     display:flex!important;
     align-items:center!important;
@@ -3448,18 +3459,40 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .plan-screen-canonical .plan-object-tab{
     min-height:58px!important;
     display:grid!important;
+    grid-template-columns:1fr auto!important;
+    grid-template-rows:auto auto!important;
+    align-items:center!important;
     justify-items:start!important;
     gap:3px!important;
     padding:8px!important;
     border-radius:9px!important;
     border:1px solid rgba(141,183,232,.14)!important;
     background:rgba(255,255,255,.025)!important;
+    overflow:hidden!important;
+  }
+  .plan-screen-canonical .plan-object-tab svg{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:14px!important;
+    height:14px!important;
   }
   .plan-screen-canonical .plan-object-tab span{
-    font-size:10px!important;
+    grid-column:1 / span 2!important;
+    grid-row:2!important;
+    font-size:9px!important;
+    line-height:1!important;
+    max-width:100%!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
   }
   .plan-screen-canonical .plan-object-tab b{
-    font-size:17px!important;
+    grid-column:2!important;
+    grid-row:1!important;
+    min-width:22px!important;
+    width:22px!important;
+    height:22px!important;
+    font-size:12px!important;
     color:var(--stage)!important;
   }
   .plan-screen-canonical .plan-week-exec-card{
@@ -3501,12 +3534,21 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     color:var(--wm-blue)!important;
   }
   .plan-screen-canonical .plan-support-head{
-    margin:2px 0 -2px!important;
+    margin:4px 0 2px!important;
+    padding:0 2px!important;
+    overflow:hidden!important;
+  }
+  .plan-screen-canonical .plan-support-head small{
+    max-width:130px!important;
+    overflow:hidden!important;
+    white-space:nowrap!important;
+    text-overflow:ellipsis!important;
   }
   .plan-screen-canonical .plan-system-stack{
     display:grid!important;
     grid-template-columns:repeat(4,minmax(0,1fr))!important;
     gap:7px!important;
+    overflow:hidden!important;
   }
   .plan-screen-canonical .plan-accordion{
     min-height:65px!important;
@@ -3516,8 +3558,11 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   }
   .plan-screen-canonical .plan-accordion-head{
     min-height:65px!important;
-    padding:8px!important;
-    gap:6px!important;
+    padding:7px!important;
+    gap:4px!important;
+    display:grid!important;
+    grid-template-columns:24px minmax(0,1fr) auto!important;
+    align-items:center!important;
   }
   .plan-screen-canonical .plan-accordion-head .hub-ico,
   .plan-screen-canonical .plan-accordion-head .plan-accordion-icon{
@@ -3525,12 +3570,18 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     height:25px!important;
   }
   .plan-screen-canonical .plan-accordion-title{
-    font-size:10px!important;
+    font-size:9.5px!important;
     line-height:1.1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
   }
   .plan-screen-canonical .plan-accordion-sub{
-    font-size:8px!important;
+    font-size:7.5px!important;
     line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
   }
   .plan-screen-canonical .plan-accordion-count{
     font-size:10px!important;
@@ -3557,7 +3608,13 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     }
     .plan-screen-canonical .plan-system-stack,
     .plan-screen-canonical .plan-object-tabs{
-      grid-template-columns:repeat(4,minmax(0,1fr))!important;
+      grid-template-columns:repeat(4,minmax(74px,1fr))!important;
+      overflow-x:auto!important;
+      scrollbar-width:none!important;
+    }
+    .plan-screen-canonical .plan-system-stack::-webkit-scrollbar,
+    .plan-screen-canonical .plan-object-tabs::-webkit-scrollbar{
+      display:none!important;
     }
     .plan-screen-canonical .plan-head{
       grid-template-columns:1fr auto!important;
@@ -5665,7 +5722,35 @@ function wmScheduleForItem(item,calendarEvents=[]){
   const day=d.toLocaleDateString('en-US',{weekday:'short'});
   return `${day} ${formatCalendarTime(match.rawTime||match.time||'')}`;
 }
-function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,moveDisabledLabel,calendarEvents=[]}){
+function wmParseCalendarMinute(value){
+  const raw=String(value||'').trim();
+  const hhmm=raw.match(/^(\d{1,2}):(\d{2})$/);
+  if(hhmm) return Number(hhmm[1])*60+Number(hhmm[2]);
+  const casual=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if(!casual) return null;
+  let h=Number(casual[1]);
+  const m=Number(casual[2]||0);
+  const ap=casual[3].toLowerCase();
+  if(ap==='pm'&&h<12) h+=12;
+  if(ap==='am'&&h===12) h=0;
+  return h*60+m;
+}
+function wmFormatMinute(m){ return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+function wmFindOpenStart(calendarEvents=[],duration=60){
+  const now=new Date();
+  const earliest=Math.max(8*60,Math.ceil((now.getHours()*60+now.getMinutes())/30)*30);
+  const dayEnd=21*60;
+  const busy=(calendarEvents||[]).filter(e=>!e.date||String(e.date).slice(0,10)===todayStr()||e.day==='Today').map(e=>{
+    const start=wmParseCalendarMinute(e.rawTime||e.time);
+    if(start===null) return null;
+    return {start,end:Math.min(start+wmEventDuration(e),22*60)};
+  }).filter(Boolean).sort((a,b)=>a.start-b.start);
+  for(let m=earliest;m<=dayEnd-duration;m+=30){
+    if(!busy.some(b=>m<b.end&&m+duration>b.start)) return m;
+  }
+  return earliest;
+}
+function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,moveDisabledLabel,calendarEvents=[],setCalendarEvents}){
   const [draft,setDraft]=useState('');
   const [editing,setEditing]=useState(null);
   const [editText,setEditText]=useState('');
@@ -5681,6 +5766,25 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
   const cancelEdit=()=>{ setEditing(null); setEditText(''); };
   const saveEdit=item=>{ const text=editText.trim(); if(text){ patch(item.id,{text,title:text}); notify('Saved'); } cancelEdit(); };
   const add=()=>{ const text=draft.trim(); if(!text||open.length>=max) return; setItems([...(items||[]),{id:Date.now()+Math.random(),text,title:text,goal:kind==='daily'?'Today':'Weekly Focus',done:false}]); setDraft(''); notify(kind==='daily'?'Added to Daily 3':'Added to Weekly 5'); };
+  const scheduleItem=item=>{
+    if(!setCalendarEvents){ notify('Calendar scheduling is not available here yet.'); return; }
+    const duration=kind==='daily'?90:60;
+    const start=wmFindOpenStart(calendarEvents,duration);
+    const time=wmFormatMinute(start);
+    const title=asTitle(item);
+    setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{
+      id:`plan-${kind}-${item.id}-${Date.now()}`,
+      date:todayStr(),
+      time,
+      title,
+      note:`${duration}m · ${kind==='daily'?'Daily 3':'Weekly 5'} execution block`,
+      source:'manual',
+      kind:'execution-block',
+      createdAt:new Date().toISOString()
+    }]));
+    patch(item.id,{scheduledDate:todayStr(),scheduledStart:time,lastScheduledAt:new Date().toISOString()});
+    notify(`${title} scheduled at ${formatCalendarTime(time)}`);
+  };
   return <div className={`glass card plan-priority-card ${kind}`}>
     <div className="plan-priority-card-head"><span>{kind==='daily'?'Daily 3':'Weekly 5'}</span><div className="plan-priority-head-actions">{completed.length?<button type="button" className={`plan-priority-toggle ${showDone?'active':''}`} onClick={()=>setShowDone(v=>!v)}>{showDone?'Hide done':'Show done'}</button>:null}<b style={{color:accent}}>{open.length}/{max}</b></div></div>
     <div className="plan-priority-list">
@@ -5689,7 +5793,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
         <div className="plan-priority-main">
           {editing===item.id?<input className="text-input" value={editText} onChange={e=>setEditText(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') saveEdit(item); if(e.key==='Escape') cancelEdit(); }} autoFocus />:<div className="plan-priority-text">{item.text||item.title}</div>}
           <div className="plan-priority-tag" style={{color:domainFamilyColor(item.goal||item.category||item.domain||'Priority')}}>{item.goal||item.category||item.domain||'Priority'}</div>
-          <div className="plan-priority-coverage"><span className={scheduled?'scheduled':'unscheduled'}>{scheduled||'Find time →'}</span>{kind==='weekly'?<span>{pct}%</span>:null}</div>
+          <div className="plan-priority-coverage">{scheduled?<span className="scheduled">{scheduled}</span>:<button type="button" className="plan-find-time" onClick={()=>scheduleItem(item)}>Find time →</button>}{kind==='weekly'?<span>{pct}%</span>:null}</div>
           {kind==='weekly'?<div className="plan-priority-progressline"><i style={{width:`${pct}%`,background:accent}}></i></div>:null}
           {rollovers>=3?<div className="plan-rollover-actions"><b>3rd rollover</b><button type="button" onClick={()=>notify('Use Find time to schedule this commitment.')}>Schedule</button><button type="button" onClick={()=>{patch(item.id,{rollovers:0,rolloverCount:0,recommittedAt:new Date().toISOString()});notify('Recommitted');}}>Recommit</button><button type="button" onClick={()=>{patch(item.id,{status:'delegated',rollovers:0,rolloverCount:0});notify('Marked delegated');}}>Delegate</button><button type="button" onClick={()=>{patch(item.id,{archived:true,status:'deferred'});notify('Dropped from active plan');}}>Drop</button></div>:null}
         </div>
@@ -5702,7 +5806,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
     {open.length<max?<div className="plan-priority-add"><input className="text-input" value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={kind==='daily'?'Restock Daily 3…':'Restock Weekly 5…'} /><button type="button" className="primary-btn" style={{background:accent,color:'#091005'}} onClick={add}>Add</button></div>:null}
   </div>;
 }
-function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOpenTasks,calendarEvents=[]}){
+function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOpenTasks,calendarEvents=[],setCalendarEvents}){
   const [focusDraft,setFocusDraft]=useState(focus||'');
   useEffect(()=>setFocusDraft(focus||''),[focus]);
   const dailyOpen=(todos||[]).filter(x=>!x.done&&!x.archived).length;
@@ -5732,8 +5836,8 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
       <div className="plan-capacity-strip"><span>Week Capacity</span><b>{capacity.committedH}h committed · {capacity.openFocus}h open focus · Load: {capacity.load}</b></div>
       <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 set · Weekly 5 {weeklyDone}/5 done</span></div>
       <div className="plan-priority-grid">
-        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" moveDisabledLabel="Done" calendarEvents={calendarEvents} />
-        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" moveDisabledLabel="Done" calendarEvents={calendarEvents} />
+        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
+        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
       </div>
     </div>
   </section>;
@@ -6005,7 +6109,7 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       </div>
     </header>
     <div className="plan-stack">
-      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} calendarEvents={calendarEvents||[]} /></div>
+      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} /></div>
       <PlanActionBoard todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
       <PlanWeekExecutionPreview calendarEvents={calendarEvents||[]} todos={todos||[]} weekly={weekly||[]} onOpenCalendar={()=>openPanel('calendar')} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
