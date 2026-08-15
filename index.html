@@ -4072,13 +4072,18 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
 .plan-time-finder-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .plan-time-finder-head b{display:block;margin-top:4px;font-size:15px;line-height:1.15;color:var(--text)}
 .plan-time-finder-head small{display:block;margin-top:4px;color:var(--text-mid);font-size:11px}
-.plan-time-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.plan-time-options{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
 .plan-time-option{width:100%;border:1px solid rgba(141,183,232,.16);background:rgba(141,183,232,.055);color:var(--text);border-radius:14px;padding:10px 12px;text-align:left;display:grid;gap:3px}
+.plan-time-option.suggested{border-color:rgba(141,183,232,.46);background:linear-gradient(180deg,rgba(91,168,255,.16),rgba(91,168,255,.06));box-shadow:0 12px 34px rgba(91,168,255,.10),inset 0 0 0 1px rgba(255,255,255,.035)}
 .plan-time-option span{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:var(--wm-blue,#8DB7E8)}
 .plan-time-option b{font-size:13px;line-height:1.15}
 .plan-time-option small{font-size:10px;color:var(--text-mid)}
 .plan-time-option:active{transform:translateY(1px);border-color:rgba(141,183,232,.42)}
-@media(max-width:640px){.plan-time-finder{padding:12px!important;border-radius:16px!important}.plan-time-finder-head .ghost-btn{padding:7px 9px!important;font-size:10px!important}.plan-time-options{grid-template-columns:1fr!important}}
+.plan-time-alt-head{margin:4px 2px 0;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:var(--text-dim)}
+.plan-time-more{justify-content:center!important;margin-top:2px!important;color:var(--wm-blue,#8DB7E8)!important}
+.plan-time-panel-active{grid-column:1 / -1!important;min-width:0!important;max-width:none!important;width:100%!important}
+.plan-time-panel-active .plan-accordion{overflow:visible!important}
+@media(max-width:640px){.plan-time-finder{padding:12px!important;border-radius:16px!important}.plan-time-finder-head .ghost-btn{padding:7px 9px!important;font-size:10px!important}.plan-time-options{grid-template-columns:1fr!important}.plan-screen-canonical .plan-system-stack>.plan-time-panel-active{flex:0 0 calc(100vw - 32px)!important;min-width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}.plan-time-panel-active .plan-accordion{min-height:auto!important}.plan-time-panel-active .plan-accordion-body{min-width:0!important;width:100%!important}}
 </style>
 <style id="wm-secondary-tabs-unification-2026-08-15">
 .wm-secondary-screen{
@@ -6640,9 +6645,18 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
   </section>;
 }
 function PlanTimeFinder({request,calendarEvents,onClose,onSelect}){
-  const slots=useMemo(()=>request?wmFindOpenSlots(calendarEvents,request.duration||60,6):[],[request?.title,request?.duration,JSON.stringify(calendarEvents||[])]);
+  const [showMore,setShowMore]=useState(false);
+  const slots=useMemo(()=>request?wmFindOpenSlots(calendarEvents,request.duration||60,8):[],[request?.title,request?.duration,JSON.stringify(calendarEvents||[])]);
   if(!request) return null;
   const duration=wmDurationLabel(request.duration||60);
+  const suggested=slots[0]||null;
+  const alternatives=slots.slice(1,4);
+  const more=slots.slice(4);
+  const SlotButton=({slot,featured=false})=><button type="button" className={`plan-time-option ${featured?'suggested':''}`} onClick={()=>onSelect(slot)}>
+    <span>{featured?'Suggested Time':slot.part}</span>
+    <b>{slot.label}</b>
+    <small>{duration} open · tap to schedule</small>
+  </button>;
   return <section className="glass card plan-time-finder">
     <div className="plan-time-finder-head">
       <div>
@@ -6653,11 +6667,11 @@ function PlanTimeFinder({request,calendarEvents,onClose,onSelect}){
       <button type="button" className="ghost-btn" onClick={onClose}>Cancel</button>
     </div>
     <div className="plan-time-options">
-      {slots.length?slots.map(slot=><button type="button" key={`${slot.date}-${slot.time}`} className="plan-time-option" onClick={()=>onSelect(slot)}>
-        <span>{slot.part}</span>
-        <b>{slot.label}</b>
-        <small>{duration} open · tap to schedule</small>
-      </button>):<div className="empty">No clean openings found this week. Open Calendar and add a manual block.</div>}
+      {suggested?<SlotButton slot={suggested} featured />:<div className="empty">No clean openings found this week. Open Calendar and add a manual block.</div>}
+      {alternatives.length?<div className="plan-time-alt-head">Alternative times</div>:null}
+      {alternatives.map(slot=><SlotButton key={`${slot.date}-${slot.time}`} slot={slot} />)}
+      {showMore?more.map(slot=><SlotButton key={`${slot.date}-${slot.time}`} slot={slot} />):null}
+      {more.length?<button type="button" className="ghost-btn plan-time-more" onClick={()=>setShowMore(v=>!v)}>{showMore?'Show Less':'View More'}</button>:null}
     </div>
   </section>;
 }
@@ -6939,7 +6953,7 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       <PlanWeekExecutionPreview calendarEvents={calendarEvents||[]} todos={todos||[]} weekly={weekly||[]} onOpenCalendar={()=>openPanel('calendar')} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
       <div className="plan-system-stack">
-        <div data-plan-panel="calendar"><PlanAccordion id="calendar" title="Calendar" sub={calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}>{timeFinder?<PlanTimeFinder request={timeFinder} calendarEvents={calendarEvents||[]} onClose={()=>setTimeFinder(null)} onSelect={slot=>{ timeFinder.onSelect?.(slot); setTimeFinder(null); }} />:null}<CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} /></PlanAccordion></div>
+        <div data-plan-panel="calendar" className={timeFinder?'plan-time-panel-active':''}><PlanAccordion id="calendar" title="Calendar" sub={timeFinder?'Choose a time':calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}>{timeFinder?<PlanTimeFinder request={timeFinder} calendarEvents={calendarEvents||[]} onClose={()=>setTimeFinder(null)} onSelect={slot=>{ timeFinder.onSelect?.(slot); setTimeFinder(null); }} />:<CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} />}</PlanAccordion></div>
         <div data-plan-panel="tasks"><PlanAccordion id="tasks" title="Task Queue" sub="Open tasks and errands" icon="list" count={openTaskCount} open={!!openPanels.tasks} onToggle={()=>togglePanel('tasks')}><DomainTasksView title="Task Queue" domains={tasks} setDomains={setTasks} errands={errands} setErrands={setErrands} promoteTop3={moveTaskToTop3} promoteTop5={moveTaskToWeekly} promoteErrandTop3={moveErrandToTop3} promoteErrandTop5={moveErrandToWeekly} top3Items={todos} top5Items={weekly} /></PlanAccordion></div>
         <div data-plan-panel="routines"><PlanAccordion id="routines" title="Routines" sub="Daily and weekly checklists" icon="loop" count={routines.length} open={!!openPanels.routines} onToggle={()=>togglePanel('routines')}><PlanRoutines routines={routines} onChange={items=>patchEx({routines:items})} todos={todos} setTodos={setTodos} habits={habits||[]} setHabits={setHabits} /></PlanAccordion></div>
         <div data-plan-panel="horizons"><PlanAccordion id="horizons" title="Goals" sub="Supported by tasks and priorities" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Daily 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
