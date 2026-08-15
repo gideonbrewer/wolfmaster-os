@@ -1296,6 +1296,7 @@ select.text-input.small{padding-right:30px!important;background-position:right 1
 .ghost-btn.small,.primary-btn.small{min-height:30px;padding:7px 10px;font-size:11px}.primary-btn{box-shadow:0 6px 18px rgba(147,242,10,.18)}
 .wm-action-menu{position:relative;display:inline-flex;justify-content:flex-end;z-index:5}.wm-action-trigger{width:32px;height:32px;border-radius:999px;border:1px solid rgba(255,255,255,.085);background:rgba(255,255,255,.035);color:var(--text-mid);display:grid;place-items:center;padding:0}.wm-action-trigger:active{transform:scale(.96)}
 .wm-action-popover{position:absolute;right:0;top:38px;min-width:132px;padding:6px;border-radius:15px;border:1px solid rgba(255,255,255,.12);background:rgba(18,20,28,.98);box-shadow:0 18px 38px rgba(0,0,0,.42);backdrop-filter:blur(18px);display:grid;gap:4px;z-index:30}.wm-action-popover button{width:100%;text-align:left;border:0;background:transparent;color:var(--text);border-radius:11px;padding:9px 10px;font-size:12px;font-weight:800}.wm-action-popover button:hover{background:rgba(255,255,255,.055)}.wm-action-popover button.primary{color:var(--accent)}.wm-action-popover button.danger{color:var(--danger)}.wm-action-popover button:disabled{opacity:.35}
+.wm-action-popover button.close{margin-top:4px;color:var(--text-mid);border-top:1px solid rgba(255,255,255,.08);border-radius:10px}
 .wm-toast-stack{position:fixed;left:14px;right:14px;bottom:calc(94px + var(--safe-bottom));z-index:260;display:grid;place-items:center;pointer-events:none}.wm-toast{max-width:min(440px,100%);padding:12px 15px;border-radius:999px;border:1px solid rgba(147,242,10,.25);background:rgba(13,16,20,.94);box-shadow:0 18px 42px rgba(0,0,0,.48),0 0 24px rgba(147,242,10,.12);color:var(--text);font-size:13px;font-weight:850;backdrop-filter:blur(18px)}
 .wm-tl-wrap{position:relative}.wm-tl-wrap:after{content:"";position:absolute;right:0;top:0;bottom:20px;width:34px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(9,10,14,.82))}.wm-swipe-cue{display:inline-flex!important;margin-top:7px;color:var(--text-dim);font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.wm-tl{scroll-snap-type:x proximity}.wm-tl-row{scroll-snap-align:start}
 .plan-priority-actions{justify-content:flex-end}.plan-priority-row,.task-row,.wm-top3-card{transition:border-color .15s ease,background .15s ease}.plan-priority-row:focus-within,.task-row:focus-within,.wm-top3-card:focus-within{border-color:rgba(147,242,10,.22)!important;background:rgba(147,242,10,.035)!important}
@@ -3401,6 +3402,22 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     cursor:pointer!important;
     text-align:left!important;
   }
+  .plan-screen-canonical .plan-scheduled-time{
+    appearance:none!important;
+    border:0!important;
+    background:transparent!important;
+    color:var(--wm-blue)!important;
+    padding:0!important;
+    font:inherit!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+    text-align:left!important;
+  }
+  .plan-screen-canonical .plan-scheduled-time::after{
+    content:' change';
+    color:var(--text-dim);
+    font-weight:800;
+  }
   .plan-screen-canonical .plan-priority-actions{
     display:flex!important;
     align-items:center!important;
@@ -4081,9 +4098,9 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
 .plan-time-option:active{transform:translateY(1px);border-color:rgba(141,183,232,.42)}
 .plan-time-alt-head{margin:4px 2px 0;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:var(--text-dim)}
 .plan-time-more{justify-content:center!important;margin-top:2px!important;color:var(--wm-blue,#8DB7E8)!important}
-.plan-time-panel-active{grid-column:1 / -1!important;min-width:0!important;max-width:none!important;width:100%!important}
-.plan-time-panel-active .plan-accordion{overflow:visible!important}
-@media(max-width:640px){.plan-time-finder{padding:12px!important;border-radius:16px!important}.plan-time-finder-head .ghost-btn{padding:7px 9px!important;font-size:10px!important}.plan-time-options{grid-template-columns:1fr!important}.plan-screen-canonical .plan-system-stack>.plan-time-panel-active{flex:0 0 calc(100vw - 32px)!important;min-width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}.plan-time-panel-active .plan-accordion{min-height:auto!important}.plan-time-panel-active .plan-accordion-body{min-width:0!important;width:100%!important}}
+.plan-time-panel-active,.plan-panel-expanded{grid-column:1 / -1!important;min-width:0!important;max-width:none!important;width:100%!important}
+.plan-time-panel-active .plan-accordion,.plan-panel-expanded .plan-accordion{overflow:visible!important}
+@media(max-width:640px){.plan-time-finder{padding:12px!important;border-radius:16px!important}.plan-time-finder-head .ghost-btn{padding:7px 9px!important;font-size:10px!important}.plan-time-options{grid-template-columns:1fr!important}.plan-screen-canonical .plan-system-stack>.plan-time-panel-active,.plan-screen-canonical .plan-system-stack>.plan-panel-expanded{flex:0 0 calc(100vw - 32px)!important;min-width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}.plan-time-panel-active .plan-accordion,.plan-panel-expanded .plan-accordion{min-height:auto!important}.plan-time-panel-active .plan-accordion-body,.plan-panel-expanded .plan-accordion-body{min-width:0!important;width:100%!important}}
 </style>
 <style id="wm-secondary-tabs-unification-2026-08-15">
 .wm-secondary-screen{
@@ -4529,7 +4546,7 @@ function ActionMenu({items,label='Actions',className=''}){
   const select=item=>{ if(item.disabled) return; setOpen(false); item.onSelect&&item.onSelect(); };
   return <div className={'wm-action-menu '+(open?'open ':'')+className}>
     <button type="button" className="wm-action-trigger" aria-label={label} aria-expanded={open} onClick={e=>{e.stopPropagation();setOpen(o=>!o);}}><Icon name="dots" size={16} /></button>
-    {open?<div className="wm-action-popover">{available.map((item,i)=><button type="button" key={i} className={(item.primary?'primary ':'')+(item.danger?'danger':'')} disabled={item.disabled} onClick={e=>{e.stopPropagation();select(item);}}>{item.label}</button>)}</div>:null}
+    {open?<div className="wm-action-popover">{available.map((item,i)=><button type="button" key={i} className={(item.primary?'primary ':'')+(item.danger?'danger':'')} disabled={item.disabled} onClick={e=>{e.stopPropagation();select(item);}}>{item.label}</button>)}<button type="button" className="close" onClick={e=>{e.stopPropagation();setOpen(false);}}>Close</button></div>:null}
   </div>;
 }
 const todayStr = () => new Date().toISOString().slice(0,10);
@@ -6472,6 +6489,11 @@ function wmPriorityProgress(item){
 function wmScheduleForItem(item,calendarEvents=[]){
   const title=String(item?.text||item?.title||'').trim().toLowerCase();
   if(!title) return null;
+  if(item?.scheduledDate&&item?.scheduledStart){
+    const d=new Date(`${item.scheduledDate}T00:00:00`);
+    const day=Number.isFinite(d.getTime())?d.toLocaleDateString('en-US',{weekday:'short'}):'Scheduled';
+    return `${day} ${formatCalendarTime(item.scheduledStart)}`;
+  }
   const words=title.split(/\s+/).filter(w=>w.length>3).slice(0,6);
   const {start,end}=wmWeekBounds();
   const match=(calendarEvents||[]).find(e=>{
@@ -6568,7 +6590,9 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
     const title=asTitle(item);
     const commitSlot=slot=>{
       if(!slot) return;
-      setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{
+      setCalendarEvents(prev=>normalizeCalendarEvents([
+        ...(prev||[]).filter(e=>!String(e.id||'').startsWith(`plan-${kind}-${item.id}-`)),
+        {
         id:`plan-${kind}-${item.id}-${Date.now()}`,
         date:slot.date,
         time:slot.time,
@@ -6587,6 +6611,11 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
     }
     notify('Open Calendar to choose a time.');
   };
+  const unscheduleItem=item=>{
+    setCalendarEvents?.(prev=>(prev||[]).filter(e=>!String(e.id||'').startsWith(`plan-${kind}-${item.id}-`)));
+    patch(item.id,{scheduledDate:'',scheduledStart:'',lastScheduledAt:''});
+    notify('Time removed');
+  };
   return <div className={`glass card plan-priority-card ${kind}`}>
     <div className="plan-priority-card-head"><span>{kind==='daily'?'Daily 3':'Weekly 5'}</span><div className="plan-priority-head-actions">{completed.length?<button type="button" className={`plan-priority-toggle ${showDone?'active':''}`} onClick={()=>setShowDone(v=>!v)}>{showDone?'Hide done':'Show done'}</button>:null}<b style={{color:accent}}>{open.length}/{max}</b></div></div>
     <div className="plan-priority-list">
@@ -6595,13 +6624,13 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
         <div className="plan-priority-main">
           {editing===item.id?<input className="text-input" value={editText} onChange={e=>setEditText(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter') saveEdit(item); if(e.key==='Escape') cancelEdit(); }} autoFocus />:<div className="plan-priority-text">{item.text||item.title}</div>}
           <div className="plan-priority-tag" style={{color:domainFamilyColor(item.goal||item.category||item.domain||'Priority')}}>{item.goal||item.category||item.domain||'Priority'}</div>
-          <div className="plan-priority-coverage">{scheduled?<span className="scheduled">{scheduled}</span>:<button type="button" className="plan-find-time" onClick={()=>scheduleItem(item)}>Find time →</button>}{kind==='weekly'?<span>{pct}%</span>:null}</div>
+          <div className="plan-priority-coverage">{scheduled?<button type="button" className="plan-scheduled-time" onClick={()=>scheduleItem(item)}>{scheduled}</button>:<button type="button" className="plan-find-time" onClick={()=>scheduleItem(item)}>Find time →</button>}{kind==='weekly'?<span>{pct}%</span>:null}</div>
           {kind==='weekly'?<div className="plan-priority-progressline"><i style={{width:`${pct}%`,background:accent}}></i></div>:null}
           {rollovers>=3?<div className="plan-rollover-actions"><b>3rd rollover</b><button type="button" onClick={()=>notify('Use Find time to schedule this commitment.')}>Schedule</button><button type="button" onClick={()=>{patch(item.id,{rollovers:0,rolloverCount:0,recommittedAt:new Date().toISOString()});notify('Recommitted');}}>Recommit</button><button type="button" onClick={()=>{patch(item.id,{status:'delegated',rollovers:0,rolloverCount:0});notify('Marked delegated');}}>Delegate</button><button type="button" onClick={()=>{patch(item.id,{archived:true,status:'deferred'});notify('Dropped from active plan');}}>Drop</button></div>:null}
         </div>
         <div className="plan-priority-actions">
           {kind==='weekly'?<span className="plan-weekly-ring" style={{'--pct':`${pct}%`,'--ring':accent}}><b>{pct}</b></span>:null}
-          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<ActionMenu items={[(onMoveItem&&!item.done)?{label:moveLabel,primary:true,onSelect:()=>{onMoveItem(item);notify('Moved to '+moveLabel);}}:null,{label:'Edit',onSelect:()=>startEdit(item)},{label:'Remove',danger:true,onSelect:()=>remove(item)}]} />}
+          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<ActionMenu items={[(onMoveItem&&!item.done)?{label:moveLabel,primary:true,onSelect:()=>{onMoveItem(item);notify('Moved to '+moveLabel);}}:null,scheduled?{label:'Change time',primary:true,onSelect:()=>scheduleItem(item)}:{label:'Find time',primary:true,onSelect:()=>scheduleItem(item)},scheduled?{label:'Remove time',onSelect:()=>unscheduleItem(item)}:null,{label:'Edit',onSelect:()=>startEdit(item)},{label:'Remove',danger:true,onSelect:()=>remove(item)}]} />}
         </div>
       </div>; }):<div className="empty">{kind==='daily'?'No Daily 3 set.':'No Weekly 5 set.'}</div>}
     </div>
@@ -6953,10 +6982,10 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       <PlanWeekExecutionPreview calendarEvents={calendarEvents||[]} todos={todos||[]} weekly={weekly||[]} onOpenCalendar={()=>openPanel('calendar')} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
       <div className="plan-system-stack">
-        <div data-plan-panel="calendar" className={timeFinder?'plan-time-panel-active':''}><PlanAccordion id="calendar" title="Calendar" sub={timeFinder?'Choose a time':calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}>{timeFinder?<PlanTimeFinder request={timeFinder} calendarEvents={calendarEvents||[]} onClose={()=>setTimeFinder(null)} onSelect={slot=>{ timeFinder.onSelect?.(slot); setTimeFinder(null); }} />:<CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} />}</PlanAccordion></div>
-        <div data-plan-panel="tasks"><PlanAccordion id="tasks" title="Task Queue" sub="Open tasks and errands" icon="list" count={openTaskCount} open={!!openPanels.tasks} onToggle={()=>togglePanel('tasks')}><DomainTasksView title="Task Queue" domains={tasks} setDomains={setTasks} errands={errands} setErrands={setErrands} promoteTop3={moveTaskToTop3} promoteTop5={moveTaskToWeekly} promoteErrandTop3={moveErrandToTop3} promoteErrandTop5={moveErrandToWeekly} top3Items={todos} top5Items={weekly} /></PlanAccordion></div>
-        <div data-plan-panel="routines"><PlanAccordion id="routines" title="Routines" sub="Daily and weekly checklists" icon="loop" count={routines.length} open={!!openPanels.routines} onToggle={()=>togglePanel('routines')}><PlanRoutines routines={routines} onChange={items=>patchEx({routines:items})} todos={todos} setTodos={setTodos} habits={habits||[]} setHabits={setHabits} /></PlanAccordion></div>
-        <div data-plan-panel="horizons"><PlanAccordion id="horizons" title="Goals" sub="Supported by tasks and priorities" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Daily 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
+        <div data-plan-panel="calendar" className={timeFinder?'plan-time-panel-active':openPanels.calendar?'plan-panel-expanded':''}><PlanAccordion id="calendar" title="Calendar" sub={timeFinder?'Choose a time':calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}>{timeFinder?<PlanTimeFinder request={timeFinder} calendarEvents={calendarEvents||[]} onClose={()=>setTimeFinder(null)} onSelect={slot=>{ timeFinder.onSelect?.(slot); setTimeFinder(null); }} />:<CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} />}</PlanAccordion></div>
+        <div data-plan-panel="tasks" className={openPanels.tasks?'plan-panel-expanded':''}><PlanAccordion id="tasks" title="Task Queue" sub="Open tasks and errands" icon="list" count={openTaskCount} open={!!openPanels.tasks} onToggle={()=>togglePanel('tasks')}><DomainTasksView title="Task Queue" domains={tasks} setDomains={setTasks} errands={errands} setErrands={setErrands} promoteTop3={moveTaskToTop3} promoteTop5={moveTaskToWeekly} promoteErrandTop3={moveErrandToTop3} promoteErrandTop5={moveErrandToWeekly} top3Items={todos} top5Items={weekly} /></PlanAccordion></div>
+        <div data-plan-panel="routines" className={openPanels.routines?'plan-panel-expanded':''}><PlanAccordion id="routines" title="Routines" sub="Daily and weekly checklists" icon="loop" count={routines.length} open={!!openPanels.routines} onToggle={()=>togglePanel('routines')}><PlanRoutines routines={routines} onChange={items=>patchEx({routines:items})} todos={todos} setTodos={setTodos} habits={habits||[]} setHabits={setHabits} /></PlanAccordion></div>
+        <div data-plan-panel="horizons" className={openPanels.horizons?'plan-panel-expanded':''}><PlanAccordion id="horizons" title="Goals" sub="Supported by tasks and priorities" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Daily 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
       </div>
     </div>
     {appleReview.length?<div className="apple-review-backdrop" onClick={()=>setAppleReview([])}><section className="glass card apple-review-sheet" onClick={e=>e.stopPropagation()}><div className="apple-review-head"><div><b>Apple Reminders</b><small>Categorize each capture before it enters WolfMaster.</small></div><button type="button" className="ghost-btn" onClick={()=>setAppleReview([])}>Close</button></div><div className="apple-review-list">{appleReview.map(cap=>{ const choice=appleChoices[cap.id]||{destination:'task',domain:'Inbox'}; return <article className="apple-review-item" key={cap.id}><div><div className="apple-review-title">{cap.title||'Untitled reminder'}</div>{cap.notes||cap.due_date?<div className="apple-review-note">{cap.notes||''}{cap.due_date?` · Due ${cap.due_date}`:''}</div>:null}</div><div className="apple-review-controls"><select className="text-input select-like" value={choice.destination} onChange={e=>updateAppleChoice(cap.id,{destination:e.target.value})}><option value="task">Task Queue</option><option value="errand">Errand</option><option value="comms">Comms</option><option value="daily">Daily 3</option><option value="weekly">Weekly 5</option><option value="skip">Skip</option></select><select className="text-input select-like" value={choice.domain||'Inbox'} onChange={e=>updateAppleChoice(cap.id,{domain:e.target.value})} disabled={choice.destination==='skip'}>{appleDomainOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></article>; })}</div><div className="apple-review-actions"><button type="button" className="ghost-btn" onClick={()=>setAppleReview([])}>Cancel</button><button type="button" className="primary-btn" onClick={applyAppleReview} disabled={appleLoading}>{appleLoading?'Importing…':'Import Categorized'}</button></div></section></div>:null}
