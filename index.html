@@ -122,8 +122,8 @@ body{background:linear-gradient(180deg,#08090c,#0b0d12 42%,#090a0d);letter-spaci
 /* Compact next-action strip: removes duplicate brief copy without changing the live logic. */
 .wm-next{padding:10px 12px!important;border-radius:15px!important;background:rgba(147,242,10,.06)!important}
 .wm-next .wm-also{display:none!important}
-.wm-next .wm-eyebrow-ic{font-size:0!important;gap:5px}
-.wm-next .wm-eyebrow-ic::after{content:'Focus Now';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:900}
+.wm-next .wm-eyebrow-ic{font-size:10px!important;letter-spacing:.14em;text-transform:uppercase;gap:5px}
+.wm-next .wm-eyebrow-ic::after{content:none!important;display:none!important}
 .wm-next strong{margin-top:2px!important;font-size:13.5px!important;line-height:1.2!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wm-next .wm-next-hint{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(147,242,10,.2);background:rgba(147,242,10,.07);border-radius:999px;padding:7px 10px;white-space:nowrap}
 @media (max-width:640px){.wm-next{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;padding:8px 9px 8px 11px!important}.wm-next strong{font-size:12px!important}.wm-next .wm-next-hint{font-size:8px;padding:6px 8px}}
