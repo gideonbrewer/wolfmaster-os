@@ -4067,6 +4067,19 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     }
   }
 </style>
+<style id="wm-find-time-chooser-2026-08-15">
+.plan-time-finder{margin:0 0 10px!important;border-color:rgba(141,183,232,.22)!important;background:linear-gradient(180deg,rgba(91,168,255,.08),rgba(255,255,255,.018))!important}
+.plan-time-finder-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.plan-time-finder-head b{display:block;margin-top:4px;font-size:15px;line-height:1.15;color:var(--text)}
+.plan-time-finder-head small{display:block;margin-top:4px;color:var(--text-mid);font-size:11px}
+.plan-time-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.plan-time-option{width:100%;border:1px solid rgba(141,183,232,.16);background:rgba(141,183,232,.055);color:var(--text);border-radius:14px;padding:10px 12px;text-align:left;display:grid;gap:3px}
+.plan-time-option span{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:var(--wm-blue,#8DB7E8)}
+.plan-time-option b{font-size:13px;line-height:1.15}
+.plan-time-option small{font-size:10px;color:var(--text-mid)}
+.plan-time-option:active{transform:translateY(1px);border-color:rgba(141,183,232,.42)}
+@media(max-width:640px){.plan-time-finder{padding:12px!important;border-radius:16px!important}.plan-time-finder-head .ghost-btn{padding:7px 9px!important;font-size:10px!important}.plan-time-options{grid-template-columns:1fr!important}}
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -6091,7 +6104,39 @@ function wmFindOpenStart(calendarEvents=[],duration=60){
   }
   return earliest;
 }
-function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,moveDisabledLabel,calendarEvents=[],setCalendarEvents}){
+function wmFindOpenSlots(calendarEvents=[],duration=60,count=5){
+  const slots=[];
+  const now=new Date();
+  const dayEnd=21*60;
+  for(let offset=0;offset<7&&slots.length<count;offset++){
+    const day=new Date(now);
+    day.setDate(now.getDate()+offset);
+    day.setHours(0,0,0,0);
+    const iso=day.toISOString().slice(0,10);
+    const earliest=offset===0?Math.max(8*60,Math.ceil((now.getHours()*60+now.getMinutes())/30)*30):8*60;
+    const busy=(calendarEvents||[]).filter(e=>String(e.date||'').slice(0,10)===iso||(offset===0&&!e.date&&e.day==='Today')).map(e=>{
+      const start=wmParseCalendarMinute(e.rawTime||e.time);
+      if(start===null) return null;
+      return {start,end:Math.min(start+wmEventDuration(e),22*60)};
+    }).filter(Boolean).sort((a,b)=>a.start-b.start);
+    for(let m=earliest;m<=dayEnd-duration&&slots.length<count;m+=30){
+      if(busy.some(b=>m<b.end&&m+duration>b.start)) continue;
+      const labelDay=offset===0?'Today':day.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const part=m<12*60?'Morning':m<17*60?'Afternoon':'Evening';
+      slots.push({
+        date:iso,
+        time:wmFormatMinute(m),
+        end:wmFormatMinute(m+duration),
+        duration,
+        label:`${labelDay} · ${formatCalendarTime(wmFormatMinute(m))}–${formatCalendarTime(wmFormatMinute(m+duration))}`,
+        part
+      });
+      m+=Math.max(0,duration-30);
+    }
+  }
+  return slots;
+}
+function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,moveDisabledLabel,calendarEvents=[],setCalendarEvents,onFindTime}){
   const [draft,setDraft]=useState('');
   const [editing,setEditing]=useState(null);
   const [editText,setEditText]=useState('');
@@ -6110,21 +6155,27 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
   const scheduleItem=item=>{
     if(!setCalendarEvents){ notify('Calendar scheduling is not available here yet.'); return; }
     const duration=kind==='daily'?90:60;
-    const start=wmFindOpenStart(calendarEvents,duration);
-    const time=wmFormatMinute(start);
     const title=asTitle(item);
-    setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{
-      id:`plan-${kind}-${item.id}-${Date.now()}`,
-      date:todayStr(),
-      time,
-      title,
-      note:`${duration}m · ${kind==='daily'?'Daily 3':'Weekly 5'} execution block`,
-      source:'manual',
-      kind:'execution-block',
-      createdAt:new Date().toISOString()
-    }]));
-    patch(item.id,{scheduledDate:todayStr(),scheduledStart:time,lastScheduledAt:new Date().toISOString()});
-    notify(`${title} scheduled at ${formatCalendarTime(time)}`);
+    const commitSlot=slot=>{
+      if(!slot) return;
+      setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{
+        id:`plan-${kind}-${item.id}-${Date.now()}`,
+        date:slot.date,
+        time:slot.time,
+        title,
+        note:`${duration}m · ${kind==='daily'?'Daily 3':'Weekly 5'} execution block`,
+        source:'manual',
+        kind:'execution-block',
+        createdAt:new Date().toISOString()
+      }]));
+      patch(item.id,{scheduledDate:slot.date,scheduledStart:slot.time,lastScheduledAt:new Date().toISOString()});
+      notify(`${title} scheduled ${slot.label}`);
+    };
+    if(onFindTime){
+      onFindTime({item,kind,duration,title,accent,onSelect:commitSlot});
+      return;
+    }
+    notify('Open Calendar to choose a time.');
   };
   return <div className={`glass card plan-priority-card ${kind}`}>
     <div className="plan-priority-card-head"><span>{kind==='daily'?'Daily 3':'Weekly 5'}</span><div className="plan-priority-head-actions">{completed.length?<button type="button" className={`plan-priority-toggle ${showDone?'active':''}`} onClick={()=>setShowDone(v=>!v)}>{showDone?'Hide done':'Show done'}</button>:null}<b style={{color:accent}}>{open.length}/{max}</b></div></div>
@@ -6147,7 +6198,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
     {open.length<max?<div className="plan-priority-add"><input className="text-input" value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder={kind==='daily'?'Restock Daily 3…':'Restock Weekly 5…'} /><button type="button" className="primary-btn" style={{background:accent,color:'#091005'}} onClick={add}>Add</button></div>:null}
   </div>;
 }
-function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOpenTasks,calendarEvents=[],setCalendarEvents}){
+function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOpenTasks,calendarEvents=[],setCalendarEvents,onFindTime}){
   const [focusDraft,setFocusDraft]=useState(focus||'');
   useEffect(()=>setFocusDraft(focus||''),[focus]);
   const dailyOpen=(todos||[]).filter(x=>!x.done&&!x.archived).length;
@@ -6177,9 +6228,31 @@ function PlanPriorityPlanner({todos,setTodos,weekly,setWeekly,focus,onFocus,onOp
       <div className="plan-capacity-strip"><span>Week Capacity</span><b>{capacity.committedH}h committed · {capacity.openFocus}h open focus · Load: {capacity.load}</b></div>
       <div className="plan-priority-top"><div className="plan-priority-title"><b>Set today. Shape the week.</b></div><span className="plan-priority-progress">Daily 3 {dailyOpen}/3 set · Weekly 5 {weeklyDone}/5 done</span></div>
       <div className="plan-priority-grid">
-        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
-        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} />
+        <PlanPriorityList kind="daily" items={todos||[]} setItems={setTodos} max={3} accent={C.accent} onMoveItem={moveToWeekly} moveLabel="Weekly 5" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} onFindTime={onFindTime} />
+        <PlanPriorityList kind="weekly" items={weekly||[]} setItems={setWeekly} max={5} accent={C.purple} onMoveItem={moveToDaily} moveLabel="Daily 3" moveDisabledLabel="Done" calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} onFindTime={onFindTime} />
       </div>
+    </div>
+  </section>;
+}
+function PlanTimeFinder({request,calendarEvents,onClose,onSelect}){
+  const slots=useMemo(()=>request?wmFindOpenSlots(calendarEvents,request.duration||60,6):[],[request?.title,request?.duration,JSON.stringify(calendarEvents||[])]);
+  if(!request) return null;
+  const duration=wmDurationLabel(request.duration||60);
+  return <section className="glass card plan-time-finder">
+    <div className="plan-time-finder-head">
+      <div>
+        <div className="section-title">Find Time</div>
+        <b>{request.title}</b>
+        <small>{request.kind==='daily'?'Daily 3':'Weekly 5'} · {duration}</small>
+      </div>
+      <button type="button" className="ghost-btn" onClick={onClose}>Cancel</button>
+    </div>
+    <div className="plan-time-options">
+      {slots.length?slots.map(slot=><button type="button" key={`${slot.date}-${slot.time}`} className="plan-time-option" onClick={()=>onSelect(slot)}>
+        <span>{slot.part}</span>
+        <b>{slot.label}</b>
+        <small>{duration} open · tap to schedule</small>
+      </button>):<div className="empty">No clean openings found this week. Open Calendar and add a manual block.</div>}
     </div>
   </section>;
 }
@@ -6349,11 +6422,17 @@ function PlanWeekExecutionPreview({calendarEvents,todos,weekly,onOpenCalendar}){
 }
 function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExtras,todos,setTodos,weekly,setWeekly,tasks,setTasks,careerTasks,errands,setErrands,comms,setComms,habits,setHabits,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar,onConnectGoogleCalendar,onSyncGoogleCalendar,emailItems,emailStatus,emailMessage,emailAccount,emailLoading,onConnectGmail,onSyncGmail}){
   const [openPanels,setOpenPanels]=useState({horizons:false,calendar:false,tasks:false,routines:false});
+  const [timeFinder,setTimeFinder]=useState(null);
   const [appleLoading,setAppleLoading]=useState(false);
   const [appleMessage,setAppleMessage]=useState('');
   const [appleReview,setAppleReview]=useState([]);
   const [appleChoices,setAppleChoices]=useState({});
   const openPanel=id=>{ setOpenPanels(prev=>({...prev,[id]:true})); setTimeout(()=>document.querySelector(`[data-plan-panel="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}),30); };
+  const openTimeFinder=req=>{
+    setTimeFinder(req);
+    setOpenPanels(prev=>({...prev,calendar:true}));
+    setTimeout(()=>document.querySelector(`[data-plan-panel="calendar"]`)?.scrollIntoView({behavior:'smooth',block:'start'}),30);
+  };
   const togglePanel=id=>setOpenPanels(prev=>({...prev,[id]:!prev[id]}));
   useEffect(()=>{ if(navTarget?.tab==='plan'&&navTarget.sub) openPanel(navTarget.sub); },[navTarget?.stamp]);
   const ex={...PLANEXTRASINIT,...(planExtras||{})};
@@ -6450,12 +6529,12 @@ function PlanScreen({session,navTarget,onNavigate,onSearch,planExtras,setPlanExt
       </div>
     </header>
     <div className="plan-stack">
-      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} /></div>
+      <div data-plan-panel="priorities"><PlanPriorityPlanner todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} focus={ex.focus} onFocus={v=>patchEx({focus:v})} onOpenTasks={()=>openPanel('tasks')} calendarEvents={calendarEvents||[]} setCalendarEvents={setCalendarEvents} onFindTime={openTimeFinder} /></div>
       <PlanActionBoard todos={todos} setTodos={setTodos} weekly={weekly} setWeekly={setWeekly} tasks={tasks} setTasks={setTasks} errands={errands} setErrands={setErrands} comms={comms} setComms={setComms} calendarEvents={calendarEvents||[]} calendarStatus={calendarStatus} calendarLoading={calendarLoading} onOpenCalendar={()=>openPanel('calendar')} onOpenTasks={()=>openPanel('tasks')} onOpenPeople={()=>onNavigate&&onNavigate('career')} onSyncCalendar={onSyncGoogleCalendar} onPromoteTop3={moveTaskToTop3} onPromoteWeekly={moveTaskToWeekly} />
       <PlanWeekExecutionPreview calendarEvents={calendarEvents||[]} todos={todos||[]} weekly={weekly||[]} onOpenCalendar={()=>openPanel('calendar')} />
       <div className="plan-support-head"><b>Support Planning</b><small>Open only when needed</small></div>
       <div className="plan-system-stack">
-        <div data-plan-panel="calendar"><PlanAccordion id="calendar" title="Calendar" sub={calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}><CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} /></PlanAccordion></div>
+        <div data-plan-panel="calendar"><PlanAccordion id="calendar" title="Calendar" sub={calendarUrl?'Google synced':'Connect schedule'} icon="cal" count={weekEventCount} open={!!openPanels.calendar} onToggle={()=>togglePanel('calendar')}>{timeFinder?<PlanTimeFinder request={timeFinder} calendarEvents={calendarEvents||[]} onClose={()=>setTimeFinder(null)} onSelect={slot=>{ timeFinder.onSelect?.(slot); setTimeFinder(null); }} />:null}<CalendarView calendarUrl={calendarUrl} calendarInput={calendarInput} setCalendarInput={setCalendarInput} calendarEvents={calendarEvents} setCalendarEvents={setCalendarEvents} calendarStatus={calendarStatus} calendarMessage={calendarMessage} calendarConnected={!!calendarUrl} calendarLoading={calendarLoading} onSaveCalendar={onSaveCalendar} onOpenCalendar={onOpenCalendar} onResetCalendar={onResetCalendar} onConnectGoogleCalendar={onConnectGoogleCalendar} onSyncGoogleCalendar={onSyncGoogleCalendar} /></PlanAccordion></div>
         <div data-plan-panel="tasks"><PlanAccordion id="tasks" title="Task Queue" sub="Open tasks and errands" icon="list" count={openTaskCount} open={!!openPanels.tasks} onToggle={()=>togglePanel('tasks')}><DomainTasksView title="Task Queue" domains={tasks} setDomains={setTasks} errands={errands} setErrands={setErrands} promoteTop3={moveTaskToTop3} promoteTop5={moveTaskToWeekly} promoteErrandTop3={moveErrandToTop3} promoteErrandTop5={moveErrandToWeekly} top3Items={todos} top5Items={weekly} /></PlanAccordion></div>
         <div data-plan-panel="routines"><PlanAccordion id="routines" title="Routines" sub="Daily and weekly checklists" icon="loop" count={routines.length} open={!!openPanels.routines} onToggle={()=>togglePanel('routines')}><PlanRoutines routines={routines} onChange={items=>patchEx({routines:items})} todos={todos} setTodos={setTodos} habits={habits||[]} setHabits={setHabits} /></PlanAccordion></div>
         <div data-plan-panel="horizons"><PlanAccordion id="horizons" title="Goals" sub="Supported by tasks and priorities" icon="target" count={horizons.length} open={!!openPanels.horizons} onToggle={()=>togglePanel('horizons')}><PlanHorizons defaultExpanded={true} horizons={horizons} onSave={items=>patchEx({horizons:items})} onTop3={item=>addToPriorityList(item,setTodos,todos,3,'Daily 3')} onWeekly={item=>addToPriorityList(item,setWeekly,weekly,5,'Weekly 5')} onTask={addToTaskQueue} /></PlanAccordion></div>
