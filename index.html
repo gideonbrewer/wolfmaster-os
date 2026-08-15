@@ -4727,6 +4727,119 @@ html[data-theme="light"] .review-memory-row small{
     .wm-bell.wm-sync-button,.wm-user{width:40px!important;height:40px!important}
   }
 </style>
+<style id="wm-plan-support-rail-fix-2026-08-15">
+  @media(max-width:640px){
+    .plan-screen-canonical .plan-system-stack{
+      gap:8px!important;
+      padding:0 96px 8px 0!important;
+      align-items:stretch!important;
+    }
+    .plan-screen-canonical .plan-system-stack > div{
+      flex:0 0 126px!important;
+      min-width:126px!important;
+      max-width:126px!important;
+    }
+    .plan-screen-canonical .plan-system-stack > .plan-panel-expanded,
+    .plan-screen-canonical .plan-system-stack > .plan-time-panel-active{
+      flex-basis:calc(100vw - 32px)!important;
+      min-width:calc(100vw - 32px)!important;
+      max-width:calc(100vw - 32px)!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-accordion{
+      min-height:72px!important;
+      height:72px!important;
+      padding:0!important;
+      border-radius:14px!important;
+      overflow:hidden!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-panel-expanded .plan-accordion,
+    .plan-screen-canonical .plan-system-stack .plan-time-panel-active .plan-accordion{
+      height:auto!important;
+      min-height:0!important;
+      overflow:visible!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-accordion-head{
+      min-height:72px!important;
+      height:72px!important;
+      display:grid!important;
+      grid-template-columns:30px minmax(0,1fr) auto!important;
+      grid-template-rows:auto auto!important;
+      gap:4px 7px!important;
+      padding:9px 10px!important;
+      align-items:center!important;
+    }
+    .plan-screen-canonical .plan-system-stack .hub-ico{
+      grid-column:1!important;
+      grid-row:1 / span 2!important;
+      width:30px!important;
+      height:30px!important;
+      min-width:30px!important;
+      border-radius:11px!important;
+    }
+    .plan-screen-canonical .plan-system-stack .hub-ico svg{
+      width:17px!important;
+      height:17px!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-accordion-copy{
+      grid-column:2!important;
+      grid-row:1 / span 2!important;
+      min-width:0!important;
+      display:grid!important;
+      align-content:center!important;
+      gap:2px!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-accordion-copy b{
+      display:block!important;
+      max-width:100%!important;
+      font-size:13px!important;
+      line-height:1.05!important;
+      letter-spacing:-.02em!important;
+      white-space:nowrap!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-accordion-copy small{
+      display:block!important;
+      max-width:100%!important;
+      font-size:9px!important;
+      line-height:1.05!important;
+      color:var(--text-mid)!important;
+      white-space:nowrap!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+    }
+    .plan-screen-canonical .plan-system-stack .plan-hub-count{
+      grid-column:3!important;
+      grid-row:1!important;
+      min-width:18px!important;
+      font-size:12px!important;
+      line-height:1!important;
+      text-align:right!important;
+    }
+    .plan-screen-canonical .plan-system-stack .wm-chevron{
+      grid-column:3!important;
+      grid-row:2!important;
+      justify-self:end!important;
+      width:22px!important;
+      height:22px!important;
+      min-width:22px!important;
+      font-size:13px!important;
+      opacity:.72!important;
+    }
+    .plan-screen-canonical .plan-support-head{
+      margin:6px 0 3px!important;
+    }
+    .qc-fab{
+      width:36px!important;
+      height:36px!important;
+      min-width:36px!important;
+      right:12px!important;
+      bottom:calc(104px + var(--safe-bottom))!important;
+      z-index:87!important;
+      opacity:.86!important;
+    }
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
