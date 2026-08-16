@@ -3466,7 +3466,7 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     border-radius:12px!important;
   }
   .plan-screen-canonical .plan-execution-panel > :not(.plan-object-tabs){
-    display:none!important;
+    display:block!important;
   }
   .plan-screen-canonical .plan-object-tabs{
     display:grid!important;
@@ -3511,6 +3511,28 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
     height:22px!important;
     font-size:12px!important;
     color:var(--stage)!important;
+  }
+  .plan-screen-canonical .plan-action-headline{
+    margin-top:8px!important;
+    padding:8px 2px 7px!important;
+  }
+  .plan-screen-canonical .plan-action-headline b{
+    font-size:13px!important;
+  }
+  .plan-screen-canonical .plan-action-headline small{
+    display:none!important;
+  }
+  .plan-screen-canonical .plan-action-headline span{
+    font-size:13px!important;
+  }
+  .plan-screen-canonical .plan-calendar-preview,
+  .plan-screen-canonical .plan-action-list{
+    gap:5px!important;
+    margin-top:4px!important;
+  }
+  .plan-screen-canonical .plan-panel-actions{
+    margin-top:7px!important;
+    padding-top:7px!important;
   }
   .plan-screen-canonical .plan-week-exec-card{
     padding:8px!important;
@@ -7568,7 +7590,7 @@ function PlanPriorityList({kind,items,setItems,max,accent,onMoveItem,moveLabel,m
         </div>
         <div className="plan-priority-actions">
           {kind==='weekly'?<span className="plan-weekly-ring" style={{'--pct':`${pct}%`,'--ring':accent}}><b>{pct}</b></span>:null}
-          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<ActionMenu items={[(onMoveItem&&!item.done)?{label:moveLabel,primary:true,onSelect:()=>{onMoveItem(item);notify('Moved to '+moveLabel);}}:null,scheduled?{label:'Change time',primary:true,onSelect:()=>scheduleItem(item)}:{label:'Find time',primary:true,onSelect:()=>scheduleItem(item)},scheduled?{label:'Remove time',onSelect:()=>unscheduleItem(item)}:null,{label:'Edit',onSelect:()=>startEdit(item)},{label:'Remove',danger:true,onSelect:()=>remove(item)}]} />}
+          {editing===item.id?<><button type="button" className="primary" onClick={()=>saveEdit(item)}>OK</button><button type="button" onClick={cancelEdit}>×</button></>:<ActionMenu items={[scheduled?{label:'Change time',primary:true,onSelect:()=>scheduleItem(item)}:{label:'Find time',primary:true,onSelect:()=>scheduleItem(item)},{label:'Edit',onSelect:()=>startEdit(item)},{label:'Remove',danger:true,onSelect:()=>remove(item)}]} />}
         </div>
       </div>; }):<div className="empty">{kind==='daily'?'No Daily 3 set.':'No Weekly 5 set.'}</div>}
     </div>
@@ -7744,7 +7766,7 @@ function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands
     notify('Deleted');
   };
   const renderRows=(items,empty,kind)=> <div className="plan-action-list">
-    {items.length?items.slice(0,8).map(r=>{
+    {items.length?items.slice(0,3).map(r=>{
       const color=domainFamilyColor(r.domain||r.actionMode||kind||'Task');
       return <article key={r.id} className={`plan-action-row ${r.done?'done':''} ${kind==='errand'?'errand':''}`} style={{borderLeftColor:color}}>
         <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>{kind==='comm'?'Person / org':kind==='errand'?'Bucket':'Domain'} · {r.domain}</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span>{r.source?<span>{r.source}</span>:null}<span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
@@ -7764,7 +7786,7 @@ function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands
       <div className="plan-object-tabs">{panels.map(p=><button type="button" key={p.key} className={`plan-object-tab ${panel===p.key?'active':''}`} style={{'--stage':p.color}} onClick={()=>setPanel(p.key)}><Icon name={p.icon} size={15}/><span>{p.label}</span><b>{p.count}</b></button>)}</div>
       {panel==='calendar'?<>
         <div className="plan-action-headline"><div><b style={{color:C.info}}>Calendar</b><small>Time is the constraint. Detailed editing stays in Support Planning.</small></div><span>{calendarRows.length}</span></div>
-        <div className="plan-calendar-preview">{calendarRows.length?calendarRows.map((e,i)=><article className="plan-calendar-row" key={e.id||i} style={{borderLeftColor:e.c||C.info}}><span>{e.time||'All day'}</span><b>{e.title||e.text||'Calendar item'}</b><small>{e.day||''} {e.dateNumber||''}{e.note?` · ${e.note}`:''}</small></article>):<div className="empty">No calendar items showing. Connect or sync Google Calendar.</div>}</div>
+        <div className="plan-calendar-preview">{calendarRows.length?calendarRows.slice(0,3).map((e,i)=><article className="plan-calendar-row" key={e.id||i} style={{borderLeftColor:e.c||C.info}}><span>{e.time||'All day'}</span><b>{e.title||e.text||'Calendar item'}</b><small>{e.day||''} {e.dateNumber||''}{e.note?` · ${e.note}`:''}</small></article>):<div className="empty">No calendar items showing. Connect or sync Google Calendar.</div>}</div>
         <div className="plan-panel-actions"><button type="button" className="ghost-btn" onClick={onSyncCalendar} disabled={calendarLoading}>{calendarLoading?'Syncing…':'Sync calendar'}</button><button type="button" className="ghost-btn" onClick={onOpenCalendar}>Open full calendar</button><span>{calendarStatus||'Calendar not connected'}</span></div>
       </>:null}
       {panel==='tasks'?<>
