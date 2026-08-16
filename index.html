@@ -4864,6 +4864,89 @@ html[data-theme="light"] .review-memory-row small{
     }
   }
 </style>
+<style id="wm-action-sheet-portal-2026-08-16">
+  .wm-action-backdrop{
+    position:fixed!important;
+    inset:0!important;
+    z-index:998!important;
+    background:rgba(0,0,0,.18)!important;
+    backdrop-filter:blur(2px)!important;
+  }
+  .wm-action-popover.wm-action-sheet{
+    position:fixed!important;
+    left:16px!important;
+    right:16px!important;
+    top:auto!important;
+    bottom:calc(118px + var(--safe-bottom))!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:420px!important;
+    margin:0 auto!important;
+    z-index:999!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+    padding:10px!important;
+    border-radius:22px!important;
+    border:1px solid rgba(141,183,232,.18)!important;
+    background:linear-gradient(180deg,rgba(20,31,48,.98),rgba(12,18,31,.98))!important;
+    box-shadow:0 26px 68px rgba(0,0,0,.58)!important;
+    backdrop-filter:blur(22px)!important;
+  }
+  .wm-action-popover.wm-action-sheet button{
+    width:100%!important;
+    min-height:48px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:1px solid rgba(141,183,232,.12)!important;
+    border-radius:16px!important;
+    padding:12px 14px!important;
+    background:rgba(255,255,255,.045)!important;
+    color:var(--text)!important;
+    font-size:14px!important;
+    font-weight:900!important;
+    text-align:center!important;
+  }
+  .wm-action-popover.wm-action-sheet button.primary{
+    color:#06111F!important;
+    background:linear-gradient(180deg,#A8CCF4,#7FB2EA)!important;
+    border-color:rgba(168,204,244,.42)!important;
+  }
+  .wm-action-popover.wm-action-sheet button.danger{
+    color:#FF8CA0!important;
+    background:rgba(225,120,142,.10)!important;
+    border-color:rgba(225,120,142,.20)!important;
+  }
+  .wm-action-popover.wm-action-sheet button.close{
+    color:var(--text-mid)!important;
+    background:rgba(255,255,255,.035)!important;
+  }
+  .wm-action-popover.wm-action-sheet button:disabled{
+    opacity:.36!important;
+  }
+  html[data-theme="light"] .wm-action-backdrop{
+    background:rgba(25,35,45,.14)!important;
+  }
+  html[data-theme="light"] .wm-action-popover.wm-action-sheet{
+    background:rgba(255,255,255,.98)!important;
+    border-color:rgba(26,46,66,.12)!important;
+    box-shadow:0 26px 60px rgba(37,51,70,.22)!important;
+  }
+  html[data-theme="light"] .wm-action-popover.wm-action-sheet button{
+    color:#172233!important;
+    background:#F5F8FC!important;
+    border-color:rgba(26,46,66,.12)!important;
+  }
+  html[data-theme="light"] .wm-action-popover.wm-action-sheet button.primary{
+    color:#06111F!important;
+    background:linear-gradient(180deg,#B9D8FA,#8DB7E8)!important;
+  }
+  html[data-theme="light"] .wm-action-popover.wm-action-sheet button.danger{
+    color:#B8475B!important;
+    background:#FFF0F3!important;
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -4901,9 +4984,16 @@ function ActionMenu({items,label='Actions',className=''}){
   const available=(items||[]).filter(Boolean);
   if(!available.length) return null;
   const select=item=>{ if(item.disabled) return; setOpen(false); item.onSelect&&item.onSelect(); };
+  const menu=open&&typeof document!=='undefined'?ReactDOM.createPortal(<>
+    <div className="wm-action-backdrop" onClick={e=>{e.stopPropagation();setOpen(false);}}></div>
+    <div className="wm-action-popover wm-action-sheet" role="menu" aria-label={label}>
+      {available.map((item,i)=><button type="button" key={i} className={(item.primary?'primary ':'')+(item.danger?'danger':'')} disabled={item.disabled} onClick={e=>{e.stopPropagation();select(item);}}>{item.label}</button>)}
+      <button type="button" className="close" onClick={e=>{e.stopPropagation();setOpen(false);}}>Close</button>
+    </div>
+  </>,document.body):null;
   return <div className={'wm-action-menu '+(open?'open ':'')+className}>
     <button type="button" className="wm-action-trigger" aria-label={label} aria-expanded={open} onClick={e=>{e.stopPropagation();setOpen(o=>!o);}}><Icon name="dots" size={16} /></button>
-    {open?<div className="wm-action-popover">{available.map((item,i)=><button type="button" key={i} className={(item.primary?'primary ':'')+(item.danger?'danger':'')} disabled={item.disabled} onClick={e=>{e.stopPropagation();select(item);}}>{item.label}</button>)}<button type="button" className="close" onClick={e=>{e.stopPropagation();setOpen(false);}}>Close</button></div>:null}
+    {menu}
   </div>;
 }
 const todayStr = () => new Date().toISOString().slice(0,10);
