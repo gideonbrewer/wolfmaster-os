@@ -3520,22 +3520,40 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   }
   .plan-screen-canonical .plan-week-exec-row{
     display:grid!important;
-    grid-template-columns:54px minmax(0,1fr) auto!important;
-    gap:7px!important;
+    grid-template-columns:60px minmax(0,1fr) auto!important;
+    grid-template-rows:auto auto!important;
+    gap:3px 8px!important;
     align-items:center!important;
-    padding:7px 8px!important;
-    border-radius:9px!important;
+    min-height:50px!important;
+    padding:8px 9px!important;
+    border-radius:12px!important;
     border-left:3px solid var(--row)!important;
     background:rgba(255,255,255,.025)!important;
   }
-  .plan-screen-canonical .plan-week-exec-row span,
-  .plan-screen-canonical .plan-week-exec-row small{
+  .plan-screen-canonical .plan-week-exec-row span{
+    grid-column:1!important;
+    grid-row:1 / span 2!important;
+    align-self:start!important;
     color:var(--text-mid)!important;
-    font-size:9px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
   }
   .plan-screen-canonical .plan-week-exec-row b{
-    font-size:10.5px!important;
-    line-height:1.12!important;
+    grid-column:2!important;
+    grid-row:1!important;
+    font-size:11.5px!important;
+    line-height:1.15!important;
+    overflow:hidden!important;
+    white-space:nowrap!important;
+    text-overflow:ellipsis!important;
+  }
+  .plan-screen-canonical .plan-week-exec-row small{
+    grid-column:2!important;
+    grid-row:2!important;
+    color:var(--text-mid)!important;
+    font-size:9.5px!important;
+    line-height:1.1!important;
     overflow:hidden!important;
     white-space:nowrap!important;
     text-overflow:ellipsis!important;
@@ -3543,12 +3561,18 @@ html[data-theme="light"] .wm-toast{background:rgba(255,255,255,.96)!important;co
   .plan-screen-canonical .plan-week-exec-row em{
     grid-column:3!important;
     grid-row:1 / span 2!important;
+    justify-self:end!important;
+    align-self:center!important;
     font-style:normal!important;
     font-size:8.5px!important;
     border:1px solid rgba(141,183,232,.16)!important;
     border-radius:999px!important;
     padding:4px 7px!important;
     color:var(--wm-blue)!important;
+    max-width:82px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
   }
   .plan-screen-canonical .plan-support-head{
     margin:4px 0 2px!important;
@@ -7185,10 +7209,16 @@ function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands
 }
 function PlanWeekExecutionPreview({calendarEvents,todos,weekly,onOpenCalendar}){
   const today=todayStr();
+  const eventParts=e=>{
+    const note=String(e.note||'').trim();
+    const execution=note.match(/^(\d+\s*m)\s*·\s*(Daily 3|Weekly 5)\s+execution block/i);
+    if(execution) return {sub:execution[1].replace(/\s+/g,''),mode:execution[2]};
+    return {sub:note||e.day||'',mode:e.kind==='execution-block'?'Execution':'Calendar'};
+  };
   const events=(calendarEvents||[])
     .filter(e=>!e.date||String(e.date)>=today||e.day==='Today')
     .slice(0,3)
-    .map(e=>({time:e.time||'All day',title:e.title||e.text||'Calendar item',sub:e.note||e.day||'',mode:e.kind==='execution-block'?'Execution':'Calendar',color:e.c||C.info}));
+    .map(e=>{ const parts=eventParts(e); return {time:e.time||'All day',title:e.title||e.text||'Calendar item',sub:parts.sub,mode:parts.mode,color:e.c||C.info}; });
   const planned=[...(todos||[]).filter(x=>!x.done&&!x.archived),...(weekly||[]).filter(x=>!x.done&&!x.archived)]
     .slice(0,3-events.length)
     .map((x,i)=>({time:i===0?'Find time':'Plan',title:asTitle(x),sub:x.goal||x.domain||'Priority',mode:i===0?'Deep Work':'Project Block',color:domainFamilyColor(x.goal||x.domain||x.category||'Priority')}));
