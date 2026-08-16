@@ -6639,8 +6639,8 @@ function NowScreen({session,onNavigate,todos,setTodos,weekly,setWeekly,careerLea
     <div className="wm-now-timeline-band">
       <NowTimelinePanel calendarEvents={calendarEvents||[]} todos={todos||[]} setCalendarEvents={setCalendarEvents} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} executive={reviewData?.executive} onNavigate={onNavigate} />
     </div>
-    <NowMomentumStrip habits={habits||[]} setHabits={setHabits} todos={todos||[]} />
     <RecommendedExecutionBlocks executive={reviewData?.executive} calendarEvents={calendarEvents||[]} todos={todos||[]} setTodos={setTodos} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} build={build||[]} reflect={reflect||[]} setCalendarEvents={setCalendarEvents} onNavigate={onNavigate} />
+    <NowMomentumStrip habits={habits||[]} setHabits={setHabits} todos={todos||[]} />
   </div>;
 }
 // Horizontal, collapsed-by-default Habits/Momentum strip. Shows score + delta and
