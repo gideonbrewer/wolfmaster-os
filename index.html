@@ -5261,6 +5261,68 @@ html[data-theme="light"] .review-memory-row small{
     }
   }
 </style>
+<style id="wm-timeline-autoscroll-focus-2026-08-16">
+  .wm-timeline-panel .wm-tl.auto-drift{
+    scroll-behavior:auto!important;
+  }
+  .wm-timeline-panel .wm-tl.auto-drift .wm-tl-row:not(.open){
+    border-color:rgba(141,183,232,.12)!important;
+    background:linear-gradient(180deg,rgba(141,183,232,.055),rgba(255,255,255,.018))!important;
+  }
+  .wm-timeline-panel .wm-tl.auto-drift .wm-tl-row:not(.open):nth-child(2n){
+    background:linear-gradient(180deg,rgba(92,226,214,.052),rgba(255,255,255,.018))!important;
+  }
+  .wm-timeline-panel .wm-tl-row.open,
+  .wm-now-canonical .wm-timeline-panel .wm-tl-row.open,
+  .wm-open-focus-cta{
+    border-color:rgba(141,183,232,.38)!important;
+    background:
+      radial-gradient(140% 120% at 0% 0%,rgba(141,183,232,.20),transparent 48%),
+      linear-gradient(180deg,rgba(31,58,86,.72),rgba(17,35,58,.82))!important;
+    color:#DCEEFF!important;
+    box-shadow:inset 0 0 0 1px rgba(141,183,232,.08),0 10px 30px rgba(54,113,180,.10)!important;
+  }
+  .wm-timeline-panel .wm-tl-row.open{
+    border-style:dashed!important;
+  }
+  .wm-timeline-panel .wm-tl-row.open .wm-tl-title,
+  .wm-timeline-panel .wm-tl-row.open .wm-tl-len,
+  .wm-open-focus-cta b,
+  .wm-open-focus-cta strong{
+    color:#A8CCF4!important;
+  }
+  .wm-timeline-panel .wm-tl-row.open .wm-tl-time,
+  .wm-open-focus-cta span span{
+    color:#C3D9F2!important;
+  }
+  .wm-timeline-panel .wm-tl-row.open .wm-tl-dot{
+    border-color:#A8CCF4!important;
+    box-shadow:0 0 14px rgba(141,183,232,.34)!important;
+  }
+  .wm-open-focus-cta{
+    border-style:dashed!important;
+  }
+  .wm-open-focus-cta:hover,
+  .wm-open-focus-cta:focus-visible{
+    border-color:rgba(168,204,244,.62)!important;
+    background:
+      radial-gradient(140% 120% at 0% 0%,rgba(168,204,244,.24),transparent 48%),
+      linear-gradient(180deg,rgba(36,68,102,.78),rgba(20,42,68,.88))!important;
+  }
+  .wm-swipe-cue{
+    color:#8DB7E8!important;
+  }
+  @media(max-width:640px){
+    .wm-now-canonical .wm-open-focus-cta.compact{
+      min-height:56px!important;
+      border-radius:14px!important;
+    }
+    .wm-timeline-panel .wm-tl.auto-drift::after{
+      content:"";
+      flex:0 0 16px;
+    }
+  }
+</style>
 <style id="wm-action-sheet-portal-2026-08-16">
   .wm-action-backdrop{
     position:fixed!important;
@@ -6590,6 +6652,8 @@ function NowMomentumPanel({habits,todos,bare,onNavigate}){
 }
 function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,executive,bare,onNavigate,setCalendarEvents}){
   const dotColors=[C.info,C.accent,C.warn,C.purple,C.teal,C.pink];
+  const railRef=useRef(null);
+  const [railVisible,setRailVisible]=useState(false);
   const [planner,setPlanner]=useState(null);
   const [draft,setDraft]=useState({start:'',duration:'30',title:'Focus Block'});
   const [focusChoices,setFocusChoices]=useState({});
@@ -6620,6 +6684,35 @@ function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,
   const totalOpen=openBlocks.reduce((sum,b)=>sum+(b.end-b.start),0);
   const primaryOpen=openBlocks[0];
   const shownItems=items.slice(0,primaryOpen?3:4);
+  useEffect(()=>{
+    const rail=railRef.current;
+    const panel=rail?.closest?.('.wm-timeline-panel')||rail;
+    if(!panel||typeof IntersectionObserver==='undefined') return;
+    const observer=new IntersectionObserver(entries=>{
+      const entry=entries[0];
+      setRailVisible(!!entry?.isIntersecting&&entry.intersectionRatio>=.45);
+    },{threshold:[0,.45,.75]});
+    observer.observe(panel);
+    return ()=>observer.disconnect();
+  },[]);
+  useEffect(()=>{
+    const rail=railRef.current;
+    if(!rail||!railVisible||planner) return;
+    let raf=0,dir=1,last=performance.now();
+    const tick=nowTs=>{
+      const max=rail.scrollWidth-rail.clientWidth;
+      if(max>4){
+        const delta=Math.min(40,nowTs-last);
+        rail.scrollLeft+=dir*delta*.014;
+        if(rail.scrollLeft>=max-1) dir=-1;
+        if(rail.scrollLeft<=1) dir=1;
+      }
+      last=nowTs;
+      raf=requestAnimationFrame(tick);
+    };
+    raf=requestAnimationFrame(tick);
+    return ()=>cancelAnimationFrame(raf);
+  },[railVisible,planner,shownItems.length]);
   const startOptions=makeStartOptions(planner);
   const durationOptions=makeDurationOptions(planner,Number(draft.start)||0);
   const focusCandidates=useMemo(()=>{
@@ -6642,7 +6735,7 @@ function NowTimelinePanel({calendarEvents,todos,tasks,careerTasks,errands,comms,
   },[JSON.stringify({todos,tasks,careerTasks,errands,comms,executive})]);
   const openPlanner=block=>{ const start=Math.max(block.start,nowM); const duration=[30,45,60,120].find(m=>m<=block.end-start)||Math.max(15,block.end-start); const suggested={}; let used=0; focusCandidates.forEach((c,i)=>{ if(i<3&&used+c.minutes<=Math.max(duration,30)){ suggested[c.id]=true; used+=c.minutes; } }); setFocusChoices(suggested); setPlanner(block); setDraft({start:String(start),duration:String(duration),title:focusTitleOptions[0]||'Focus Block'}); setTimeout(()=>document.querySelector('.wm-focus-planner')?.scrollIntoView({behavior:'smooth',block:'nearest'}),40); };
   const createFocusBlock=()=>{ if(!planner||!setCalendarEvents) return; const start=Number(draft.start)||Math.max(planner.start,nowM); const durationOptions=makeDurationOptions(planner,start); const minutes=Number(draft.duration)||durationOptions[0]||30; const selected=focusCandidates.filter(c=>focusChoices[c.id]); const title=draft.title||'Focus Block'; const note=[`${minutes}m`,selected.length?`Includes: ${selected.map(c=>c.title).join('; ')}`:null].filter(Boolean).join(' · '); setCalendarEvents(prev=>normalizeCalendarEvents([...(prev||[]),{id:Date.now()+Math.random(),date:todayStr(),time:`${String(Math.floor(start/60)).padStart(2,'0')}:${String(start%60).padStart(2,'0')}`,title,note,source:'manual',kind:'execution-block',createdAt:new Date().toISOString(),items:selected.map(c=>({title:c.title,source:c.source,minutes:c.minutes}))}])); notify(selected.length?`Block added with ${selected.length} item${selected.length===1?'':'s'}`:'Focus block added to calendar'); setPlanner(null); setFocusChoices({}); };
-  const inner=<><div className="wm-tl-wrap"><div className="wm-tl">{shownItems.map((e,i)=>{ const content=<><span className="wm-tl-dot" style={{background:e.open?'transparent':dotColors[i%dotColors.length],boxShadow:e.open?'none':`0 0 10px ${dotColors[i%dotColors.length]}55`}}></span><span className="wm-tl-time">{e.time}</span><b className="wm-tl-title">{e.title}</b>{e.priority?<small className={`wm-cal-priority ${e.priority.level}`}>{e.priority.label}</small>:e.length?<small className="wm-tl-len">{e.length}</small>:null}</>; return e.open?<button type="button" className="wm-tl-row open" key={i} onClick={()=>openPlanner(e)} title="Add focus block to calendar">{content}</button>:<div className={`wm-tl-row ${e.past?'past':''}`} key={i}>{content}</div>; })}</div>{shownItems.length>1?<div className="wm-swipe-cue">Swipe events →</div>:null}</div>{primaryOpen?<button type="button" className="wm-open-focus-cta compact" onClick={()=>openPlanner(primaryOpen)}><span><b>{planner?'Time block options':'Create time block'}</b><span>{primaryOpen.time} available</span></span><strong>{primaryOpen.length}</strong></button>:null}{planner?<div className="wm-focus-planner"><div className="wm-focus-grid"><div className="wm-focus-field"><label>Start</label><select value={draft.start} onChange={e=>setDraft({...draft,start:e.target.value,duration:String((makeDurationOptions(planner,Number(e.target.value))[0]||15))})}>{startOptions.map(m=><option key={m} value={m}>{m<=nowM+5?'Now':fmtMins(m)}</option>)}</select></div><div className="wm-focus-field"><label>Length</label><select value={draft.duration} onChange={e=>setDraft({...draft,duration:e.target.value})}>{durationOptions.map(m=><option key={m} value={m}>{durLabel(m)}</option>)}</select></div><div className="wm-focus-field"><label>Block</label><select value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}>{focusTitleOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></div><div className="wm-focus-suggest"><div className="wm-focus-suggest-head"><b>Suggested inside block</b><span>Tap Yes or No</span></div>{focusCandidates.length?focusCandidates.map(c=><div className="wm-focus-suggest-row" key={c.id}><div><b>{c.title}</b><small>{c.meta} · {c.minutes}m</small></div><div className="wm-focus-yn"><button type="button" className={focusChoices[c.id]?'active':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:true}))}>Yes</button><button type="button" className={!focusChoices[c.id]?'active no':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:false}))}>No</button></div></div>):<div className="wm-focus-empty">No task suggestions yet. Create the block, or add tasks from Plan/On Deck first.</div>}</div><div className="wm-focus-actions"><button type="button" className="primary-btn" onClick={createFocusBlock}>Create Block</button><button type="button" className="ghost-btn" onClick={()=>{setPlanner(null);setFocusChoices({});}}>Cancel</button></div></div>:null}<div className="wm-tl-foot"><span>{seeded?'Preview schedule':`${calEvents.length+taskEvents.length} scheduled`}</span><span className="wm-tl-open">{totalOpen?`${durLabel(totalOpen)} open`:'No open blocks'}</span></div></>;
+  const inner=<><div className="wm-tl-wrap"><div ref={railRef} className={`wm-tl ${railVisible&&!planner?'auto-drift':''}`}>{shownItems.map((e,i)=>{ const content=<><span className="wm-tl-dot" style={{background:e.open?'transparent':dotColors[i%dotColors.length],boxShadow:e.open?'none':`0 0 10px ${dotColors[i%dotColors.length]}55`}}></span><span className="wm-tl-time">{e.time}</span><b className="wm-tl-title">{e.title}</b>{e.priority?<small className={`wm-cal-priority ${e.priority.level}`}>{e.priority.label}</small>:e.length?<small className="wm-tl-len">{e.length}</small>:null}</>; return e.open?<button type="button" className="wm-tl-row open" key={i} onClick={()=>openPlanner(e)} title="Add focus block to calendar">{content}</button>:<div className={`wm-tl-row ${e.past?'past':''}`} key={i}>{content}</div>; })}</div>{shownItems.length>1?<div className="wm-swipe-cue">{railVisible&&!planner?'Auto-scanning timeline':'Swipe events →'}</div>:null}</div>{primaryOpen?<button type="button" className="wm-open-focus-cta compact" onClick={()=>openPlanner(primaryOpen)}><span><b>{planner?'Time block options':'Create time block'}</b><span>{primaryOpen.time} available</span></span><strong>{primaryOpen.length}</strong></button>:null}{planner?<div className="wm-focus-planner"><div className="wm-focus-grid"><div className="wm-focus-field"><label>Start</label><select value={draft.start} onChange={e=>setDraft({...draft,start:e.target.value,duration:String((makeDurationOptions(planner,Number(e.target.value))[0]||15))})}>{startOptions.map(m=><option key={m} value={m}>{m<=nowM+5?'Now':fmtMins(m)}</option>)}</select></div><div className="wm-focus-field"><label>Length</label><select value={draft.duration} onChange={e=>setDraft({...draft,duration:e.target.value})}>{durationOptions.map(m=><option key={m} value={m}>{durLabel(m)}</option>)}</select></div><div className="wm-focus-field"><label>Block</label><select value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}>{focusTitleOptions.map(x=><option key={x} value={x}>{x}</option>)}</select></div></div><div className="wm-focus-suggest"><div className="wm-focus-suggest-head"><b>Suggested inside block</b><span>Tap Yes or No</span></div>{focusCandidates.length?focusCandidates.map(c=><div className="wm-focus-suggest-row" key={c.id}><div><b>{c.title}</b><small>{c.meta} · {c.minutes}m</small></div><div className="wm-focus-yn"><button type="button" className={focusChoices[c.id]?'active':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:true}))}>Yes</button><button type="button" className={!focusChoices[c.id]?'active no':''} onClick={()=>setFocusChoices(x=>({...x,[c.id]:false}))}>No</button></div></div>):<div className="wm-focus-empty">No task suggestions yet. Create the block, or add tasks from Plan/On Deck first.</div>}</div><div className="wm-focus-actions"><button type="button" className="primary-btn" onClick={createFocusBlock}>Create Block</button><button type="button" className="ghost-btn" onClick={()=>{setPlanner(null);setFocusChoices({});}}>Cancel</button></div></div>:null}<div className="wm-tl-foot"><span>{seeded?'Preview schedule':`${calEvents.length+taskEvents.length} scheduled`}</span><span className="wm-tl-open">{totalOpen?`${durLabel(totalOpen)} open`:'No open blocks'}</span></div></>;
   if(bare) return inner;
   return <section className="glass card wm-panel wm-timeline-panel"><NowPanelHead icon={<Icon name="calendar" size={15} />} title="Today's Timeline" action={{label:'View calendar',onClick:()=>onNavigate&&onNavigate('plan','calendar')}} />{inner}</section>;
 }
