@@ -5651,6 +5651,120 @@ html[data-theme="light"] .review-memory-row small{
     background:#FFF0F3!important;
   }
 </style>
+<style id="wm-plan-execution-final-pass-2026-08-21">
+  .plan-screen-canonical .plan-action-card.plan-execution-panel{
+    gap:8px!important;
+    padding:9px!important;
+    overflow:hidden!important;
+  }
+  .plan-screen-canonical .plan-action-compact-title{
+    display:none!important;
+  }
+  .plan-screen-canonical .plan-filter-strip{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    gap:6px!important;
+    overflow-x:auto!important;
+    margin:8px 0 6px!important;
+    padding:0 1px 3px!important;
+    scrollbar-width:none!important;
+  }
+  .plan-screen-canonical .plan-filter-strip::-webkit-scrollbar{display:none!important}
+  .plan-screen-canonical .plan-filter-chip{
+    flex:0 0 auto!important;
+    min-width:72px!important;
+    height:32px!important;
+    display:grid!important;
+    grid-template-columns:13px minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:4px!important;
+    padding:5px 7px!important;
+    border-radius:12px!important;
+    border:1px solid rgba(141,183,232,.13)!important;
+    background:rgba(255,255,255,.025)!important;
+    color:var(--text-mid)!important;
+  }
+  .plan-screen-canonical .plan-filter-chip.active{
+    color:var(--stage)!important;
+    border-color:color-mix(in srgb,var(--stage) 44%,transparent)!important;
+    background:color-mix(in srgb,var(--stage) 13%,transparent)!important;
+  }
+  .plan-screen-canonical .plan-filter-chip svg{
+    width:12px!important;
+    height:12px!important;
+  }
+  .plan-screen-canonical .plan-filter-chip span{
+    font-size:7.5px!important;
+    line-height:1!important;
+    letter-spacing:.10em!important;
+    font-weight:900!important;
+    text-transform:uppercase!important;
+    overflow:hidden!important;
+    white-space:nowrap!important;
+    text-overflow:ellipsis!important;
+  }
+  .plan-screen-canonical .plan-filter-chip b{
+    min-width:17px!important;
+    height:17px!important;
+    padding:0 4px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:999px!important;
+    background:rgba(255,255,255,.055)!important;
+    color:inherit!important;
+    font-size:9px!important;
+    line-height:1!important;
+    font-weight:900!important;
+  }
+  .plan-screen-canonical .plan-action-subhead.compact{
+    display:none!important;
+  }
+  .plan-screen-canonical .plan-action-headline{
+    display:none!important;
+  }
+  .plan-screen-canonical .plan-action-list,
+  .plan-screen-canonical .plan-calendar-preview{
+    gap:5px!important;
+    margin-top:4px!important;
+  }
+  .plan-screen-canonical .plan-action-row{
+    min-height:50px!important;
+    padding:7px 7px 7px 9px!important;
+    border-radius:12px!important;
+    grid-template-columns:minmax(0,1fr) 30px!important;
+    gap:7px!important;
+  }
+  .plan-screen-canonical .plan-action-title{
+    font-size:11px!important;
+    line-height:1.15!important;
+    -webkit-line-clamp:2!important;
+  }
+  .plan-screen-canonical .plan-action-meta{
+    flex-wrap:nowrap!important;
+    gap:4px!important;
+    margin-top:4px!important;
+    max-height:19px!important;
+  }
+  .plan-screen-canonical .plan-action-meta span{
+    max-width:86px!important;
+    font-size:7.2px!important;
+    padding:3px 5px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .plan-screen-canonical .plan-action-buttons .wm-action-trigger{
+    width:30px!important;
+    height:30px!important;
+    min-height:30px!important;
+  }
+  .plan-screen-canonical .plan-action-card .empty{
+    min-height:42px!important;
+    padding:11px!important;
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -7991,8 +8105,13 @@ function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands
   const renderRows=(items,empty,kind)=> <div className="plan-action-list">
     {items.length?items.slice(0,2).map(r=>{
       const color=domainFamilyColor(r.domain||r.actionMode||kind||'Task');
+      const chips=[
+        r.domain?`${kind==='comm'?'Person':'Domain'} · ${r.domain}`:null,
+        kind==='task'?r.source:(kind==='errand'?'Errand':r.source||modeLabel(r.actionMode)),
+        r.dueDate?dueLabel(r.dueDate):r.priority
+      ].filter(Boolean).slice(0,3);
       return <article key={r.id} className={`plan-action-row ${r.done?'done':''} ${kind==='errand'?'errand':''}`} style={{borderLeftColor:color}}>
-        <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta"><span className="context" style={{color}}>{kind==='comm'?'Person / org':kind==='errand'?'Bucket':'Domain'} · {r.domain}</span><span className="mode">Mode · {modeLabel(r.actionMode)}</span>{r.source?<span>{r.source}</span>:null}<span>{r.priority}</span><span>{dueLabel(r.dueDate)}</span></div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
+        <div className="plan-action-main"><div className="plan-action-title">{r.title}</div><div className="plan-action-meta">{chips.map((chip,i)=><span key={i} className={i===0?'context':''} style={i===0?{color}:null}>{chip}</span>)}</div>{r.subtasks?.length?<ul className="plan-subtasks">{r.subtasks.slice(0,3).map((s,i)=><li key={i}>{typeof s==='string'?s:s.text||s.title}</li>)}</ul>:null}</div>
         <div className="plan-action-buttons"><ActionMenu label="Item actions" items={[{label:'Edit',onSelect:()=>editRow(r)},{label:'Delete',danger:true,onSelect:()=>deleteRow(r)},{label:'Move to Daily 3',primary:true,onSelect:()=>promote(r,'top3')},{label:'Move to Weekly 5',onSelect:()=>promote(r,'weekly')}]} /></div>
       </article>;
     }):<div className="empty">{empty}</div>}
@@ -8008,25 +8127,25 @@ function PlanActionBoard({todos,setTodos,weekly,setWeekly,tasks,setTasks,errands
     <div className="glass card plan-action-card plan-execution-panel">
       <div className="plan-object-tabs">{panels.map(p=><button type="button" key={p.key} className={`plan-object-tab ${panel===p.key?'active':''}`} style={{'--stage':p.color}} onClick={()=>setPanel(p.key)}><Icon name={p.icon} size={15}/><span>{p.label}</span><b>{p.count}</b></button>)}</div>
       {panel==='calendar'?<>
-        <div className="plan-action-headline"><div><b style={{color:C.info}}>Calendar</b><small>Time is the constraint. Detailed editing stays in Support Planning.</small></div><span>{calendarRows.length}</span></div>
+        <div className="plan-action-compact-title" style={{'--panel':C.info}}><b>Calendar</b><span>{calendarRows.length} visible</span></div>
         <div className="plan-calendar-preview">{calendarRows.length?calendarRows.slice(0,3).map((e,i)=><article className="plan-calendar-row" key={e.id||i} style={{borderLeftColor:e.c||C.info}}><span>{e.time||'All day'}</span><b>{e.title||e.text||'Calendar item'}</b><small>{e.day||''} {e.dateNumber||''}{e.note?` · ${e.note}`:''}</small></article>):<div className="empty">No calendar items showing. Connect or sync Google Calendar.</div>}</div>
         <div className="plan-panel-actions"><button type="button" className="ghost-btn" onClick={onSyncCalendar} disabled={calendarLoading}>{calendarLoading?'Syncing…':'Sync calendar'}</button><button type="button" className="ghost-btn" onClick={onOpenCalendar}>Open full calendar</button><span>{calendarStatus||'Calendar not connected'}</span></div>
       </>:null}
       {panel==='tasks'?<>
-        <div className="plan-action-headline"><div><b style={{color:C.accent}}>Tasks</b><small>Actionable work prioritized by Now, Soon, Later.</small></div><span>{taskRows.length}</span></div>
-        <div className="plan-stage-pills plan-task-pills">{taskBuckets.map(s=>{ const count=taskRows.filter(r=>r.bucket===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${taskBucket===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setTaskBucket(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
-        <div className="plan-action-subhead"><b style={{color:taskBucketMeta.color}}>{taskBucketMeta.label}</b><span>{visibleTasks.length}</span></div>
+        <div className="plan-action-compact-title" style={{'--panel':taskBucketMeta.color}}><b>Tasks</b><span>{taskRows.length} total</span></div>
+        <div className="plan-filter-strip">{taskBuckets.map(s=>{ const count=taskRows.filter(r=>r.bucket===s.key).length; return <button type="button" key={s.key} className={`plan-filter-chip ${taskBucket===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setTaskBucket(s.key)}><Icon name={s.icon} size={12} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
+        <div className="plan-action-subhead compact"><b style={{color:taskBucketMeta.color}}>{taskBucketMeta.label}</b><span>{visibleTasks.length}</span></div>
         {renderRows(visibleTasks,`No tasks in ${taskBucketMeta.label}.`,'task')}
       </>:null}
       {panel==='comms'?<>
-        <div className="plan-action-headline"><div><b style={{color:C.purple}}>Comms</b><small>People owns the history. PLAN shows loops that need movement.</small></div><span>{commRows.length}</span></div>
-        <div className="plan-stage-pills">{stages.map(s=>{ const count=commRows.filter(r=>r.stage===s.key).length; return <button type="button" key={s.key} className={`plan-stage-pill ${stage===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setStage(s.key)}><Icon name={s.icon} size={13} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
-        <div className="plan-action-subhead"><b style={{color:stageMeta.color}}>{stageMeta.label}</b><span>{rows.length}</span></div>
+        <div className="plan-action-compact-title" style={{'--panel':stageMeta.color}}><b>Comms</b><span>{commRows.length} loops</span></div>
+        <div className="plan-filter-strip comms">{stages.map(s=>{ const count=commRows.filter(r=>r.stage===s.key).length; return <button type="button" key={s.key} className={`plan-filter-chip ${stage===s.key?'active':''}`} style={{'--stage':s.color}} onClick={()=>setStage(s.key)}><Icon name={s.icon} size={12} /><span>{s.label}</span><b>{count}</b></button>; })}</div>
+        <div className="plan-action-subhead compact"><b style={{color:stageMeta.color}}>{stageMeta.label}</b><span>{rows.length}</span></div>
         {renderRows(rows,`No comms in ${stageMeta.label}.`,'comm')}
         <div className="plan-panel-actions"><button type="button" className="ghost-btn" onClick={onOpenPeople}>Open People</button><span>Comms are relationship loops, not generic tasks.</span></div>
       </>:null}
       {panel==='errands'?<>
-        <div className="plan-action-headline"><div><b style={{color:C.warn}}>Errands</b><small>Physical stops, pickups, drop-offs, and outside-the-house execution.</small></div><span>{errandRows.length}</span></div>
+        <div className="plan-action-compact-title" style={{'--panel':C.warn}}><b>Errands</b><span>{errandRows.length} open</span></div>
         {renderRows(errandRows,'No open errands.','errand')}
       </>:null}
     </div>
