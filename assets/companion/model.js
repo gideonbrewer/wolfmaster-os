@@ -80,6 +80,25 @@
   }
   function upsertFinance(rows,row){return [...rows.filter(x=>!(x.kind===row.kind&&x.date===row.date&&x.currency===row.currency)),row];}
   function comparableTrend(points){return points.length>=2&&points.every(x=>x.coverage===points[0].coverage&&x.signature===points[0].signature);}
-  const api={closed,sourceRef,protectList,taskProjection,freshness,completeCanonical,fields,validDate,validateFinance,financeModel,upsertFinance,comparableTrend};
+  function companionRoute(tab,sub=null){
+    const allowed=['now','plan','projects','finance','career','more','track','plan-tools','finance-legacy'];
+    if(!allowed.includes(tab))return {tab:'now',sub:null};
+    if(tab==='track'&&sub==='money')return {tab:'finance',sub:null};
+    if(tab==='plan'&&['calendar','tasks','horizons','routines'].includes(sub))tab='plan-tools';
+    return {tab,sub:typeof sub==='string'?sub:null};
+  }
+  const primaryTab=tab=>['career','more','track'].includes(tab)?'projects':tab==='plan-tools'?'plan':tab==='finance-legacy'?'finance':tab;
+  function companionHandoff({priorities=[],next=null,urgent=[],waiting=[],calendarFreshness={label:'Freshness unknown'}}){
+    // Explicit allowlist: finance records, legacy snapshots, credentials and chat history never enter this handoff.
+    return ['Wallace — help me choose a realistic next step.',
+      'This is a manual handoff from my saved WolfMaster records, not live TickTick/Notion data or synced chat context.',
+      '', 'Today’s priorities:',...(priorities.length?priorities.slice(0,3).map((x,i)=>`${i+1}. ${title(x)}${closed(x)?' (completed)':''}`):['No priorities selected.']),
+      '',next?`Next saved commitment: ${next.time||next.rawTime||''} — ${title(next)}`:'No upcoming timed commitment in the available snapshot; availability is unknown.',
+      `Calendar: ${calendarFreshness.label}.`,
+      '',`Attention: ${urgent.length} urgent flags; ${waiting.length} waiting-on records.`,
+      ...urgent.slice(0,3).map(x=>`- ${title(x)} (${x.reason||'flagged in saved records'})`),
+      '', 'Ask me about missing context before making assumptions. Finance entries are not included.'].join('\n');
+  }
+  const api={closed,sourceRef,protectList,taskProjection,freshness,completeCanonical,fields,validDate,validateFinance,financeModel,upsertFinance,comparableTrend,companionRoute,primaryTab,companionHandoff};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.WMCompanion=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -22,11 +22,14 @@ assert.equal(next([{date:'2026-10-21',time:'All day',title:'All day'}],now),null
 assert.equal(next([{date:'2026-10-21',time:'13:90',title:'Invalid'}],now),null);
 assert.equal(next([{date:'2026-10-21',time:'1 PM',title:'Afternoon'}],now).start,780);
 assert.equal(next([{date:'2026-10-21',time:'12:00 AM',title:'Midnight'}],now),null);
-const screen=html.slice(html.indexOf('function NowScreen('),html.indexOf('// Horizontal, collapsed'));
-assert(screen.indexOf('<NowTop3Cards')<screen.indexOf('<NowNextCommitment'));
-assert(screen.includes('<CompanionBrief'));assert(screen.includes('<CompanionTasks'));assert(!screen.includes('<NowDrawer'));assert(!screen.includes('<LifeClock'));
+const screen=html.slice(html.indexOf('function NowScreen('),html.indexOf('function CompanionPlanHub('));
+assert(screen.indexOf('comp-focus-panel')<screen.indexOf('comp-next-card'));
+assert(screen.indexOf('comp-next-card')<screen.indexOf('comp-attention-row'));
+assert(!/FinanceSnapshot|financeEntries|financeCurrency|financeYear/.test(screen),'No finance on Today');
+assert(!screen.includes('<CompanionTasks'),'Full task list belongs in Projects');
+assert(screen.includes('comp-wallace-entry'));assert(screen.includes('CompanionConnections'));assert(!screen.includes('<LifeClock'));
 assert(!html.includes('SEED_TL'));assert(!html.includes("id:'sw1'"));
-console.log('NOW focus: 19 data, provenance, time and composition assertions passed');
+console.log('NOW focus: data, provenance, time and compact Today composition assertions passed');
 const cards=html.slice(html.indexOf('function NowTop3Cards('),html.indexOf('// NowDrawer:'));
 assert(cards.includes('e.target===e.currentTarget'), 'Child keyboard events must not open the parent detail card');
 assert(cards.includes('aria-pressed={!!item.done}'), 'Completion exposes current state');

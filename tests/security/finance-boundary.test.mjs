@@ -10,3 +10,14 @@ const sensitive=html.split('\n').filter(x=>/financeEntries|financeDraft/.test(x)
 assert(sensitive.length>0);
 assert(!sensitive.some(x=>/localStorage|sessionStorage|supabase|JSON.stringify|fetch\(/.test(x)),'Finance cannot join legacy snapshots, browser storage or network requests');
 console.log('Finance boundary: no browser table access, no legacy/network finance serialization, TickTick server deployment disabled.');
+
+const store=fs.readFileSync(new URL('../../assets/companion/finance-store.js',import.meta.url),'utf8');
+assert(html.includes('const FINANCE_PERSISTENCE_ENABLED = false;'),'Production gate must stay disabled');
+assert(!/localStorage|sessionStorage|console\.|sendBeacon/.test(store),'Finance transport has no storage or telemetry side channel');
+assert(!store.includes('resolution=merge-duplicates'),'Do not bypass revisions with unconditional upsert');
+const snapshot=html.slice(html.indexOf('  const currentSnapshot'),html.indexOf('  const applySnapshot'));
+assert(snapshot.length>0,'Locate the explicit snapshot allowlist');
+assert(!/financeEntries|financeDraft|financeStorage|WMFinance/.test(snapshot),'Finance excluded from legacy snapshot/export/backup path');
+const ai=html.slice(html.indexOf('async function fetchAIBrief'),html.indexOf('const SNAPSHOT_KEY'));
+assert(!/financeEntries|financeDraft|financeStorage|WMFinance/.test(ai),'Finance excluded from AI request');
+console.log('Finance persistence boundary: build gate disabled, dedicated transport only, no legacy/AI/storage/telemetry path.');

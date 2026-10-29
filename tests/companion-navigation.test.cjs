@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const M=require('../assets/companion/model.js');
+for(const [route,primary] of [['now','now'],['plan','plan'],['projects','projects'],['finance','finance'],['career','projects'],['track','projects'],['more','projects'],['plan-tools','plan'],['finance-legacy','finance']])assert.equal(M.primaryTab(route),primary);
+assert.deepEqual(M.companionRoute('plan','calendar'),{tab:'plan-tools',sub:'calendar'});
+assert.deepEqual(M.companionRoute('plan','priorities'),{tab:'plan',sub:'priorities'});
+assert.deepEqual(M.companionRoute('unknown'),{tab:'now',sub:null});
+const handoff=M.companionHandoff({priorities:[{title:'Synthetic priority'}],next:{time:'11:30',title:'Synthetic event'},urgent:[{title:'Synthetic attention',reason:'Due today'}],waiting:[{}],calendarFreshness:{label:'Stale snapshot'},financeEntries:[{coverage:'SECRET_FINANCE',work:123456789}],access_token:'SECRET_TOKEN',chatHistory:'SECRET_CHAT'});
+assert(handoff.includes('Synthetic priority')&&handoff.includes('11:30')&&handoff.includes('Stale snapshot'));
+assert(!/SECRET_|123456789/.test(handoff),'Handoff includes only explicitly selected non-finance context');
+assert(handoff.includes('manual handoff')&&handoff.includes('not live TickTick/Notion data'));
+const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const today=html.slice(html.indexOf('function NowScreen('),html.indexOf('function CompanionPlanHub('));
+assert(!/financeEntries|financeCurrency|financeYear|FinanceSnapshot/.test(today));
+assert(today.includes('disabled={external}'),'Imported completion remains blocked');
+const app=html.slice(html.indexOf('function App('),html.indexOf('function Icon('));
+assert(!/<NowScreen[^>]*finance/i.test(app));
+for(const [id,component] of [['plan-tools','PlanScreen'],['career','CareerScreen'],['track','TrackLifeScreen'],['more','BuildScreen']])assert(app.includes("tab==='"+id+"' && <"+component),'Existing workspace preserved: '+component);
+assert(html.includes('const FINANCE_PERSISTENCE_ENABLED = false;'));
+assert(html.includes('window.history.pushState')&&html.includes("addEventListener('popstate'"));
+console.log('Navigation: four primary destinations, preserved legacy workspaces, browser-back routes, no Today finance, honest allowlisted Wallace handoff and disabled persistence passed.');
+
+assert.deepEqual(M.companionRoute('track','money'),{tab:'finance',sub:null});
