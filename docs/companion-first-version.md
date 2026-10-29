@@ -67,3 +67,9 @@ PLAYWRIGHT_PATH=/path/to/playwright node tests/companion-browser.cjs
 ```
 
 Browser checks cover desktop 1440px and mobile 390px, no horizontal overflow, imported completion lock, local completion, canonical projection deduplication, full project list/filter, manual earnings/net worth → Home aggregation, hidden amounts, real dated chart points, reload clearing, empty/stale states, zero runtime exceptions and zero external requests. Evidence is in `qa/`. These are fixture tests, not a live task-sync loop or production security test.
+
+## Mobile-first follow-up (October 29)
+
+Home keeps the main brief visible, puts the financial picture immediately after Daily 3, and moves source detail into an explicit freshness disclosure. Finance opens into entry, uses decimal/numeric keyboard hints and 16px input text, and preserves its unfinished draft across tab changes in memory. Cancel clears only the draft. Edit returns to the form; same-date submission replaces the existing snapshot. Navigation uses 44px-or-larger targets, safe-area padding and an unobstructed focused-input viewport when the keyboard shrinks the visual viewport. Zoom is allowed.
+
+Mobile QA covers widths 320/375/390/430, a shortened viewport, repeated Home/Finance navigation, save/cancel/edit/replacement/error paths, no horizontal overflow, touch targets and simulated iOS-style visual-viewport keyboard resizing. These are Chromium touch-emulation checks, not physical iPhone/Safari keyboard verification. All fixtures are synthetic and block external network requests. Secure persistence and canonical server preparation are documented in `security-preparation.md`; the database migration is not applied and the server adapter remains disabled.

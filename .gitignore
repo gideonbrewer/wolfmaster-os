@@ -3,3 +3,5 @@ supabase/.temp/
 
 # Reproducible synthetic browser evidence
 qa/
+
+node_modules/

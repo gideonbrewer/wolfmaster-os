@@ -22,3 +22,22 @@
 .tabs.fixed-tabs{grid-template-columns:repeat(6,minmax(0,1fr))!important}.comp-home .text-input:focus-visible,.comp-finance-page .text-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(max-width:760px){.comp-home,.comp-finance-page{gap:14px!important}.comp-home .card,.comp-finance-page .card{padding:18px!important;border-radius:15px!important}.comp-source-strip{grid-template-columns:1fr 1fr}.comp-source{padding:13px;border-bottom:1px solid var(--border)}.comp-source:nth-child(2){border-right:0}.comp-columns{grid-template-columns:1fr;gap:14px}.comp-columns>div{gap:14px}.comp-home-heading,.comp-page-heading{align-items:start;flex-direction:column;gap:8px}.comp-home h1,.comp-finance-page h1{font-size:29px}.comp-brief h2{font-size:24px}.comp-note{display:grid;gap:6px}.comp-note b{flex:auto}.comp-money-grid{grid-template-columns:1fr;gap:19px;margin-top:18px}.comp-money-grid>div{grid-template-columns:1fr auto;gap:5px 12px}.comp-money-grid strong{grid-column:2;grid-row:1 / 3;font-size:28px}.comp-money-grid small{grid-column:1;max-width:none}.comp-money-grid span{font-size:11px}.comp-trends{grid-template-columns:1fr;gap:12px}.comp-form-grid{grid-template-columns:1fr 1fr;gap:14px}.comp-form-grid label:first-child{grid-column:1 / -1}.comp-finance .section-head{flex-wrap:wrap;gap:8px}.comp-history{align-items:start;flex-direction:column}.tabs.fixed-tabs .tab{min-width:0!important;padding:9px 2px!important}.tabs.fixed-tabs .tab span{font-size:8px!important;letter-spacing:.03em!important}}
 @media(prefers-reduced-motion:reduce){.comp-home *,.comp-finance-page *{animation:none!important;transition:none!important}}
+/* Mobile is the primary surface. Keep controls usable with touch and zoom. */
+.comp-entry-help summary,.comp-sources summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:13px;color:var(--text-mid)}
+.comp-sources summary::before,.comp-entry-help summary::before{content:'＋';margin-right:10px;color:var(--accent)}
+.comp-sources[open] summary::before,.comp-entry-help[open] summary::before{content:'−'}
+.comp-form-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}.comp-form-error{color:var(--danger);font-size:14px;line-height:1.6}
+.comp-finance-form{scroll-margin-top:90px}.comp-finance-page input{scroll-margin-block:110px}
+@media(max-width:760px){
+ .tabs.fixed-tabs{left:8px!important;right:8px!important;bottom:0!important;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))!important;border-radius:20px 20px 0 0!important;max-width:none!important;width:auto!important}
+ .tabs.fixed-tabs .tab{min-height:56px!important;min-width:44px!important}.tabs.fixed-tabs .tab span{font-size:10px!important;letter-spacing:0!important}
+ .comp-home button,.comp-finance-page button{min-height:44px!important}.comp-home .wm-card-check{min-width:44px!important;position:relative!important;top:auto!important;right:auto!important;flex:0 0 44px}
+ .comp-home .wm-card-actions button{min-width:44px!important;font-size:12px!important}.comp-home .wm-top3-card{padding:14px!important}.comp-home .wm-card-title{font-size:16px!important}
+ .comp-finance-page .text-input,.comp-home .text-input{font-size:16px!important;min-height:48px}.comp-finance-page label{font-size:13px}
+ .comp-form-grid{grid-template-columns:minmax(0,1fr)}.comp-form-grid label:first-child{grid-column:auto}.comp-page-heading .row{width:100%;align-items:end}.comp-page-heading .row label{flex:1}.comp-page-heading input{max-width:none}
+ .comp-form-actions{display:grid;grid-template-columns:1fr}.comp-form-actions button{font-size:15px;min-height:48px!important}
+ .comp-source small,.comp-task small,.comp-history small,.comp-money-grid small,.comp-coverage p,.comp-session-label,.comp-note,.comp-top3-source{font-size:12px!important}
+ .comp-home .comp-brief-body p{font-size:15px;line-height:1.6}.comp-home-heading{padding-top:0}.comp-notice{padding:14px 16px}
+ html[data-keyboard-open] .fixed-tabs,html[data-keyboard-open] .qc-fab{visibility:hidden;pointer-events:none}
+ .main.v3{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}
+}

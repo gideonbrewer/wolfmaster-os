@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8');
+const endpoint=fs.readFileSync(new URL('../../supabase/functions/ticktick/index.ts',import.meta.url),'utf8');
+assert(!html.includes('finance_snapshots'),'Preview must not reach the new table');
+assert(!html.includes('ticktick-adapter'),'Server transport must not enter browser');
+assert(endpoint.includes('policy: DISABLED_TICKTICK_POLICY')||endpoint.includes('policy:DISABLED_TICKTICK_POLICY'));
+assert(!endpoint.includes('TICKTICK_TOKEN'),'No credential is provisioned in this phase');
+const sensitive=html.split('\n').filter(x=>/financeEntries|financeDraft/.test(x));
+assert(sensitive.length>0);
+assert(!sensitive.some(x=>/localStorage|sessionStorage|supabase|JSON.stringify|fetch\(/.test(x)),'Finance cannot join legacy snapshots, browser storage or network requests');
+console.log('Finance boundary: no browser table access, no legacy/network finance serialization, TickTick server deployment disabled.');
