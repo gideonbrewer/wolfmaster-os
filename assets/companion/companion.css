@@ -81,3 +81,36 @@
 .comp-finance-page{max-width:660px;gap:14px!important}.comp-finance-page .comp-page-heading{padding-top:6px}.comp-finance-page .comp-page-heading h1{font-size:38px;letter-spacing:-1.5px;line-height:1.05;margin-top:8px}.comp-finance-page .comp-page-heading>.row{margin-top:6px}
 .comp-finance-safety{border-left:2px solid var(--warn);padding:6px 13px;font-size:12px;color:var(--warn);line-height:1.5}.comp-finance-safety details{color:var(--text-mid)}.comp-finance-safety summary{min-height:34px;display:flex;align-items:center;cursor:pointer;font-size:11px}.comp-finance-safety p{font-size:12px;line-height:1.7;margin:4px 0 8px}.comp-finance-detail{margin-top:20px;border-top:1px solid var(--border)}.comp-finance-detail>summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;color:var(--text-mid);font-size:12px;cursor:pointer}.comp-finance-detail>summary:after{content:'＋';color:var(--accent)}.comp-finance-detail[open]>summary:after{content:'−'}.comp-finance-detail .comp-coverage{border:0;margin-top:0;padding-top:0}
 @media(max-width:760px){.comp-finance-page .comp-page-heading h1{font-size:34px}.comp-finance-page .card{padding:18px!important}.comp-finance-page .comp-notice p{font-size:12px}}
+
+
+/* Mobile readability pass: one deliberate scale, not oversized titles beside tiny copy. */
+.companion-shell{--comp-title:30px;--comp-section:19px;--comp-body:16px;--comp-secondary:13px;--comp-label:12px}
+.comp-today h1,.comp-destination h1,.comp-finance-page .comp-page-heading h1{font-size:var(--comp-title);line-height:1.15;letter-spacing:-.7px}
+.comp-today-heading time,.comp-source-button,.comp-focus-manage,.comp-next-card>small,.comp-attention-row small,.comp-priority-title small,.comp-destination-heading p,.comp-tool-list small,.comp-project-link small,.comp-knowledge-link small,.comp-detail-item small{font-size:var(--comp-secondary);line-height:1.5}
+.comp-eyebrow,.comp-section-line>span:last-child,.comp-today-footnote,.comp-project-number,.comp-workspace-grid small{font-size:var(--comp-label);line-height:1.5}
+.comp-eyebrow{letter-spacing:.08em}
+.comp-priority-title strong,.comp-next-card>strong,.comp-attention-row strong,.comp-tool-list strong,.comp-all-tasks,.comp-workspace-grid strong,.comp-knowledge-link strong,.comp-detail-item strong{font-size:var(--comp-body);line-height:1.4;letter-spacing:-.1px}
+.lead .comp-priority-title strong{font-size:18px;line-height:1.4;letter-spacing:-.2px}
+.comp-project-link strong,.comp-section-line h2,.comp-empty-card h2,.comp-focus-empty h2{font-size:var(--comp-section);line-height:1.35;letter-spacing:-.25px}
+.comp-segments button,.comp-primary-button,.comp-text-button,.comp-body-note,.comp-empty-card p,.comp-focus-empty p{font-size:14px;line-height:1.5}
+.comp-dialog h2{font-size:22px;line-height:1.3;letter-spacing:-.3px}.comp-dialog h3{font-size:19px;line-height:1.4}
+.comp-handoff-label,.comp-finance-page label,.comp-finance-safety,.comp-finance-safety summary,.comp-finance-safety p,.comp-finance-detail>summary{font-size:var(--comp-secondary);line-height:1.5}
+.comp-task b{font-size:var(--comp-body)}.comp-task small,.comp-history small,.comp-money-grid small,.comp-coverage p,.comp-session-label,.comp-top3-source{font-size:var(--comp-secondary)!important;line-height:1.5}
+.comp-finance-page h2{font-size:21px}.comp-money-grid span{font-size:14px}.comp-money-grid strong{font-size:28px;line-height:1.15}
+.tabs.fixed-tabs.comp-nav .tab span{font-size:12px!important;line-height:1.3}
+.comp-wallace-composer{border:1px solid var(--border-strong);border-radius:18px;padding:12px 14px 8px;background:var(--surface);min-width:0}
+.comp-composer-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}.comp-composer-heading label{font-size:14px;font-weight:650}.comp-composer-heading span{font-size:12px;color:var(--text-mid)}
+.comp-wallace-composer textarea{display:block;width:100%;min-height:44px;max-height:128px;resize:vertical;box-sizing:border-box;padding:10px 0;border:0;background:transparent;color:var(--text);font:inherit;font-size:16px;line-height:1.5;scroll-margin-block:100px}
+.comp-wallace-composer textarea::placeholder{color:var(--text-mid);opacity:1}
+.comp-composer-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.comp-composer-actions .comp-text-button{font-size:13px;min-height:44px;padding:8px 0}
+.comp-copy-button{border:0;border-radius:11px;background:var(--accent);color:var(--bg);padding:10px 13px;min-height:44px;flex-shrink:0;font:inherit;font-size:13px;font-weight:650;cursor:pointer}.comp-copy-button:disabled{background:var(--surface3);color:var(--text-dim);cursor:default}
+.comp-wallace-composer p{font-size:12px;line-height:1.5;color:var(--text-mid);margin:3px 0 0}
+.comp-wallace-composer textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+@media(max-width:760px){
+ .companion-shell{--comp-title:28px}
+ .comp-today{gap:10px}.comp-today-heading{padding-bottom:0}
+ .comp-focus-panel{padding:13px 14px 2px}.comp-focus-list{margin-top:6px}.comp-focus-list li,.comp-focus-list li:first-child{min-height:58px}
+ .comp-next-card{padding:13px 15px;gap:6px}.comp-attention-row{padding:12px 14px;min-height:66px}
+ .comp-workspace-grid{grid-template-columns:1fr}.comp-workspace-grid>button{display:grid;grid-template-columns:26px 1fr;gap:4px 10px;padding:14px}.comp-workspace-grid>button svg{grid-row:1/3}.comp-workspace-grid small{grid-column:2}
+ .comp-destination .text-input,.comp-finance-page .text-input,.comp-handoff-label textarea{font-size:16px!important}
+}

@@ -1,0 +1,24 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const Babel=require(process.env.WM_BABEL_PATH||'/tmp/wolfmaster-qa-libs/babel.js');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const source=html.slice(html.indexOf('function CompanionWallaceComposer('),html.indexOf('function CompanionWallace({'));
+let draft='',status='',writes=[],opened=0,fail=false;
+const env={React:{createElement:(type,props,...children)=>({type,props:props||{},children})},useState:()=>[status,v=>status=v],useRef:()=>({current:null}),useEffect:()=>{},navigator:{clipboard:{writeText:async text=>{if(fail)throw Error('Unavailable');writes.push(text)}}}};
+vm.createContext(env);vm.runInContext(Babel.transform(source,{presets:['react']}).code,env);
+const render=()=>env.CompanionWallaceComposer({draft,setDraft:v=>draft=v,onContext:()=>opened++});
+const nodes=x=>x==null?[]:Array.isArray(x)?x.flatMap(nodes):typeof x==='object'?[x,...nodes(x.children)]:[];
+(async()=>{
+let tree=render();let all=nodes(tree);const get=(type,predicate=()=>true)=>nodes(tree).find(x=>x.type===type&&predicate(x));
+assert(get('textarea'),'Editable textarea is rendered without a launcher');assert.equal(get('textarea').props.id,'wallace-message');
+let copy=get('button',x=>x.props.className==='comp-copy-button');assert.equal(copy.props.disabled,true);await copy.props.onClick();assert.deepEqual(writes,[]);
+get('textarea').props.onChange({target:{value:'My synthetic question'}});tree=render();assert.equal(get('textarea').props.value,'My synthetic question');assert.deepEqual(writes,[],'Typing must not send or copy');
+copy=get('button',x=>x.props.className==='comp-copy-button');assert.equal(copy.props.disabled,false);await copy.props.onClick();assert.deepEqual(writes,['My synthetic question']);assert(status.includes('Copied'));assert.equal(draft,'My synthetic question','Copy does not discard draft');
+get('button',x=>x.props.className==='comp-text-button').props.onClick();assert.equal(opened,1);assert.equal(writes.length,1,'Context review does not transmit');
+fail=true;await copy.props.onClick();assert(status.includes('Copy unavailable'));assert.equal(draft,'My synthetic question');assert.equal(writes.length,1);
+const app=html.slice(html.indexOf('function App('),html.indexOf('function Icon('));
+assert(app.includes("const [wallaceDraft,setWallaceDraft]=useState('')"),'Draft owned above routes');assert(app.includes("useEffect(()=>setWallaceDraft(''),[session?.user?.id])"),'Account switch clears unsent draft');assert(app.includes('<NowScreen wallaceDraft={wallaceDraft} setWallaceDraft={setWallaceDraft}'));
+const snapshot=html.slice(html.indexOf('const currentSnapshot ='),html.indexOf('const applySnapshot ='));assert(!snapshot.includes('wallaceDraft'),'Draft excluded from legacy storage/export');assert(!/fetch\(|localStorage|sessionStorage|supabase/.test(source));
+const today=html.slice(html.indexOf('function NowScreen('),html.indexOf('function CompanionPlanHub('));assert(today.indexOf('<CompanionWallaceComposer')<today.indexOf('comp-focus-panel'));
+const css=fs.readFileSync(require('node:path').join(__dirname,'../assets/companion/companion.css'),'utf8');assert(css.includes('--comp-title:28px'));assert(css.includes('--comp-body:16px'));assert(css.includes('--comp-secondary:13px'));assert(css.includes('--comp-label:12px'));assert(css.includes('min-height:44px;max-height:128px'));
+console.log('Inline Wallace: empty/typed/copy/failure/context/draft boundaries and mobile scale contracts passed. Hook simulation only; not browser QA.');
+})().catch(e=>{console.error(e);process.exitCode=1});

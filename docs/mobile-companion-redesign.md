@@ -46,3 +46,17 @@ Screenshots requested for Library contain synthetic records only. The Library pr
 ## Approval boundary
 
 The user approved publication of this reviewed revision to draft PR #1 and its automatic review preview on 29 October 2026 at 12:47:37 UTC. This supersedes the earlier publication restriction for this revision only. Keep draft status, no merge or production promotion. Finance activation remains a separate migration/security test/deployment decision. TickTick credentials and live writes remain unapproved. The denied PR metadata change has not been retried.
+
+
+## Typography and immediate composer refinement — 29 October 2026
+
+Prepared against published commit `7c0bd4f0238cf01a28d8034a60ff1052f724a1af` after the user's mobile feedback. No publication is included in this preparation.
+
+- A consistent mobile scale replaces the extreme heading/caption contrast: 28px page titles, 18–19px emphasized items/sections, 16px primary text, 13px secondary text and 12px labels/navigation. Form and composer inputs remain at least 16px. Finance stays on its separate tab.
+- Today renders the editable Wallace composer immediately below its heading, not behind a launcher or sheet. The single-line field grows up to 128px for longer messages. Copy is explicitly a manual handoff; typing or opening context does not transmit anything. Context review remains optional and excludes Finance.
+- Draft state is owned above the tab routes, so tab switches preserve it. It clears on account change or reload and is excluded from legacy saves, backups and export. Clipboard failure retains the draft and provides a manual-copy explanation.
+- Narrow Projects utility cards become a readable single-column list rather than three cramped cards.
+
+Passed locally: Babel JSX compilation; new composer hook-simulation tests; existing model, navigation, compact Today/data, executive-sync, finance form/store/boundary and 30-request TickTick boundary suites; `git diff --check`. The maintained browser test was updated for inline typing, optional context review and draft retention.
+
+Browser verification for this refinement is **not completed**. Installed Chromium could not start because its sandbox disallowed process socket creation. A normal escalation attempt failed before execution with a read-only runtime session-path error. The supported cloud browser could not reach the workspace loopback fixture. No security settings or denied paths were changed; no retry bypass was attempted. Responsive widths 320/375/390/430, physical iOS keyboard, text enlargement, final overall height and screenshots still require browser QA. The previous revision's successful rendering does not prove this refinement's layout.

@@ -27,7 +27,7 @@ assert(screen.indexOf('comp-focus-panel')<screen.indexOf('comp-next-card'));
 assert(screen.indexOf('comp-next-card')<screen.indexOf('comp-attention-row'));
 assert(!/FinanceSnapshot|financeEntries|financeCurrency|financeYear/.test(screen),'No finance on Today');
 assert(!screen.includes('<CompanionTasks'),'Full task list belongs in Projects');
-assert(screen.includes('comp-wallace-entry'));assert(screen.includes('CompanionConnections'));assert(!screen.includes('<LifeClock'));
+assert(screen.includes('<CompanionWallaceComposer'));assert(screen.indexOf('<CompanionWallaceComposer')<screen.indexOf('comp-focus-panel'));assert(screen.includes('CompanionConnections'));assert(!screen.includes('<LifeClock'));
 assert(!html.includes('SEED_TL'));assert(!html.includes("id:'sw1'"));
 console.log('NOW focus: data, provenance, time and compact Today composition assertions passed');
 const cards=html.slice(html.indexOf('function NowTop3Cards('),html.indexOf('// NowDrawer:'));
@@ -36,3 +36,4 @@ assert(cards.includes('aria-pressed={!!item.done}'), 'Completion exposes current
 assert(cards.includes('aria-label="Close task details"'), 'Detail close control has a clear label');
 assert(cards.includes('className="wm-top3-actions"'), 'Actions have their own layout slot');
 console.log('NOW card accessibility: 4 regression assertions passed');
+
