@@ -4,7 +4,8 @@ WolfMaster is the executive attention layer, not the archive.
 
 Canonical systems remain:
 
-- Notion for durable projects, tasks, decisions, relationships, and knowledge
+- TickTick for canonical tasks and habits
+- Notion for durable project context, decisions, relationships, and knowledge
 - Google Calendar for scheduled commitments
 - Gmail for communication loops
 - Apple Reminders for rapid capture when technically available
@@ -40,7 +41,9 @@ interface SyncAdapter {
 }
 ```
 
-Planned adapters:
+Planned adapters (not connected):
+
+- `TickTickAdapter` — canonical tasks; habit API coverage must be verified separately
 
 - `NotionAdapter`
 - `GoogleCalendarAdapter`
@@ -57,3 +60,5 @@ node tests/executive-sync.test.mjs
 ```
 
 The app is still a single-file React/Babel build, so JSX validation can be run with the existing parser command used during development.
+
+The companion preview adds a gated canonical completion/read-back contract in `assets/companion/model.js`; no live adapter is enabled. See [the current implementation handoff](companion-first-version.md).

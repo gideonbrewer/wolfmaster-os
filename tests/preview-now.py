@@ -5,7 +5,7 @@ Serve that directory with python3 -m http.server. Use ?scenario=empty or demo.
 The fixture replaces only the App mount and blocks network requests via CSP.
 """
 from pathlib import Path
-import sys
+import sys, shutil
 source = Path(__file__).resolve().parents[1] / "index.html"
 output = Path(sys.argv[1]).resolve()
 output.mkdir(parents=True, exist_ok=True)
@@ -14,6 +14,7 @@ harness = 'function QAHarness(){\nconst scenario=new URLSearchParams(location.se
 mount = "ReactDOM.createRoot(document.getElementById('root')).render(<App />);"
 assert html.count(mount) == 1
 html = html.replace(mount, harness).replace('<head>', '<head><meta http-equiv="Content-Security-Policy" content="connect-src \'none\'; form-action \'none\'">')
+shutil.copytree(source.parent / 'assets' / 'companion', output / 'assets' / 'companion', dirs_exist_ok=True)
 (output / 'index.html').write_text(html)
 (output / 'mobile.html').write_text('<!doctype html><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>WolfMaster 390px QA</title><style>body{margin:0;background:#151515;color:white;font:14px system-ui}iframe{width:390px;height:844px;border:0;display:block;margin:0 auto}p{text-align:center}</style><p>390px viewport · isolated mock data</p><iframe title="WolfMaster mobile QA" src="index.html"></iframe>')
 print(f'Generated isolated NOW preview in {output}')

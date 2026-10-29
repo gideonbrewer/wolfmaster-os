@@ -29,11 +29,12 @@ python3 -m http.server 8000      # open http://localhost:8000
 
 ## AI Command Brief
 
-The NOW brief uses `supabase/functions/ai-brief` for a real OpenAI-written brief
-when the user is signed in. The existing deterministic brief remains the fallback
-if the function is not deployed, the user is offline/logged out, or the AI call fails.
+The legacy generated-brief implementation remains in `supabase/functions/ai-brief`.
+The companion Home currently shows an explicitly labeled local summary and does
+not call this endpoint until the data path is approved. The endpoint receives an
+app-generated digest; it does not access the assistant conversation.
 
-One-time Supabase setup:
+Legacy setup reference (do not execute before security and deployment approval):
 
 ```bash
 supabase login
@@ -85,3 +86,7 @@ Open `/` for populated data, `/?scenario=empty` for empty/disconnected states,
 `/?scenario=demo` for legacy Daily 3 suppression, or `/mobile.html` for a 390px
 iframe viewport. Fixture changes are in-memory and reset on reload. This checks
 NOW UI behavior, not authenticated Supabase persistence or other app tabs.
+
+## Home companion and manual Finance preview
+
+The local companion version replaces the hidden NOW details layout with visible source status, brief, schedule, tasks by project, waiting-on items and a Home finance snapshot. Finance is **session-only, test amounts only** until secure persistence is approved. TickTick is the canonical task/habit tracker; live writes and the assistant event bridge are not connected. See [implementation, safety boundaries and validation](docs/companion-first-version.md).
