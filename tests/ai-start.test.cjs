@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const html=fs.readFileSync(process.env.WM_HTML||'index.html','utf8');
+const Babel=require(process.env.WM_BABEL_PATH);
+const start=html.indexOf('function NowCommandBrief('),end=html.indexOf('\nfunction ',start+1),source=html.slice(start,end);
+let draft='',slots=[],index=0,copied=[],focused=0,fail=false;
+const env={React:{createElement:(type,props,...children)=>({type,props:props||{},children})},useState:initial=>{const i=index++;if(!(i in slots))slots[i]=initial;return [slots[i],v=>slots[i]=v];},useRef:()=>({current:{focus:()=>focused++}}),navigator:{clipboard:{writeText:async text=>{if(fail)throw Error('no clipboard');copied.push(text);}}}};
+vm.createContext(env);vm.runInContext(Babel.transform(source,{presets:['react']}).code,env);
+const render=()=>{index=0;return env.NowCommandBrief({draft,setDraft:v=>draft=typeof v==='function'?v(draft):v});};
+const flatten=x=>Array.isArray(x)?x.flatMap(flatten):x&&typeof x==='object'?[x,...flatten(x.children)]:[];
+const text=x=>Array.isArray(x)?x.map(text).join(''):x&&typeof x==='object'?text(x.children):String(x??'');
+const nodes=()=>flatten(render()),button=name=>nodes().find(x=>x.type==='button'&&text(x)===name);
+(async()=>{
+assert(button('Copy').props.disabled);button('Plan my day').props.onClick();assert(draft.startsWith('Help me plan my day'));assert.equal(copied.length,0);assert.equal(focused,1);
+const initial=draft;button('Capture a task').props.onClick();assert(draft.startsWith(initial));assert(draft.includes('Help me capture a task'));assert(text(render()).includes('not sent or saved as a task'));
+const area=nodes().find(x=>x.type==='textarea');area.props.onChange({target:{value:'Synthetic draft'}});assert.equal(draft,'Synthetic draft');await button('Copy').props.onClick();assert.deepEqual(copied,['Synthetic draft']);assert.equal(draft,'Synthetic draft');assert(text(render()).includes('Copied. Paste'));
+fail=true;await button('Copy').props.onClick();assert(text(render()).includes('Copy unavailable'));assert.equal(draft,'Synthetic draft');
+assert(!/fetch\(|localStorage|sessionStorage|supabase|fetchAIBrief/.test(source));assert(!source.includes('wm-metrics'));
+const home=html.slice(html.indexOf('function NowScreen('),html.indexOf('// Horizontal, collapsed',html.indexOf('function NowScreen(')));assert(home.indexOf('<LifeClock')<home.indexOf('<NowCommandBrief'));assert(home.indexOf('<NowCommandBrief')<home.indexOf('wm-dashboard-grid'));
+assert(html.includes('<NowScreen wallaceDraft={wallaceDraft}'));assert(html.includes("useEffect(()=>setWallaceDraft(''),[session?.user?.id])"));
+const snap=html.slice(html.indexOf('  const currentSnapshot'),html.indexOf('  const applySnapshot'));assert(!snap.includes('wallaceDraft'));
+console.log('AI draft tests passed: clock-first ordering, visible input, draft append/focus, explicit copy, error retention, no sending/storage/task write, root draft wiring/account clear.');
+})().catch(e=>{console.error(e);process.exit(1)});
