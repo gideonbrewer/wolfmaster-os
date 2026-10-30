@@ -6146,6 +6146,17 @@ html[data-theme="light"] .review-memory-row small{
 .wm-ai-start button:focus-visible,.wm-ai-start textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(max-width:640px){.app-shell:has(.wm-ai-start textarea:focus) .fixed-tabs,.app-shell:has(.wm-ai-start textarea:focus) .qc-fab{visibility:hidden;pointer-events:none}}
 </style>
+<style id="wm-home-focus-2026-10-30">
+.wm-main-outcome,.wm-focus-areas{padding:14px 16px!important;min-width:0}
+.wm-focus-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.wm-focus-heading>b{font-size:14px;color:var(--accent)}.wm-focus-heading>span{font-size:11px;color:var(--text-dim)}
+.wm-focus-heading button,.wm-area-button{font:inherit;cursor:pointer;color:var(--text);background:transparent;border:1px solid var(--border);border-radius:10px;min-height:44px;padding:8px 10px;font-size:12px}
+.wm-main-outcome>label{font-size:13px;color:var(--text-mid);display:block;margin-bottom:8px}.wm-main-outcome>select{width:100%;min-width:0;font:inherit;font-size:16px;min-height:44px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:8px}
+.wm-main-next>b{display:block;font-size:16px;line-height:1.4;margin-top:12px}.wm-main-next p,.wm-focus-note{font-size:12px;line-height:1.5;color:var(--text-mid);margin:8px 0 0}
+.wm-area-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.wm-area-button{text-align:left;padding:9px 10px;min-width:0}.wm-area-button>strong{font-size:12px;display:block;margin-bottom:4px}.wm-area-title{font-size:12px;line-height:1.4;color:var(--text-mid);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.wm-area-urgency{display:block;font-size:11px;color:var(--warn);margin-top:4px}
+.wm-other-areas>summary{min-height:44px;display:flex;align-items:center;font-size:12px;cursor:pointer;color:var(--text-mid)}
+.wm-area-detail{width:min(540px,100%);max-height:85dvh;overflow:auto}.wm-area-detail ul{padding:0;list-style:none}.wm-area-detail li{padding:12px 0;border-bottom:1px solid var(--border)}.wm-area-detail .wm-area-title{display:block;overflow:visible}.wm-area-detail small{display:block;font-size:11px;color:var(--text-dim);margin-top:4px}
+.wm-area-button:focus-visible,.wm-focus-heading button:focus-visible,.wm-main-outcome select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -7286,7 +7297,7 @@ function NowCommandBrief({draft,setDraft}){
   const copy=async()=>{if(!draft.trim())return;try{await navigator.clipboard.writeText(draft);setStatus('Copied. Paste into your conversation with Wallace.');}catch{setStatus('Copy unavailable. Select the text and copy it manually.');}};
   return <section className="glass card wm-ai-start" aria-label="Wallace AI draft">
     <div className="wm-ai-start-heading"><b>Wallace</b><span>Manual handoff</span></div>
-    <label htmlFor="wm-ai-draft">What’s the one thing you want to get done today?</label>
+    <label htmlFor="wm-ai-draft">What’s the highest-value thing you can move forward today?</label>
     <div className="wm-ai-input-row"><textarea id="wm-ai-draft" ref={field} rows={2} value={draft} onChange={e=>{setDraft(e.target.value);setStatus('');}} placeholder="Type what’s on your mind…" aria-describedby="wm-ai-draft-status"/><button type="button" onClick={copy} disabled={!draft.trim()}>Copy</button></div>
     <div className="wm-ai-quick-actions" aria-label="Prepare a draft"><button type="button" onClick={()=>prepare('Help me plan my day. My priorities and constraints are: ')}>Plan my day</button><button type="button" onClick={()=>prepare('Help me capture a task. The task is: ')}>Capture a task</button></div>
     <p id="wm-ai-draft-status" role="status">{status||'Nothing sends automatically. Draft clears on reload.'}</p>
@@ -7923,13 +7934,49 @@ function LifeClock(){
   useEffect(()=>{ const id=setInterval(()=>setLeft(calc()),1000); return ()=>clearInterval(id); },[]);
   return <section className="wm-life-clock" aria-label="Life clock"><div><div className="wm-life-kicker">Default Aggressive</div><div className="wm-life-title">Life Clock</div></div><div className="wm-life-count"><strong>{left.days.toLocaleString()}</strong><span>days</span><em>{left.hours}h {left.minutes}m</em><b className="wm-life-seconds">{String(left.seconds).padStart(2,'0')}s</b></div></section>;
 }
+function homeFocusModel({tasks=[],careerTasks=[],errands=[],comms=[],todos=[],today=todayStr()}){
+  const title=t=>String(t.title||t.text||'Untitled');
+  const seeds=[...(typeof TASKSINIT==='undefined'?[]:TASKSINIT).flatMap(d=>d.tasks||[]),...(typeof CAREERTASKSINIT==='undefined'?[]:CAREERTASKSINIT).flatMap(d=>d.tasks||[]),...(typeof TOP3INIT==='undefined'?[]:TOP3INIT),...(typeof COMMSINIT==='undefined'?[]:COMMSINIT),...(typeof ERRANDSINIT==='undefined'?[]:ERRANDSINIT)];
+  const example=t=>seeds.some(s=>String(s.id)===String(t.id)&&title(s)===title(t))&&!t.source&&!t.updatedAt&&!t.importedAt;
+  const open=t=>!t.done&&!t.archived&&!['completed','complete','cancelled','canceled','closed'].includes(String(t.status||t.phase||'').toLowerCase());
+  const area=raw=>{const s=String(raw||'').trim();const k=s.toLowerCase();return ({leg:'Legislative',legislative:'Legislative','michigan house':'Legislative',wolflock:'WolfLock',wl:'WolfLock','purple atlas':'Purple Atlas',pa:'Purple Atlas','campus probation':'Campus Probation',cp:'Campus Probation',personal:'Personal',family:'Family',house:'Home','home and property':'Home'})[k]||s||'Unassigned';};
+  const urgency=t=>{const d=String(t.dueDate||'').slice(0,10);const valid=/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d))&&new Date(d).toISOString().slice(0,10)===d;if(valid&&d<today)return 'Overdue · '+d;if(valid&&d===today)return 'Due today';if(['urgent','critical','high','p1'].includes(String(t.priority||'').toLowerCase()))return 'Marked '+t.priority;return '';};
+  const items=[];
+  const add=(t,raw,source)=>{if(!open(t)||example(t))return;const waiting=['waiting','waiting on','waiting-on','blocked','sent','follow-up','follow up'].includes(String(t.status||t.phase||'').toLowerCase());items.push({...t,title:title(t),area:area(t.project||t.domain||raw),sourceLabel:source,waiting,urgency:urgency(t),key:source+':'+String(t.id)});};
+  tasks.forEach(d=>(d.tasks||[]).forEach(t=>add(t,d.label||d.id,'Tasks')));
+  careerTasks.forEach(d=>(d.tasks||[]).forEach(t=>add(t,d.label||d.id,'Career')));
+  errands.forEach(t=>add(t,t.category||'Personal','Errands'));
+  comms.forEach(t=>add(t,t.project||t.domain||t.goal||'Unassigned','Communications'));
+  const names=['Legislative','WolfLock','Purple Atlas','Campus Probation','Personal','Family'];items.forEach(t=>{if(!names.includes(t.area))names.push(t.area);});
+  const groups=names.map(name=>({name,items:items.filter(t=>t.area===name).sort((a,b)=>Number(!!b.urgency)-Number(!!a.urgency)||Number(a.waiting)-Number(b.waiting))}));
+  return {groups,outcomes:todos.filter(t=>open(t)&&!example(t))};
+}
+function HomeMainOutcome({todos,setTodos,model,onNavigate}){
+  const options=model.outcomes,chosen=options.find(t=>t.mainOutcome===true);
+  const choose=e=>{const id=e.target.value;setTodos(previous=>previous.map(t=>({...t,mainOutcome:id!==''&&String(t.id)===id})));};
+  return <section className="glass card wm-main-outcome"><div className="wm-focus-heading"><b>My main outcome</b><button type="button" onClick={()=>onNavigate?.('plan','priorities')}>Daily 3 →</button></div>
+    <label htmlFor="wm-main-outcome">Choose where your next hour goes</label>
+    <select id="wm-main-outcome" value={chosen?String(chosen.id):''} onChange={choose}><option value="">Choose an existing Daily 3 item</option>{options.map(t=><option key={t.id} value={String(t.id)}>{asTitle(t)}</option>)}</select>
+    {chosen?<div className="wm-main-next"><b>{asTitle(chosen)}</b><p><span>Next action: </span>{chosen.nextAction||'Not specified yet — review this item in Daily 3.'}</p></div>:<p className="wm-focus-note">{options.length?'Nothing chosen yet. Value is your call, not an AI ranking.':'No current Daily 3 items available. Choose or add one in Plan.'}</p>}
+  </section>;
+}
+function HomeFocusAreas({model}){
+  const [selected,setSelected]=useState(null);const returnFocus=useRef(null);const show=(name,e)=>{returnFocus.current=e.currentTarget;setSelected(name);};const group=model.groups.find(g=>g.name===selected);
+  useEffect(()=>{if(!selected)return;const previous=returnFocus.current;const close=e=>{if(e.key==='Escape')setSelected(null);};document.addEventListener('keydown',close);return()=>{document.removeEventListener('keydown',close);previous?.focus();};},[selected]);
+  const row=t=><><span className="wm-area-title">{t.waiting?'Waiting: ':''}{t.nextAction||t.title}</span>{t.urgency?<span className="wm-area-urgency">{t.urgency}</span>:null}</>;
+  return <section className="glass card wm-focus-areas"><div className="wm-focus-heading"><b>Focus areas</b><span>Saved app items</span></div><div className="wm-area-grid">{model.groups.slice(0,6).map(g=><button type="button" key={g.name} className="wm-area-button" onClick={e=>show(g.name,e)}><strong>{g.name}</strong>{g.items.length?row(g.items[0]):<span className="wm-area-title">No current item available</span>}</button>)}</div>{model.groups.length>6?<details className="wm-other-areas"><summary>Other focus areas</summary><div className="wm-area-grid">{model.groups.slice(6).map(g=><button type="button" key={g.name} className="wm-area-button" onClick={e=>show(g.name,e)}><strong>{g.name}</strong>{row(g.items[0])}</button>)}</div></details>:null}
+    {group?<div className="wm-task-detail-backdrop" onClick={()=>setSelected(null)}><section role="dialog" aria-modal="true" aria-label={group.name+' focus area'} className="glass wm-task-detail wm-area-detail" onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Tab'){e.preventDefault();e.currentTarget.querySelector('button')?.focus();}}}><div className="wm-focus-heading"><h2>{group.name}</h2><button type="button" autoFocus onClick={()=>setSelected(null)}>Close</button></div><p className="wm-focus-note">Existing saved app items only; not a live inbox or TickTick review.</p>{group.items.length?<ul>{group.items.map(t=><li key={t.key}>{row(t)}<small>{t.sourceLabel}{t.waiting&&t.waitingOn?' · Waiting on '+t.waitingOn:''}{t.dueDate?' · Due '+t.dueDate:''}</small></li>)}</ul>:<p>No current item is assigned to this area. Starter examples are not shown.</p>}</section></div>:null}
+  </section>;
+}
+
 function NowScreen({wallaceDraft,setWallaceDraft,session,onNavigate,todos,setTodos,weekly,setWeekly,careerLeads,setCareerLeads,careerPipeline,setCareerPipeline,errands,setErrands,tasks,setTasks,careerTasks,setCareerTasks,comms,emailItems,habits,setHabits,reflect,setReflect,build,reviewData,calendarUrl,calendarInput,setCalendarInput,calendarEvents,setCalendarEvents,calendarStatus,calendarMessage,calendarLoading,onSaveCalendar,onOpenCalendar,onResetCalendar}){
+  const focusModel=homeFocusModel({tasks,careerTasks,errands,comms,todos});
   return <div className="wm-now wm-now-compact wm-now-cockpit wm-now-canonical">
     <LifeClock />
     <NowCommandBrief draft={wallaceDraft} setDraft={setWallaceDraft} />
     <div className="wm-dashboard-grid wm-now-primary-grid">
-      <NowTop3Cards todos={todos} setTodos={setTodos} setCalendarEvents={setCalendarEvents} />
-      <NowAttentionPanel tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} onNavigate={onNavigate} />
+      <HomeMainOutcome todos={todos} setTodos={setTodos} model={focusModel} onNavigate={onNavigate} />
+      <HomeFocusAreas model={focusModel} />
     </div>
     <div className="wm-now-timeline-band">
       <NowTimelinePanel calendarEvents={calendarEvents||[]} todos={todos||[]} setCalendarEvents={setCalendarEvents} tasks={tasks||[]} careerTasks={careerTasks||[]} errands={errands||[]} comms={comms||[]} executive={reviewData?.executive} onNavigate={onNavigate} />
