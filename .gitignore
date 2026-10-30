@@ -1,7 +1,2 @@
 supabase/.temp/
 .vercel
-
-# Reproducible synthetic browser evidence
-qa/
-
-node_modules/
